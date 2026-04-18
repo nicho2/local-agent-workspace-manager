@@ -36,6 +36,7 @@ a {
 
 .top-nav {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   padding: 16px 0 24px;
   border-bottom: 1px solid var(--border);
@@ -71,7 +72,7 @@ a {
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 18px;
 }
 
@@ -113,6 +114,69 @@ th {
   font-size: 12px;
 }
 
+.badge-completed {
+  color: var(--success);
+}
+
+.badge-failed,
+.badge-blocked {
+  color: var(--warning);
+}
+
+.table-link {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.page-heading-row {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.button-link {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  display: inline-flex;
+  padding: 10px 12px;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.code-block {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  margin: 0;
+  overflow-x: auto;
+  padding: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.log-list {
+  display: grid;
+  gap: 8px;
+}
+
+.log-row {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(180px, 220px) minmax(72px, 90px) 1fr;
+  padding: 10px;
+}
+
 .stack {
   display: grid;
   gap: 16px;
@@ -126,4 +190,18 @@ code {
   background: var(--panel-soft);
   padding: 2px 6px;
   border-radius: 6px;
+}
+
+@media (max-width: 700px) {
+  .page-shell {
+    padding: 16px;
+  }
+
+  .page-heading-row {
+    display: grid;
+  }
+
+  .log-row {
+    grid-template-columns: 1fr;
+  }
 }

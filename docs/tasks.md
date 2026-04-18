@@ -381,7 +381,7 @@ Les schedules actives et echues peuvent declencher des runs de facon controlee, 
 
 Note de realisation : 2026-04-18 - Ajout du service `schedule_worker_service` avec `process_due_schedules(now)` testable, claim SQL conditionnel des schedules interval dus, creation de runs `trigger=schedule` en dry-run par defaut et avance de `next_run_at`. Le lifespan FastAPI demarre une boucle de polling locale uniquement si `LAWM_SCHEDULE_WORKER_ENABLED=true`; le polling est configure par `LAWM_SCHEDULE_WORKER_POLL_SECONDS`. Tests ajoutes pour schedule interval echu, anti-doublon par avance de `next_run_at`, schedule desactive et schedule non echu. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 34 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `README.md`, `.env.example`, `docs/spec.md` et `docs/architecture.md` documentent la configuration et les limites MVP du worker.
 
-## [ ] T011 - Ajouter une page Runs et une page detail de run
+## [x] T011 - Ajouter une page Runs et une page detail de run
 
 ### Outcome
 L'UI permet de consulter l'historique des runs, puis le detail d'un run avec metadata, logs et artifacts.
@@ -419,7 +419,7 @@ L'UI permet de consulter l'historique des runs, puis le detail d'un run avec met
 - La page detail affiche logs et artifacts.
 - Les types frontend compilent en strict.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout de la route `/runs` avec etat vide/erreur simple et tableau des runs recents, et de la route `/runs/{runId}` affichant metadata, commande, logs chronologiques et artifacts. Ajout du composant `RunTable`, lien depuis les runs recents du dashboard vers le detail, et entree `Runs` dans la navigation principale. Styles responsive ajoutes pour le detail, les logs et les artifacts ; `docs/wireframes.md` inclut la liste des runs. Validation : `npm run build` depuis `apps/web` passe sans warning. Aucune suite de tests frontend dediee n'est configuree dans `package.json`.
 
 ## [ ] T012 - Ajouter le detail workspace avec onglets MVP
 

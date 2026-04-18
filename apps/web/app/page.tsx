@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import { RunTable } from "@/components/run-table";
 import { StatCard } from "@/components/stat-card";
 import { getDashboardSummary } from "@/lib/api";
 
@@ -31,30 +32,7 @@ export default async function DashboardPage(): Promise<ReactElement> {
         {summary.recent_runs.length === 0 ? (
           <p className="muted">No runs yet.</p>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Run</th>
-                <th>Status</th>
-                <th>Trigger</th>
-                <th>Dry-run</th>
-                <th>Started</th>
-              </tr>
-            </thead>
-            <tbody>
-              {summary.recent_runs.map((run) => (
-                <tr key={run.id}>
-                  <td>{run.id}</td>
-                  <td>
-                    <span className="badge">{run.status}</span>
-                  </td>
-                  <td>{run.trigger}</td>
-                  <td>{run.dry_run ? "yes" : "no"}</td>
-                  <td>{new Date(run.started_at).toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <RunTable runs={summary.recent_runs} />
         )}
       </section>
     </main>
