@@ -50,6 +50,10 @@ base directories if your workspaces live elsewhere, for example:
 LAWM_WORKSPACE_ALLOWED_ROOTS='["/path/to/workspaces"]'
 ```
 
+The API allows browser requests from the local Next.js dev server by default:
+`http://localhost:3000` and `http://127.0.0.1:3000`. Override
+`LAWM_CORS_ALLOWED_ORIGINS` with a JSON array if the frontend runs elsewhere.
+
 Scheduled runs are processed by a local background worker only when
 `LAWM_SCHEDULE_WORKER_ENABLED=true`. The worker is disabled by default, polls
 every `LAWM_SCHEDULE_WORKER_POLL_SECONDS` seconds, and triggers due interval

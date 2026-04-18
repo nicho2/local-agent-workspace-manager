@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     )
     logs_root: Path = Field(default=REPO_ROOT / "storage" / "logs")
     artifacts_root: Path = Field(default=REPO_ROOT / "storage" / "artifacts")
+    cors_allowed_origins: list[str] = Field(
+        default_factory=lambda: ["http://localhost:3000", "http://127.0.0.1:3000"]
+    )
     schedule_worker_enabled: bool = False
     schedule_worker_poll_seconds: int = Field(default=60, ge=5, le=3600)
 

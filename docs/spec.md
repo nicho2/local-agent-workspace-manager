@@ -8,6 +8,8 @@
 - Pydantic v2
 - SQLite via `sqlite3`
 - `uvicorn` for local serving
+- CORS origins configured with `LAWM_CORS_ALLOWED_ORIGINS`, defaulting to the
+  local Next.js dev origins
 
 ### Frontend
 - Next.js

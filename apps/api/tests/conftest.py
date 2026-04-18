@@ -47,6 +47,7 @@ def _create_test_client(
     os.environ["LAWM_WORKSPACE_ALLOWED_ROOTS"] = json.dumps([str(workspace_root)])
     os.environ["LAWM_LOGS_ROOT"] = str(tmp_path / "logs")
     os.environ["LAWM_ARTIFACTS_ROOT"] = str(tmp_path / "artifacts")
+    os.environ["LAWM_CORS_ALLOWED_ORIGINS"] = json.dumps(["http://localhost:3000"])
     os.environ["LAWM_EXECUTION_ENABLED"] = "true" if execution_enabled else "false"
     get_settings.cache_clear()
 

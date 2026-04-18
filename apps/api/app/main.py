@@ -2,6 +2,7 @@ import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.errors import AppError, app_error_handler
@@ -40,10 +41,17 @@ async def lifespan(_: FastAPI):
 
 
 def create_app() -> FastAPI:
+    current_settings = get_settings()
     application = FastAPI(
         title="Local Agent Workspace Manager API",
         version="0.1.0",
         lifespan=lifespan,
+    )
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=current_settings.cors_allowed_origins,
+        allow_methods=["GET", "POST", "PUT", "OPTIONS"],
+        allow_headers=["Content-Type"],
     )
     application.include_router(health.router)
     application.include_router(dashboard.router)
