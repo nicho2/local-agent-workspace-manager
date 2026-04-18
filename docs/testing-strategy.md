@@ -50,6 +50,33 @@ As UI logic grows:
 - prefer explicit fixtures over global mutable state
 - do not depend on execution against real local repositories for unit/integration tests
 
+## MVP verification path
+
+Automated lightweight path:
+
+```bash
+cd apps/api
+python -m pytest tests/test_mvp_flow.py
+```
+
+This path seeds the demo dataset in a temporary SQLite database, verifies two
+demo workspaces, agents and disabled schedules, launches a manual dry-run,
+checks logs and artifacts, confirms the run appears in the dashboard, and
+confirms disabled schedules do not trigger additional runs.
+
+Manual local path:
+
+1. From the repository root, run `py -3.12 scripts/seed_demo.py`.
+2. Start the API from `apps/api` with `python -m uvicorn app.main:app --reload`.
+3. Start the web app from `apps/web` with `npm run dev`.
+4. Open the dashboard and confirm execution mode is dry-run / disabled.
+5. Open Workspaces and confirm `Demo Maintenance` and `Repo Triage` exist.
+6. Open a workspace detail page and confirm Execution, Agent, Policy, Scheduling and History are visible.
+7. Launch a manual dry-run from the workspace detail page.
+8. Confirm the app opens the run detail page with metadata, logs and `summary.md`.
+9. Open Schedules and confirm demo schedules are disabled by default.
+10. Open Settings and confirm real execution remains disabled unless explicitly changed.
+
 ## Regression policy
 
 Every bug fix must add:

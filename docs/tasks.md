@@ -615,7 +615,7 @@ Un utilisateur peut initialiser des donnees demo locales pour valider rapidement
 
 Note de realisation : 2026-04-18 - Ajout de `scripts/seed_demo.py`, seed idempotente qui initialise la base, reutilise la policy `default-safe`, cree les deux workspaces demo sous `examples/workspaces`, un agent actif par workspace et deux schedules interval desactives. La seed reutilise les services existants pour conserver la validation des racines autorisees et cherche les enregistrements existants par cles naturelles afin de ne pas dupliquer ni ecraser les donnees demo. Test backend ajoute pour executer la seed deux fois sur une base temporaire et verifier l'absence de doublons. Validation : script lance depuis la racine avec `LAWM_DATABASE_PATH=storage/sqlite/seed-demo-validation.db` puis base temporaire supprimee ; `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 37 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests ..\..\scripts\seed_demo.py` passe avec seulement l'avertissement local de cache Ruff. `README.md` et `docs/spec.md` documentent la commande et le comportement.
 
-## [ ] T017 - Verifier le parcours MVP de bout en bout
+## [x] T017 - Verifier le parcours MVP de bout en bout
 
 ### Outcome
 Le parcours de succes V1 est executable localement : creer deux workspaces, attacher policies et agents, lancer des dry-runs, consulter logs/artifacts, configurer schedules et verifier l'audit trail.
@@ -651,7 +651,7 @@ Le parcours de succes V1 est executable localement : creer deux workspaces, atta
 - Les checks passent.
 - Les instructions de verification MVP sont documentees.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout d'un test e2e leger `tests/test_mvp_flow.py` qui seed une base temporaire, verifie les deux workspaces/agents/schedules demo, lance un dry-run manuel, consulte logs et artifacts, confirme le dashboard et verifie qu'un schedule desactive ne declenche pas de run supplementaire. `docs/testing-strategy.md` documente maintenant le parcours MVP automatise et le parcours manuel local avec seed, API, web, lancement dry-run, run detail, schedules et settings. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 38 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests ..\..\scripts\seed_demo.py` passe avec seulement l'avertissement local de cache Ruff ; `npm test` depuis `apps/web` : 12 tests passent ; `npm run build` depuis `apps/web` passe sans warning.
 
 ## [ ] T018 - Stabiliser la documentation MVP
 
