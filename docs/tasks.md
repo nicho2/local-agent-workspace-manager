@@ -299,7 +299,7 @@ L'API expose un historique de runs utilisable par l'UI MVP, avec detail, logs et
 
 Note de realisation : 2026-04-18 - Les endpoints detail, logs et artifacts de runs retournent maintenant une erreur structuree 404 quand le run n'existe pas. Les logs sont listes par ordre chronologique avec ordre d'insertion stable pour timestamps identiques, et les tests verifient logs/artifacts utiles pour l'UI. Types et helpers frontend ajoutes pour `RunLog`, `RunArtifact`, `getRuns`, `getRun`, `getRunLogs` et `getRunArtifacts`. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 28 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `npm run build` cote web reste bloque par l'erreur preexistante `app/layout.tsx: Cannot find namespace 'JSX'`. `docs/spec.md` documente le contrat d'historique.
 
-## [ ] T009 - Introduire un runner reel garde par settings et policy
+## [x] T009 - Introduire un runner reel garde par settings et policy
 
 ### Outcome
 Un run non dry-run peut executer une commande uniquement si l'execution globale est active et si la policy du workspace l'autorise explicitement.
@@ -339,7 +339,7 @@ Un run non dry-run peut executer une commande uniquement si l'execution globale 
 - Une commande autorisee peut s'executer dans un test controle.
 - Une commande non autorisee, hors timeout ou en sortie non-zero est testee.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout du service `runner_service` pour executer une commande controlee avec liste d'arguments explicite, `cwd`, timeout, capture stdout/stderr bornee et sans `shell=True`. `POST /runs` conserve le dry-run par defaut ; en execution reelle il persiste un run `blocked` si le setting global ou la policy refuse, `completed` si le processus sort a 0, et `failed` en non-zero, timeout ou echec de lancement. Tests ajoutes pour blocage par defaut, commande autorisee, commande non autorisee, sortie non-zero et timeout du runner. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 32 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `docs/spec.md`, `docs/architecture.md` et l'ADR 0003 documentent les gardes.
 
 ## [ ] T010 - Ajouter un worker de schedules minimal
 

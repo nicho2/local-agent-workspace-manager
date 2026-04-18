@@ -244,16 +244,34 @@ artifacts expose `id`, `run_id`, `name`, `relative_path`, `media_type`, and
 `created_at`. Detail, logs, and artifacts endpoints all return structured `404`
 errors when the run does not exist.
 
+### Real execution
+
+`POST /runs` keeps dry-runs as the default. When `dry_run=false`, the run is
+created for auditability and receives a terminal status:
+
+- `blocked` when `execution_enabled=false`
+- `blocked` when the command does not start with an allowed policy prefix
+- `completed` when the controlled subprocess exits with code `0`
+- `failed` when the subprocess exits non-zero, times out, cannot start, or has
+  an invalid working directory
+
+Real execution uses an explicit argument list derived from the command template
+with `shlex.split`; it never uses `shell=True`. The runner always sets `cwd` to
+the workspace `root_path`, uses the workspace policy `max_runtime_seconds` as
+the subprocess timeout, and captures stdout/stderr into bounded run logs.
+Captured stdout/stderr entries are truncated after `4000` characters per stream.
+
 ## 6. Safety rules
 
 - `execution_enabled=false` by default
 - workspace `root_path` must resolve inside one of `workspace_allowed_roots`
 - inactive agents cannot start runs
 - workspace-bound agents can only run in their bound workspace
+- real execution must be globally enabled and policy-prefix allowed
 - runner must never use `shell=True`
 - runner must receive an explicit working directory
+- runner must set a timeout and capture stdout/stderr explicitly
 - policies expose allowlist-style command prefixes
-- real execution must be rejected when globally disabled
 - dry-run remains allowed
 
 ## 7. Testing requirements

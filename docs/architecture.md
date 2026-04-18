@@ -76,4 +76,8 @@ This is not a sandbox. It is a guarded local execution manager.
 Therefore:
 - default posture is deny / simulate
 - all runner behavior must remain explicit
+- real execution is gated by the global `execution_enabled` setting and
+  workspace policy command-prefix allowlists
+- controlled subprocess runs use explicit argument lists, workspace `cwd`,
+  timeout, stdout/stderr capture, and no shell
 - future hardening should consider per-run containerization or OS-level sandboxing

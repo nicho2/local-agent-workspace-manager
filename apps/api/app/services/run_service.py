@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from pathlib import Path
 from sqlite3 import Connection
@@ -7,6 +8,7 @@ from app.core.config import get_settings
 from app.core.errors import bad_request, conflict, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.run import RunArtifactRead, RunCreate, RunLogRead, RunRead, RunStatus
+from app.services.runner_service import run_controlled_command
 
 
 def _row_to_run(row: object) -> RunRead:
@@ -151,12 +153,30 @@ def create_run(database_path: Path, payload: RunCreate) -> RunRead:
             )
 
         command_preview = payload.command_override or str(agent_row["command_template"])
-        if not payload.dry_run and not settings.execution_enabled:
-            raise conflict(
-                "real_execution_disabled",
-                "Real execution is disabled globally; use dry_run=true",
-                {"setting": "execution_enabled", "dry_run": payload.dry_run},
+        log_entries = [
+            ("INFO", f"Run requested for workspace {workspace_row['slug']}."),
+            ("INFO", f"Command preview: {command_preview}"),
+        ]
+        status = RunStatus.completed
+
+        if payload.dry_run:
+            log_entries.append(
+                ("INFO", "Simulation complete; real execution remains disabled by default.")
             )
+        elif not settings.execution_enabled:
+            status = RunStatus.blocked
+            log_entries.append(
+                ("ERROR", "Execution blocked: real execution is disabled globally.")
+            )
+        else:
+            runner_result = run_controlled_command(
+                command=command_preview,
+                cwd=Path(str(workspace_row["root_path"])),
+                timeout_seconds=int(policy_row["max_runtime_seconds"]),
+                allowed_command_prefixes=json.loads(policy_row["allowed_command_prefixes"]),
+            )
+            status = runner_result.status
+            log_entries.extend((entry.level, entry.message) for entry in runner_result.logs)
 
         run_id = f"run_{uuid4().hex[:12]}"
         now = utc_now_iso()
@@ -174,7 +194,7 @@ def create_run(database_path: Path, payload: RunCreate) -> RunRead:
                 payload.workspace_id,
                 payload.agent_profile_id,
                 payload.trigger.value,
-                RunStatus.completed.value if payload.dry_run else RunStatus.blocked.value,
+                status.value,
                 int(payload.dry_run),
                 payload.requested_by,
                 command_preview,
@@ -182,17 +202,6 @@ def create_run(database_path: Path, payload: RunCreate) -> RunRead:
                 finished_at,
             ),
         )
-
-        log_entries = [
-            ("INFO", f"Run {run_id} created for workspace {workspace_row['slug']}."),
-            ("INFO", f"Command preview: {command_preview}"),
-            (
-                "INFO",
-                "Simulation complete; real execution remains disabled by default."
-                if payload.dry_run
-                else "Execution blocked by global settings.",
-            ),
-        ]
 
         for level, message in log_entries:
             connection.execute(
