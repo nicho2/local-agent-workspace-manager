@@ -150,6 +150,20 @@ th {
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
+.section-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.section-tabs a {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 10px;
+}
+
 .code-block {
   background: var(--panel-soft);
   border: 1px solid var(--border);

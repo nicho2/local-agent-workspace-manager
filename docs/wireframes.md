@@ -42,6 +42,18 @@
 | Mode: dry-run                                                         |
 | [Launch]                                                              |
 +-----------------------------------------------------------------------+
+| Agent                                                                 |
+| - active and global profiles available to the workspace                |
++-----------------------------------------------------------------------+
+| Policy                                                                |
+| - runtime limit, write/network guardrails, command prefixes            |
++-----------------------------------------------------------------------+
+| Scheduling                                                            |
+| - enabled interval schedules and next run times                        |
++-----------------------------------------------------------------------+
+| History                                                               |
+| - recent runs linked to run detail                                     |
++-----------------------------------------------------------------------+
 ```
 
 ## Run detail

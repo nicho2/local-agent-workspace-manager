@@ -421,7 +421,7 @@ L'UI permet de consulter l'historique des runs, puis le detail d'un run avec met
 
 Note de realisation : 2026-04-18 - Ajout de la route `/runs` avec etat vide/erreur simple et tableau des runs recents, et de la route `/runs/{runId}` affichant metadata, commande, logs chronologiques et artifacts. Ajout du composant `RunTable`, lien depuis les runs recents du dashboard vers le detail, et entree `Runs` dans la navigation principale. Styles responsive ajoutes pour le detail, les logs et les artifacts ; `docs/wireframes.md` inclut la liste des runs. Suite Vitest ajoutee ensuite pour couvrir navigation MVP, dashboard vers detail, liste runs et detail avec logs/artifacts. Validation : `npm test` et `npm run build` depuis `apps/web` passent sans warning.
 
-## [ ] T012 - Ajouter le detail workspace avec onglets MVP
+## [x] T012 - Ajouter le detail workspace avec onglets MVP
 
 ### Outcome
 L'UI workspace permet de voir et piloter les facettes MVP : execution manuelle, agent, policy, scheduling et historique.
@@ -457,7 +457,7 @@ L'UI workspace permet de voir et piloter les facettes MVP : execution manuelle, 
 - Les sections attendues par le PRD sont presentes.
 - La navigation depuis la liste fonctionne.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout de la route `/workspaces/{workspaceId}` avec sections Execution, Agent, Policy, Scheduling et History. La page recupere workspace, policies, agents, schedules et runs via helpers centralises, filtre les donnees liees cote serveur, affiche les agents actifs disponibles pour le futur lancement manuel, la policy attachee, les schedules du workspace et les runs recents avec liens vers le detail. La liste des workspaces pointe maintenant vers le detail. Tests Vitest ajoutes pour navigation liste -> detail et presence des sections/facettes essentielles. Validation : `npm test` depuis `apps/web` : 6 tests passent ; `npm run build` depuis `apps/web` passe sans warning.
 
 ## [ ] T013 - Ajouter le lancement manuel depuis l'UI
 

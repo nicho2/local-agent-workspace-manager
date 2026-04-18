@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import Link from "next/link";
 
 import type { Workspace } from "@/lib/types";
 
@@ -23,7 +24,11 @@ export function WorkspaceTable({ workspaces }: WorkspaceTableProps): ReactElemen
         <tbody>
           {workspaces.map((workspace) => (
             <tr key={workspace.id}>
-              <td>{workspace.name}</td>
+              <td>
+                <Link className="table-link" href={`/workspaces/${workspace.id}`}>
+                  {workspace.name}
+                </Link>
+              </td>
               <td>{workspace.slug}</td>
               <td>
                 <code>{workspace.root_path}</code>

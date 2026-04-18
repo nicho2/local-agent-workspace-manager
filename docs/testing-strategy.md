@@ -31,6 +31,8 @@ Coverage baseline:
 - dashboard recent runs link to run detail pages
 - runs list shows status, trigger, dry-run state, and detail links
 - run detail shows metadata, command preview, logs, and artifacts
+- workspaces list links to workspace detail pages
+- workspace detail shows execution, agent, policy, scheduling, and history sections
 
 As UI logic grows:
 - test API client helpers

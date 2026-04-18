@@ -1,5 +1,17 @@
 export type RunStatus = "queued" | "running" | "completed" | "failed" | "blocked";
 
+export interface WorkspacePolicy {
+  id: string;
+  name: string;
+  description?: string | null;
+  max_runtime_seconds: number;
+  allow_write: boolean;
+  allow_network: boolean;
+  allowed_command_prefixes: string[];
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Workspace {
   id: string;
   name: string;

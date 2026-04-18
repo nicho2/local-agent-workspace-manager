@@ -7,6 +7,7 @@ import type {
   Schedule,
   SystemSetting,
   Workspace,
+  WorkspacePolicy,
 } from "@/lib/types";
 
 const API_BASE_URL =
@@ -30,6 +31,14 @@ export function getDashboardSummary(): Promise<DashboardSummary> {
 
 export function getWorkspaces(): Promise<Workspace[]> {
   return fetchJson<Workspace[]>("/workspaces");
+}
+
+export function getWorkspace(workspaceId: string): Promise<Workspace> {
+  return fetchJson<Workspace>(`/workspaces/${workspaceId}`);
+}
+
+export function getPolicies(): Promise<WorkspacePolicy[]> {
+  return fetchJson<WorkspacePolicy[]>("/policies");
 }
 
 export function getAgents(): Promise<AgentProfile[]> {
