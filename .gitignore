@@ -20,3 +20,5 @@ storage/artifacts/*
 !storage/artifacts/.gitkeep
 !storage/sqlite/.gitkeep
 /.idea/
+/local-agent-workspace-manager-starter.zip
+/apps/api/lawm_api.egg-info/
