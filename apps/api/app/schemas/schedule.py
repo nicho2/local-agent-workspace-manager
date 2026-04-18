@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import StrEnum
+from typing import Self
 
 from pydantic import Field, model_validator
 
@@ -35,3 +36,31 @@ class ScheduleRead(ScheduleCreate):
     next_run_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
+
+
+class ScheduleUpdate(ModelBase):
+    name: str | None = Field(default=None, min_length=3, max_length=120)
+    workspace_id: str | None = None
+    agent_profile_id: str | None = None
+    mode: ScheduleMode | None = None
+    interval_minutes: int | None = Field(default=None, ge=5, le=10080)
+    cron_expression: str | None = None
+    enabled: bool | None = None
+
+    @model_validator(mode="after")
+    def reject_null_required_fields(self) -> Self:
+        required_when_present = {
+            "name",
+            "workspace_id",
+            "agent_profile_id",
+            "mode",
+            "enabled",
+        }
+        null_fields = [
+            field
+            for field in required_when_present
+            if field in self.model_fields_set and getattr(self, field) is None
+        ]
+        if null_fields:
+            raise ValueError(f"Fields cannot be null: {', '.join(sorted(null_fields))}")
+        return self

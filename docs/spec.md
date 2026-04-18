@@ -131,6 +131,7 @@
 - `GET|POST /agents`
 - `PUT /agents/{agent_profile_id}`
 - `GET|POST /schedules`
+- `PUT /schedules/{schedule_id}`
 - `GET|POST /runs`
 - `GET /runs/{run_id}`
 - `GET /runs/{run_id}/logs`
@@ -209,6 +210,26 @@ profile is inactive. Runs are also rejected when a workspace-bound agent is
 used with a different workspace; global agents can run against any existing
 workspace. Successful updates refresh `updated_at` with a UTC ISO-8601
 timestamp.
+
+### Schedule updates
+
+`PUT /schedules/{schedule_id}` accepts partial updates for:
+
+- `name`
+- `workspace_id`
+- `agent_profile_id`
+- `mode`
+- `interval_minutes`
+- `cron_expression`
+- `enabled`
+
+`workspace_id` and `agent_profile_id` must reference existing resources. For
+`mode=interval`, `interval_minutes` is required and must stay between `5` and
+`10080`. For `mode=cron`, `cron_expression` is required, but the MVP does not
+parse cron expressions yet, so `next_run_at` remains `null` until worker support
+is introduced. When an interval schedule is enabled, `next_run_at` is recalculated
+from the current UTC time. When any schedule is disabled, `next_run_at` is set to
+`null`. Successful updates refresh `updated_at` with a UTC ISO-8601 timestamp.
 
 ## 6. Safety rules
 

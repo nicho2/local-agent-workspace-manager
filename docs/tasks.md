@@ -226,7 +226,7 @@ Les profils agents peuvent etre modifies, actives ou desactives, et les runs ref
 
 Note de realisation : 2026-04-18 - Ajout du schema `AgentProfileUpdate`, du endpoint `PUT /agents/{agent_profile_id}` et de la logique service d'edition partielle avec validation de `workspace_id` et mise a jour de `updated_at`. Les runs refusent maintenant un agent inactif et un agent lie a un autre workspace ; un agent avec `workspace_id=null` reste global et peut lancer un run sur tout workspace existant. Tests ajoutes pour edition, workspace inconnu, agent inactif, mismatch workspace et agent global. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 23 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `docs/spec.md` documente le contrat.
 
-## [ ] T007 - Ajouter l'edition et la desactivation des schedules
+## [x] T007 - Ajouter l'edition et la desactivation des schedules
 
 ### Outcome
 Les schedules peuvent etre modifies, actives ou desactives, avec recalcul coherent de `next_run_at`.
@@ -260,7 +260,7 @@ Les schedules peuvent etre modifies, actives ou desactives, avec recalcul cohere
 - Les tests couvrent activation, desactivation, interval invalide et references inconnues.
 - Le contrat est documente.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout du schema `ScheduleUpdate`, du endpoint `PUT /schedules/{schedule_id}` et de la logique service d'edition partielle avec validation des references workspace/agent, recalcul de `next_run_at` pour les schedules interval actives, et remise a `null` quand `enabled=false`. `mode=interval` exige `interval_minutes`; `mode=cron` exige `cron_expression`, mais le MVP ne parse pas encore cron et documente `next_run_at=null` pour ce mode. Tests ajoutes pour activation, desactivation, interval invalide et references inconnues. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 27 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `docs/spec.md` documente le contrat.
 
 ## [ ] T008 - Completer le contrat d'historique des runs
 
