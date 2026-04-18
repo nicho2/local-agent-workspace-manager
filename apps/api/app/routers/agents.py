@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
 from app.core.config import get_settings
-from app.schemas.agent import AgentProfileCreate, AgentProfileRead
-from app.services.agent_service import create_agent, list_agents
+from app.schemas.agent import AgentProfileCreate, AgentProfileRead, AgentProfileUpdate
+from app.services.agent_service import create_agent, list_agents, update_agent
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
@@ -15,3 +15,8 @@ def get_agents() -> list[AgentProfileRead]:
 @router.post("", response_model=AgentProfileRead, status_code=201)
 def post_agent(payload: AgentProfileCreate) -> AgentProfileRead:
     return create_agent(get_settings().database_path, payload)
+
+
+@router.put("/{agent_profile_id}", response_model=AgentProfileRead)
+def put_agent(agent_profile_id: str, payload: AgentProfileUpdate) -> AgentProfileRead:
+    return update_agent(get_settings().database_path, agent_profile_id, payload)

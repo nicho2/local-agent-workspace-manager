@@ -1,26 +1,38 @@
-def _bootstrap_workspace_and_agent(client, workspace_root):
+def _create_workspace(client, workspace_root, slug="maintenance"):
     policy_id = client.get("/policies").json()[0]["id"]
-    workspace = client.post(
+    response = client.post(
         "/workspaces",
         json={
-            "name": "Maintenance",
-            "slug": "maintenance",
-            "root_path": str(workspace_root / "maintenance"),
+            "name": f"Workspace {slug}",
+            "slug": slug,
+            "root_path": str(workspace_root / slug),
             "tags": ["ops"],
             "policy_id": policy_id,
         },
-    ).json()
-    agent = client.post(
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
+def _create_agent(client, workspace_id=None, *, is_active=True, name="maintenance-agent"):
+    response = client.post(
         "/agents",
         json={
-            "name": "maintenance-agent",
+            "name": name,
             "runtime": "copilot_cli",
-            "workspace_id": workspace["id"],
+            "workspace_id": workspace_id,
             "command_template": "gh copilot suggest -t maintenance",
             "environment": {},
-            "is_active": True,
+            "is_active": is_active,
         },
-    ).json()
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
+def _bootstrap_workspace_and_agent(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent = _create_agent(client, workspace["id"])
     return workspace, agent
 
 
@@ -70,3 +82,70 @@ def test_real_execution_rejected_when_globally_disabled(client, workspace_root):
         "message": "Real execution is disabled globally; use dry_run=true",
         "details": {"setting": "execution_enabled", "dry_run": False},
     }
+
+
+def test_inactive_agent_cannot_start_run(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent = _create_agent(client, workspace["id"], is_active=False)
+
+    response = client.post(
+        "/runs",
+        json={
+            "workspace_id": workspace["id"],
+            "agent_profile_id": agent["id"],
+            "dry_run": True,
+            "requested_by": "pytest",
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {
+        "code": "agent_profile_inactive",
+        "message": "Agent profile is inactive",
+        "details": {"agent_profile_id": agent["id"]},
+    }
+
+
+def test_workspace_bound_agent_cannot_start_run_for_other_workspace(client, workspace_root):
+    first_workspace = _create_workspace(client, workspace_root, "first-workspace")
+    second_workspace = _create_workspace(client, workspace_root, "second-workspace")
+    agent = _create_agent(client, first_workspace["id"])
+
+    response = client.post(
+        "/runs",
+        json={
+            "workspace_id": second_workspace["id"],
+            "agent_profile_id": agent["id"],
+            "dry_run": True,
+            "requested_by": "pytest",
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {
+        "code": "agent_workspace_mismatch",
+        "message": "Agent profile is bound to a different workspace",
+        "details": {
+            "agent_profile_id": agent["id"],
+            "agent_workspace_id": first_workspace["id"],
+            "workspace_id": second_workspace["id"],
+        },
+    }
+
+
+def test_global_agent_can_start_run_for_any_workspace(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent = _create_agent(client, workspace_id=None)
+
+    response = client.post(
+        "/runs",
+        json={
+            "workspace_id": workspace["id"],
+            "agent_profile_id": agent["id"],
+            "dry_run": True,
+            "requested_by": "pytest",
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["agent_profile_id"] == agent["id"]

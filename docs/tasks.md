@@ -188,7 +188,7 @@ Les policies peuvent etre modifiees apres creation, avec validation des limites 
 
 Note de realisation : 2026-04-18 - Ajout du schema `WorkspacePolicyUpdate`, du endpoint `PUT /policies/{policy_id}` et de la logique service d'edition partielle avec mise a jour de `updated_at`. Le nom reste unique, `max_runtime_seconds` conserve les bornes 30..7200 et les prefixes de commande doivent etre des entrees non vides. Tests ajoutes pour edition reussie, conflit de nom, limite d'execution invalide et prefixe vide. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 18 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `docs/spec.md` documente le contrat.
 
-## [ ] T006 - Ajouter l'edition et l'activation des agents
+## [x] T006 - Ajouter l'edition et l'activation des agents
 
 ### Outcome
 Les profils agents peuvent etre modifies, actives ou desactives, et les runs refusent un agent inactif.
@@ -224,7 +224,7 @@ Les profils agents peuvent etre modifies, actives ou desactives, et les runs ref
 - Un agent inactif ne peut pas lancer de run.
 - Les tests documentent le comportement agent global vs agent lie.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout du schema `AgentProfileUpdate`, du endpoint `PUT /agents/{agent_profile_id}` et de la logique service d'edition partielle avec validation de `workspace_id` et mise a jour de `updated_at`. Les runs refusent maintenant un agent inactif et un agent lie a un autre workspace ; un agent avec `workspace_id=null` reste global et peut lancer un run sur tout workspace existant. Tests ajoutes pour edition, workspace inconnu, agent inactif, mismatch workspace et agent global. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 23 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `docs/spec.md` documente le contrat.
 
 ## [ ] T007 - Ajouter l'edition et la desactivation des schedules
 

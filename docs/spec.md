@@ -129,6 +129,7 @@
 - `GET|POST /workspaces`
 - `GET|PUT /workspaces/{workspace_id}`
 - `GET|POST /agents`
+- `PUT /agents/{agent_profile_id}`
 - `GET|POST /schedules`
 - `GET|POST /runs`
 - `GET /runs/{run_id}`
@@ -190,10 +191,31 @@ updates refresh `updated_at` with a UTC ISO-8601 timestamp.
 empty strings. Successful updates refresh `updated_at` with a UTC ISO-8601
 timestamp.
 
+### Agent updates
+
+`PUT /agents/{agent_profile_id}` accepts partial updates for:
+
+- `name`
+- `runtime`
+- `workspace_id`
+- `command_template`
+- `system_prompt`
+- `environment`
+- `is_active`
+
+`workspace_id` may be `null`, which makes the agent profile global. When it is
+set, it must reference an existing workspace. Runs are rejected when the agent
+profile is inactive. Runs are also rejected when a workspace-bound agent is
+used with a different workspace; global agents can run against any existing
+workspace. Successful updates refresh `updated_at` with a UTC ISO-8601
+timestamp.
+
 ## 6. Safety rules
 
 - `execution_enabled=false` by default
 - workspace `root_path` must resolve inside one of `workspace_allowed_roots`
+- inactive agents cannot start runs
+- workspace-bound agents can only run in their bound workspace
 - runner must never use `shell=True`
 - runner must receive an explicit working directory
 - policies expose allowlist-style command prefixes

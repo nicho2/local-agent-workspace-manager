@@ -110,6 +110,22 @@ def create_run(database_path: Path, payload: RunCreate) -> RunRead:
                 "Unknown agent_profile_id",
                 {"agent_profile_id": payload.agent_profile_id},
             )
+        if not bool(agent_row["is_active"]):
+            raise conflict(
+                "agent_profile_inactive",
+                "Agent profile is inactive",
+                {"agent_profile_id": payload.agent_profile_id},
+            )
+        if agent_row["workspace_id"] is not None and agent_row["workspace_id"] != payload.workspace_id:
+            raise conflict(
+                "agent_workspace_mismatch",
+                "Agent profile is bound to a different workspace",
+                {
+                    "agent_profile_id": payload.agent_profile_id,
+                    "agent_workspace_id": str(agent_row["workspace_id"]),
+                    "workspace_id": payload.workspace_id,
+                },
+            )
 
         policy_row = connection.execute(
             "SELECT * FROM workspace_policies WHERE id = ?",

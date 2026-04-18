@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from app.core.errors import bad_request, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
-from app.schemas.agent import AgentProfileCreate, AgentProfileRead
+from app.schemas.agent import AgentProfileCreate, AgentProfileRead, AgentProfileUpdate
 
 
 def _row_to_agent(row: object) -> AgentProfileRead:
@@ -84,4 +84,80 @@ def create_agent(database_path: Path, payload: AgentProfileCreate) -> AgentProfi
         ).fetchone()
     if row is None:
         raise internal_error("agent_profile_create_failed", "Failed to create agent profile")
+    return _row_to_agent(row)
+
+
+def update_agent(
+    database_path: Path,
+    agent_id: str,
+    payload: AgentProfileUpdate,
+) -> AgentProfileRead:
+    fields_set = payload.model_fields_set
+    updates: list[str] = []
+    values: list[object] = []
+
+    with get_connection(database_path) as connection:
+        existing = connection.execute(
+            "SELECT * FROM agent_profiles WHERE id = ?",
+            (agent_id,),
+        ).fetchone()
+        if existing is None:
+            raise not_found("agent_profile", agent_id)
+
+        if "workspace_id" in fields_set:
+            if payload.workspace_id is not None:
+                workspace_row = connection.execute(
+                    "SELECT id FROM workspaces WHERE id = ?",
+                    (payload.workspace_id,),
+                ).fetchone()
+                if workspace_row is None:
+                    raise bad_request(
+                        "unknown_workspace_id",
+                        "Unknown workspace_id",
+                        {"workspace_id": payload.workspace_id},
+                    )
+            updates.append("workspace_id = ?")
+            values.append(payload.workspace_id)
+
+        if "name" in fields_set:
+            updates.append("name = ?")
+            values.append(payload.name)
+
+        if "runtime" in fields_set:
+            assert payload.runtime is not None
+            updates.append("runtime = ?")
+            values.append(payload.runtime.value)
+
+        if "command_template" in fields_set:
+            updates.append("command_template = ?")
+            values.append(payload.command_template)
+
+        if "system_prompt" in fields_set:
+            updates.append("system_prompt = ?")
+            values.append(payload.system_prompt)
+
+        if "environment" in fields_set:
+            updates.append("environment = ?")
+            values.append(json.dumps(payload.environment or {}))
+
+        if "is_active" in fields_set:
+            updates.append("is_active = ?")
+            values.append(int(bool(payload.is_active)))
+
+        if updates:
+            updates.append("updated_at = ?")
+            values.append(utc_now_iso())
+            values.append(agent_id)
+            connection.execute(
+                f"UPDATE agent_profiles SET {', '.join(updates)} WHERE id = ?",
+                values,
+            )
+
+        row = connection.execute(
+            "SELECT * FROM agent_profiles WHERE id = ?",
+            (agent_id,),
+        ).fetchone()
+
+    if row is None:
+        raise internal_error("agent_profile_update_failed", "Failed to update agent profile")
     return _row_to_agent(row)
