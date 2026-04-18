@@ -10,7 +10,7 @@ Mode d'emploi pour Codex :
 - lancer les checks utiles ;
 - quand la tache est terminee, cocher la case, ajouter une note courte de realisation, puis s'arreter.
 
-## [ ] T001 - Verifier le socle actuel du MVP
+## [x] T001 - Verifier le socle actuel du MVP
 
 ### Outcome
 Le depot a une base connue et verifiee avant d'empiler les taches MVP restantes : les tests existants passent ou les ecarts bloquants sont documentes dans la note de realisation.
@@ -41,7 +41,7 @@ Le depot a une base connue et verifiee avant d'empiler les taches MVP restantes 
 - Les checks utiles sont lances ou leur impossibilite est expliquee.
 - La note de realisation indique l'etat de depart fiable pour les taches suivantes.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Docs de cadrage et ADRs 0001/0002 relus, API et web inspectes rapidement. Backend valide avec `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 6 tests passent ; la commande `pytest` seule n'est pas disponible dans le PATH et pytest a besoin d'un basetemp hors blocage de permissions local. Frontend : `npm run build` depuis `apps/web` est lancable avec les dependances installees, compile le bundle, puis echoue au type-check sur `app/layout.tsx` avec `Cannot find namespace 'JSX'`. Aucun correctif fonctionnel applique dans cette tache de verification.
 
 ## [ ] T002 - Structurer les erreurs API
 
