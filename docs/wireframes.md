@@ -45,6 +45,21 @@
 +-----------------------------------------------------------------------+
 ```
 
+## Settings
+
+```text
++-----------------------------------------------------------------------+
+| Execution control                                                     |
+| Warning: real execution can run local commands                         |
+| [ ] Enable real execution globally                                     |
+| [Save execution setting]                                               |
++-----------------------------------------------------------------------+
+| Settings                                                              |
+| Key                       | Value | Description                        |
+| runner.execution_enabled  | false | Global switch ...                  |
++-----------------------------------------------------------------------+
+```
+
 ## Workspace detail
 
 ```text

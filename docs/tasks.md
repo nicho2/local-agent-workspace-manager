@@ -538,7 +538,7 @@ L'UI permet de creer et modifier les workspaces, policies, agents et schedules n
 
 Note de realisation : 2026-04-18 - Ajout des formulaires MVP de creation/edition pour workspaces, policies et agents sur `/workspaces`, et schedules sur `/schedules`. Les appels API sont centralises avec helpers `create/update` types pour workspaces, policies, agents et schedules ; les formulaires affichent les erreurs API structurees, rafraichissent les donnees apres succes et gardent les defaults de securite visibles (policies explicites, agents actifs, schedules enabled controlles). Tests Vitest ajoutes pour le rendu des panneaux et les contrats POST/PUT principaux. Validation : `npm test` depuis `apps/web` : 10 tests passent ; `npm run build` depuis `apps/web` passe sans warning.
 
-## [ ] T015 - Completer la page Settings
+## [x] T015 - Completer la page Settings
 
 ### Outcome
 L'utilisateur peut consulter et modifier les settings MVP, notamment le flag global d'execution, avec avertissement explicite.
@@ -576,7 +576,7 @@ L'utilisateur peut consulter et modifier les settings MVP, notamment le flag glo
 - Les tests backend couvrent lecture et mise a jour.
 - Le dashboard reflete l'etat d'execution.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Le setting persistant `runner.execution_enabled` devient la source operationnelle pour le dashboard et le runner, avec valeur initiale seedee depuis `LAWM_EXECUTION_ENABLED` seulement a la creation de la base. Tests backend ajoutes pour mise a jour du setting, `updated_at`, 404 structuree et reflet dashboard. Ajout du helper frontend `updateSetting` et du composant Settings avec avertissement explicite avant activation globale ; la page affiche aussi la table des settings. Tests Vitest ajoutes pour le rendu Settings et le contrat PUT. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 36 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local de cache Ruff ; `npm test` depuis `apps/web` : 12 tests passent ; `npm run build` depuis `apps/web` passe sans warning.
 
 ## [ ] T016 - Ajouter une seed demo reproductible
 

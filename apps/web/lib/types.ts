@@ -165,3 +165,7 @@ export interface SystemSetting {
   description: string;
   updated_at: string;
 }
+
+export interface SystemSettingUpdate {
+  value: string;
+}

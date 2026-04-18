@@ -36,6 +36,8 @@ Coverage baseline:
 - manual run creation posts the expected dry-run payload
 - MVP create/edit forms render for workspaces, policies, agents, and schedules
 - API client POST/PUT contracts are covered for workspace, policy, agent, schedule, and run creation
+- settings page shows the real-execution warning and settings table
+- runner execution setting updates are reflected by the dashboard
 
 As UI logic grows:
 - test API client helpers

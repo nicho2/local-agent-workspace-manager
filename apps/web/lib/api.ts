@@ -12,6 +12,7 @@ import type {
   ScheduleCreate,
   ScheduleUpdate,
   SystemSetting,
+  SystemSettingUpdate,
   Workspace,
   WorkspaceCreate,
   WorkspacePolicyCreate,
@@ -215,4 +216,17 @@ export function createRun(payload: RunCreate): Promise<Run> {
 
 export function getSettings(): Promise<SystemSetting[]> {
   return fetchJson<SystemSetting[]>("/settings");
+}
+
+export function updateSetting(
+  key: string,
+  payload: SystemSettingUpdate
+): Promise<SystemSetting> {
+  return fetchJson<SystemSetting>(`/settings/${encodeURIComponent(key)}`, {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "PUT",
+  });
 }

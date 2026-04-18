@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import { SettingsForm } from "@/components/settings-form";
 import { getSettings } from "@/lib/api";
 
 export default async function SettingsPage(): Promise<ReactElement> {
@@ -14,6 +15,7 @@ export default async function SettingsPage(): Promise<ReactElement> {
         </p>
       </div>
 
+      <SettingsForm settings={settings} />
       <section className="card">
         <h3>Settings</h3>
         <table>

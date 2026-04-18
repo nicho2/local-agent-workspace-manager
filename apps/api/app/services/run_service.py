@@ -9,6 +9,7 @@ from app.core.errors import bad_request, conflict, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.run import RunArtifactRead, RunCreate, RunLogRead, RunRead, RunStatus
 from app.services.runner_service import run_controlled_command
+from app.services.settings_service import get_bool_setting
 
 
 def _row_to_run(row: object) -> RunRead:
@@ -163,7 +164,11 @@ def create_run(database_path: Path, payload: RunCreate) -> RunRead:
             log_entries.append(
                 ("INFO", "Simulation complete; real execution remains disabled by default.")
             )
-        elif not settings.execution_enabled:
+        elif not get_bool_setting(
+            database_path,
+            "runner.execution_enabled",
+            default=settings.execution_enabled,
+        ):
             status = RunStatus.blocked
             log_entries.append(
                 ("ERROR", "Execution blocked: real execution is disabled globally.")

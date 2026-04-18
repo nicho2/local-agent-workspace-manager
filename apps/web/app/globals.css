@@ -256,6 +256,14 @@ textarea {
   margin: 0;
 }
 
+.warning-panel {
+  background: rgba(246, 173, 85, 0.12);
+  border: 1px solid var(--warning);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 12px;
+}
+
 .stack {
   display: grid;
   gap: 16px;

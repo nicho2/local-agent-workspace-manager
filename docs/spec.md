@@ -246,6 +246,16 @@ worker for the same due timestamp. The worker triggers runs with
 advances `next_run_at` by the schedule interval from the processing time.
 Disabled schedules, non-due schedules, and `cron` schedules do not create runs.
 
+### Settings
+
+`GET /settings` returns persisted system settings. `PUT /settings/{key}` accepts
+`{"value": "..."}` and updates `updated_at` with a UTC ISO-8601 timestamp.
+
+The `runner.execution_enabled` setting is the operational source for real
+execution and dashboard status. It is seeded from `LAWM_EXECUTION_ENABLED` on a
+new database, remains `false` by default, and can later be changed explicitly
+through the settings API. Changing the setting does not launch any run.
+
 ### Run history
 
 `GET /runs` returns the 20 most recent runs ordered by `started_at` descending.

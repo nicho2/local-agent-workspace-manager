@@ -16,7 +16,10 @@ async def lifespan(_: FastAPI):
     current_settings.workspace_root.mkdir(parents=True, exist_ok=True)
     current_settings.logs_root.mkdir(parents=True, exist_ok=True)
     current_settings.artifacts_root.mkdir(parents=True, exist_ok=True)
-    ensure_database(current_settings.database_path)
+    ensure_database(
+        current_settings.database_path,
+        execution_enabled_default=current_settings.execution_enabled,
+    )
     worker_task: asyncio.Task[None] | None = None
     if current_settings.schedule_worker_enabled:
         worker_task = asyncio.create_task(

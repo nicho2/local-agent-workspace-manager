@@ -110,15 +110,19 @@ def utc_now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
-def ensure_database(database_path: Path) -> None:
+def ensure_database(database_path: Path, *, execution_enabled_default: bool = False) -> None:
     database_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(database_path) as connection:
         connection.executescript(SCHEMA)
-        seed_defaults(connection)
+        seed_defaults(connection, execution_enabled_default=execution_enabled_default)
         connection.commit()
 
 
-def seed_defaults(connection: sqlite3.Connection) -> None:
+def seed_defaults(
+    connection: sqlite3.Connection,
+    *,
+    execution_enabled_default: bool = False,
+) -> None:
     now = utc_now_iso()
 
     connection.execute(
@@ -142,7 +146,11 @@ def seed_defaults(connection: sqlite3.Connection) -> None:
     )
 
     defaults = [
-        ("runner.execution_enabled", "false", "Global switch for real command execution."),
+        (
+            "runner.execution_enabled",
+            "true" if execution_enabled_default else "false",
+            "Global switch for real command execution.",
+        ),
         ("storage.retention_days", "30", "Default retention period for run artifacts."),
         ("ui.compact_mode", "true", "Compact mode preference for the web UI."),
     ]

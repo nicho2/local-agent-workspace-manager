@@ -22,6 +22,22 @@ def list_settings(database_path: Path) -> list[SystemSettingRead]:
     return [_row_to_setting(row) for row in rows]
 
 
+def get_setting_value(database_path: Path, key: str) -> str | None:
+    with get_connection(database_path) as connection:
+        row = connection.execute(
+            "SELECT value FROM system_settings WHERE key = ?",
+            (key,),
+        ).fetchone()
+    return str(row["value"]) if row is not None else None
+
+
+def get_bool_setting(database_path: Path, key: str, *, default: bool = False) -> bool:
+    value = get_setting_value(database_path, key)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def update_setting(database_path: Path, key: str, value: str) -> SystemSettingRead:
     with get_connection(database_path) as connection:
         row = connection.execute(

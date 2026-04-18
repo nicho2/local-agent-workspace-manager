@@ -7,6 +7,7 @@ import {
   createSchedule,
   createWorkspace,
   updateSchedule,
+  updateSetting,
   updateWorkspace,
 } from "@/lib/api";
 
@@ -210,5 +211,27 @@ describe("api client", () => {
       headers: { "Content-Type": "application/json" },
       method: "PUT",
     });
+  });
+
+  it("updates settings with the expected PUT contract", async () => {
+    const fetchMock = stubJsonResponse({
+      key: "runner.execution_enabled",
+      value: "true",
+      description: "Global switch for real command execution.",
+      updated_at: "2026-04-18T09:00:00+00:00",
+    });
+
+    const setting = await updateSetting("runner.execution_enabled", { value: "true" });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:8000/settings/runner.execution_enabled",
+      {
+        body: JSON.stringify({ value: "true" }),
+        cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        method: "PUT",
+      }
+    );
+    expect(setting.value).toBe("true");
   });
 });
