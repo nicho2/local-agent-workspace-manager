@@ -114,15 +114,22 @@ afterEach(() => {
 
 describe("workspaces flow", () => {
   it("renders workspace names as links to detail pages", async () => {
-    const fetchMock = mockFetchSequence([[sampleWorkspace]]);
+    const fetchMock = mockFetchSequence([[sampleWorkspace], [samplePolicy], [sampleAgent]]);
 
     const html = renderToStaticMarkup(await WorkspacesPage());
 
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/workspaces", {
       cache: "no-store",
     });
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/policies", {
+      cache: "no-store",
+    });
     expect(html).toContain("Docs Vault");
     expect(html).toContain('href="/workspaces/ws_docs"');
+    expect(html).toContain("Create and edit");
+    expect(html).toContain("Create workspace");
+    expect(html).toContain("Create policy");
+    expect(html).toContain("Create agent");
   });
 
   it("renders workspace detail sections for execution, agent, policy, scheduling, and history", async () => {

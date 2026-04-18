@@ -18,6 +18,17 @@ export interface WorkspacePolicy {
   updated_at: string;
 }
 
+export interface WorkspacePolicyCreate {
+  name: string;
+  description?: string | null;
+  max_runtime_seconds: number;
+  allow_write: boolean;
+  allow_network: boolean;
+  allowed_command_prefixes: string[];
+}
+
+export type WorkspacePolicyUpdate = Partial<WorkspacePolicyCreate>;
+
 export interface Workspace {
   id: string;
   name: string;
@@ -29,6 +40,25 @@ export interface Workspace {
   policy_id: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface WorkspaceCreate {
+  name: string;
+  slug: string;
+  root_path: string;
+  description?: string | null;
+  tags: string[];
+  status?: "active" | "archived";
+  policy_id?: string | null;
+}
+
+export interface WorkspaceUpdate {
+  name?: string;
+  root_path?: string;
+  description?: string | null;
+  tags?: string[];
+  status?: "active" | "archived";
+  policy_id?: string;
 }
 
 export interface AgentProfile {
@@ -44,6 +74,18 @@ export interface AgentProfile {
   updated_at: string;
 }
 
+export interface AgentProfileCreate {
+  name: string;
+  runtime: "copilot_cli" | "codex" | "local_script" | "custom";
+  workspace_id?: string | null;
+  command_template: string;
+  system_prompt?: string | null;
+  environment: Record<string, string>;
+  is_active: boolean;
+}
+
+export type AgentProfileUpdate = Partial<AgentProfileCreate>;
+
 export interface Schedule {
   id: string;
   name: string;
@@ -57,6 +99,18 @@ export interface Schedule {
   created_at: string;
   updated_at: string;
 }
+
+export interface ScheduleCreate {
+  name: string;
+  workspace_id: string;
+  agent_profile_id: string;
+  mode: "manual" | "interval" | "cron";
+  interval_minutes?: number | null;
+  cron_expression?: string | null;
+  enabled: boolean;
+}
+
+export type ScheduleUpdate = Partial<ScheduleCreate>;
 
 export interface Run {
   id: string;

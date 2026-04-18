@@ -21,11 +21,27 @@
 
 ```text
 +-----------------------------------------------------------------------+
-| Search [.........................]    [+ New workspace]                |
+| Create and edit                                                       |
+| Workspace form | Policy form | Agent form                             |
++-----------------------------------------------------------------------+
+| Search [.........................]                                    |
 +-----------------------------------------------------------------------+
 | Name            | Policy        | Root path                | Status    |
 | Docs Vault      | default-safe  | D:/vaults/docs          | active    |
 | Repo Triage     | repo-review   | D:/repos/project-x      | active    |
++-----------------------------------------------------------------------+
+```
+
+## Schedules
+
+```text
++-----------------------------------------------------------------------+
+| Create and edit schedule                                              |
+| Name | Workspace | Agent | Mode | Interval | Enabled                  |
++-----------------------------------------------------------------------+
+| Configured schedules                                                  |
+| Name            | Mode       | Agent              | Enabled | Next run |
+| nightly-docs    | interval   | maintenance-agent  | yes     | ...      |
 +-----------------------------------------------------------------------+
 ```
 

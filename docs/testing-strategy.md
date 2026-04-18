@@ -34,6 +34,8 @@ Coverage baseline:
 - workspaces list links to workspace detail pages
 - workspace detail shows execution, agent, policy, scheduling, and history sections
 - manual run creation posts the expected dry-run payload
+- MVP create/edit forms render for workspaces, policies, agents, and schedules
+- API client POST/PUT contracts are covered for workspace, policy, agent, schedule, and run creation
 
 As UI logic grows:
 - test API client helpers

@@ -1,5 +1,7 @@
 import type {
   AgentProfile,
+  AgentProfileCreate,
+  AgentProfileUpdate,
   APIError,
   DashboardSummary,
   Run,
@@ -7,8 +9,14 @@ import type {
   RunCreate,
   RunLog,
   Schedule,
+  ScheduleCreate,
+  ScheduleUpdate,
   SystemSetting,
   Workspace,
+  WorkspaceCreate,
+  WorkspacePolicyCreate,
+  WorkspacePolicyUpdate,
+  WorkspaceUpdate,
   WorkspacePolicy,
 } from "@/lib/types";
 
@@ -71,20 +79,112 @@ export function getWorkspaces(): Promise<Workspace[]> {
   return fetchJson<Workspace[]>("/workspaces");
 }
 
+export function createWorkspace(payload: WorkspaceCreate): Promise<Workspace> {
+  return fetchJson<Workspace>("/workspaces", {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+}
+
 export function getWorkspace(workspaceId: string): Promise<Workspace> {
   return fetchJson<Workspace>(`/workspaces/${workspaceId}`);
+}
+
+export function updateWorkspace(
+  workspaceId: string,
+  payload: WorkspaceUpdate
+): Promise<Workspace> {
+  return fetchJson<Workspace>(`/workspaces/${workspaceId}`, {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "PUT",
+  });
 }
 
 export function getPolicies(): Promise<WorkspacePolicy[]> {
   return fetchJson<WorkspacePolicy[]>("/policies");
 }
 
+export function createPolicy(payload: WorkspacePolicyCreate): Promise<WorkspacePolicy> {
+  return fetchJson<WorkspacePolicy>("/policies", {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+}
+
+export function updatePolicy(
+  policyId: string,
+  payload: WorkspacePolicyUpdate
+): Promise<WorkspacePolicy> {
+  return fetchJson<WorkspacePolicy>(`/policies/${policyId}`, {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "PUT",
+  });
+}
+
 export function getAgents(): Promise<AgentProfile[]> {
   return fetchJson<AgentProfile[]>("/agents");
 }
 
+export function createAgent(payload: AgentProfileCreate): Promise<AgentProfile> {
+  return fetchJson<AgentProfile>("/agents", {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+}
+
+export function updateAgent(
+  agentProfileId: string,
+  payload: AgentProfileUpdate
+): Promise<AgentProfile> {
+  return fetchJson<AgentProfile>(`/agents/${agentProfileId}`, {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "PUT",
+  });
+}
+
 export function getSchedules(): Promise<Schedule[]> {
   return fetchJson<Schedule[]>("/schedules");
+}
+
+export function createSchedule(payload: ScheduleCreate): Promise<Schedule> {
+  return fetchJson<Schedule>("/schedules", {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+}
+
+export function updateSchedule(
+  scheduleId: string,
+  payload: ScheduleUpdate
+): Promise<Schedule> {
+  return fetchJson<Schedule>(`/schedules/${scheduleId}`, {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "PUT",
+  });
 }
 
 export function getRuns(): Promise<Run[]> {

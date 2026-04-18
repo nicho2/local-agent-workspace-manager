@@ -1,9 +1,14 @@
 import type { ReactElement } from "react";
 
-import { getAgents, getSchedules } from "@/lib/api";
+import { ScheduleAdminForm } from "@/components/schedule-admin-form";
+import { getAgents, getSchedules, getWorkspaces } from "@/lib/api";
 
 export default async function SchedulesPage(): Promise<ReactElement> {
-  const [schedules, agents] = await Promise.all([getSchedules(), getAgents()]);
+  const [schedules, agents, workspaces] = await Promise.all([
+    getSchedules(),
+    getAgents(),
+    getWorkspaces(),
+  ]);
   const agentById = new Map(agents.map((agent) => [agent.id, agent.name]));
 
   return (
@@ -15,6 +20,7 @@ export default async function SchedulesPage(): Promise<ReactElement> {
         </p>
       </div>
 
+      <ScheduleAdminForm agents={agents} schedules={schedules} workspaces={workspaces} />
       <section className="card">
         <h3>Configured schedules</h3>
         {schedules.length === 0 ? (
