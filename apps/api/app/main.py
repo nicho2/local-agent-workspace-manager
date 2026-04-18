@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.core.config import get_settings
+from app.core.errors import AppError, app_error_handler
 from app.db.database import ensure_database
 from app.routers import agents, dashboard, health, policies, runs, schedules, settings, workspaces
 
@@ -31,6 +32,7 @@ def create_app() -> FastAPI:
     application.include_router(schedules.router)
     application.include_router(runs.router)
     application.include_router(settings.router)
+    application.add_exception_handler(AppError, app_error_handler)
     return application
 
 

@@ -43,7 +43,7 @@ Le depot a une base connue et verifiee avant d'empiler les taches MVP restantes 
 
 Note de realisation : 2026-04-18 - Docs de cadrage et ADRs 0001/0002 relus, API et web inspectes rapidement. Backend valide avec `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 6 tests passent ; la commande `pytest` seule n'est pas disponible dans le PATH et pytest a besoin d'un basetemp hors blocage de permissions local. Frontend : `npm run build` depuis `apps/web` est lancable avec les dependances installees, compile le bundle, puis echoue au type-check sur `app/layout.tsx` avec `Cannot find namespace 'JSX'`. Aucun correctif fonctionnel applique dans cette tache de verification.
 
-## [ ] T002 - Structurer les erreurs API
+## [x] T002 - Structurer les erreurs API
 
 ### Outcome
 Les erreurs produites par les services et routes MVP utilisent une forme structuree minimale et coherente, au lieu de messages opaques, sans casser inutilement les clients existants.
@@ -77,7 +77,7 @@ Les erreurs produites par les services et routes MVP utilisent une forme structu
 - Les tests couvrent au moins une erreur de validation metier, une ressource introuvable et le blocage d'execution reelle.
 - `docs/spec.md` documente la forme d'erreur.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout d'un schema `APIError` (`code`, `message`, `details`) et d'une exception applicative centralisee pour les erreurs metier/services. Les erreurs principales 400, 404, 409 et 500 des services policies, workspaces, agents, schedules, runs et settings sont structurees sans changer les codes HTTP. Tests ajoutes pour policy inconnue, workspace introuvable et execution reelle bloquee. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 8 tests passent. `docs/spec.md` documente le contrat d'erreur.
 
 ## [ ] T003 - Renforcer les limites de workspace
 

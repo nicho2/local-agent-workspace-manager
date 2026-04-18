@@ -2,9 +2,8 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import HTTPException
-
 from app.core.config import get_settings
+from app.core.errors import bad_request, conflict, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.run import RunArtifactRead, RunCreate, RunLogRead, RunRead, RunStatus
 
@@ -64,7 +63,7 @@ def get_run(database_path: Path, run_id: str) -> RunRead:
             (run_id,),
         ).fetchone()
     if row is None:
-        raise HTTPException(status_code=404, detail="Run not found")
+        raise not_found("run", run_id)
     return _row_to_run(row)
 
 
@@ -95,27 +94,40 @@ def create_run(database_path: Path, payload: RunCreate) -> RunRead:
             (payload.workspace_id,),
         ).fetchone()
         if workspace_row is None:
-            raise HTTPException(status_code=400, detail="Unknown workspace_id")
+            raise bad_request(
+                "unknown_workspace_id",
+                "Unknown workspace_id",
+                {"workspace_id": payload.workspace_id},
+            )
 
         agent_row = connection.execute(
             "SELECT * FROM agent_profiles WHERE id = ?",
             (payload.agent_profile_id,),
         ).fetchone()
         if agent_row is None:
-            raise HTTPException(status_code=400, detail="Unknown agent_profile_id")
+            raise bad_request(
+                "unknown_agent_profile_id",
+                "Unknown agent_profile_id",
+                {"agent_profile_id": payload.agent_profile_id},
+            )
 
         policy_row = connection.execute(
             "SELECT * FROM workspace_policies WHERE id = ?",
             (workspace_row["policy_id"],),
         ).fetchone()
         if policy_row is None:
-            raise HTTPException(status_code=500, detail="Workspace policy missing")
+            raise internal_error(
+                "workspace_policy_missing",
+                "Workspace policy is missing",
+                {"workspace_id": payload.workspace_id},
+            )
 
         command_preview = payload.command_override or str(agent_row["command_template"])
         if not payload.dry_run and not settings.execution_enabled:
-            raise HTTPException(
-                status_code=409,
-                detail="Real execution is disabled globally; use dry_run=true",
+            raise conflict(
+                "real_execution_disabled",
+                "Real execution is disabled globally; use dry_run=true",
+                {"setting": "execution_enabled", "dry_run": payload.dry_run},
             )
 
         run_id = f"run_{uuid4().hex[:12]}"
@@ -203,5 +215,5 @@ def create_run(database_path: Path, payload: RunCreate) -> RunRead:
         ).fetchone()
 
     if row is None:
-        raise HTTPException(status_code=500, detail="Failed to create run")
+        raise internal_error("run_create_failed", "Failed to create run")
     return _row_to_run(row)

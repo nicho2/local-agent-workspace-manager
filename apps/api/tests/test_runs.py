@@ -65,4 +65,8 @@ def test_real_execution_rejected_when_globally_disabled(client):
         },
     )
     assert response.status_code == 409
-    assert "disabled" in response.json()["detail"]
+    assert response.json() == {
+        "code": "real_execution_disabled",
+        "message": "Real execution is disabled globally; use dry_run=true",
+        "details": {"setting": "execution_enabled", "dry_run": False},
+    }

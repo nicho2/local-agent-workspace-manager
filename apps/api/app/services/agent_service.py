@@ -3,8 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import HTTPException
-
+from app.core.errors import bad_request, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.agent import AgentProfileCreate, AgentProfileRead
 
@@ -38,7 +37,7 @@ def get_agent(database_path: Path, agent_id: str) -> AgentProfileRead:
             (agent_id,),
         ).fetchone()
     if row is None:
-        raise HTTPException(status_code=404, detail="Agent profile not found")
+        raise not_found("agent_profile", agent_id)
     return _row_to_agent(row)
 
 
@@ -53,7 +52,11 @@ def create_agent(database_path: Path, payload: AgentProfileCreate) -> AgentProfi
                 (payload.workspace_id,),
             ).fetchone()
             if workspace_row is None:
-                raise HTTPException(status_code=400, detail="Unknown workspace_id")
+                raise bad_request(
+                    "unknown_workspace_id",
+                    "Unknown workspace_id",
+                    {"workspace_id": payload.workspace_id},
+                )
 
         connection.execute(
             '''
@@ -80,5 +83,5 @@ def create_agent(database_path: Path, payload: AgentProfileCreate) -> AgentProfi
             (agent_id,),
         ).fetchone()
     if row is None:
-        raise HTTPException(status_code=500, detail="Failed to create agent profile")
+        raise internal_error("agent_profile_create_failed", "Failed to create agent profile")
     return _row_to_agent(row)

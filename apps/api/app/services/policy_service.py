@@ -3,8 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import HTTPException
-
+from app.core.errors import conflict, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.policy import WorkspacePolicyCreate, WorkspacePolicyRead
 
@@ -39,7 +38,7 @@ def get_policy(database_path: Path, policy_id: str) -> WorkspacePolicyRead:
             (policy_id,),
         ).fetchone()
     if row is None:
-        raise HTTPException(status_code=404, detail="Policy not found")
+        raise not_found("policy", policy_id)
     return _row_to_policy(row)
 
 
@@ -49,7 +48,7 @@ def get_default_policy_id(database_path: Path) -> str:
             "SELECT id FROM workspace_policies WHERE name = 'default-safe'"
         ).fetchone()
     if row is None:
-        raise HTTPException(status_code=500, detail="Default policy is missing")
+        raise internal_error("default_policy_missing", "Default policy is missing")
     return str(row["id"])
 
 
@@ -62,7 +61,11 @@ def create_policy(database_path: Path, payload: WorkspacePolicyCreate) -> Worksp
             (payload.name,),
         ).fetchone()
         if existing is not None:
-            raise HTTPException(status_code=409, detail="Policy name already exists")
+            raise conflict(
+                "policy_name_conflict",
+                "Policy name already exists",
+                {"name": payload.name},
+            )
 
         connection.execute(
             '''
@@ -88,5 +91,5 @@ def create_policy(database_path: Path, payload: WorkspacePolicyCreate) -> Worksp
             (policy_id,),
         ).fetchone()
     if row is None:
-        raise HTTPException(status_code=500, detail="Failed to create policy")
+        raise internal_error("policy_create_failed", "Failed to create policy")
     return _row_to_policy(row)

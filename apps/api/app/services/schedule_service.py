@@ -2,8 +2,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import HTTPException
-
+from app.core.errors import bad_request, internal_error
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.schedule import ScheduleCreate, ScheduleMode, ScheduleRead
 
@@ -54,14 +53,22 @@ def create_schedule(database_path: Path, payload: ScheduleCreate) -> ScheduleRea
             (payload.workspace_id,),
         ).fetchone()
         if workspace_row is None:
-            raise HTTPException(status_code=400, detail="Unknown workspace_id")
+            raise bad_request(
+                "unknown_workspace_id",
+                "Unknown workspace_id",
+                {"workspace_id": payload.workspace_id},
+            )
 
         agent_row = connection.execute(
             "SELECT id FROM agent_profiles WHERE id = ?",
             (payload.agent_profile_id,),
         ).fetchone()
         if agent_row is None:
-            raise HTTPException(status_code=400, detail="Unknown agent_profile_id")
+            raise bad_request(
+                "unknown_agent_profile_id",
+                "Unknown agent_profile_id",
+                {"agent_profile_id": payload.agent_profile_id},
+            )
 
         connection.execute(
             '''
@@ -89,5 +96,5 @@ def create_schedule(database_path: Path, payload: ScheduleCreate) -> ScheduleRea
             (schedule_id,),
         ).fetchone()
     if row is None:
-        raise HTTPException(status_code=500, detail="Failed to create schedule")
+        raise internal_error("schedule_create_failed", "Failed to create schedule")
     return _row_to_schedule(row)

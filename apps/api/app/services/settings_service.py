@@ -1,8 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import HTTPException
-
+from app.core.errors import internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.settings import SystemSettingRead
 
@@ -30,7 +29,7 @@ def update_setting(database_path: Path, key: str, value: str) -> SystemSettingRe
             (key,),
         ).fetchone()
         if row is None:
-            raise HTTPException(status_code=404, detail="Setting not found")
+            raise not_found("setting", key)
 
         connection.execute(
             "UPDATE system_settings SET value = ?, updated_at = ? WHERE key = ?",
@@ -42,5 +41,5 @@ def update_setting(database_path: Path, key: str, value: str) -> SystemSettingRe
         ).fetchone()
 
     if updated is None:
-        raise HTTPException(status_code=500, detail="Failed to update setting")
+        raise internal_error("setting_update_failed", "Failed to update setting")
     return _row_to_setting(updated)

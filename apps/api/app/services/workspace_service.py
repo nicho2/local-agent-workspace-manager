@@ -3,8 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import HTTPException
-
+from app.core.errors import bad_request, conflict, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.workspace import WorkspaceCreate, WorkspaceRead
 from app.services.policy_service import get_default_policy_id
@@ -39,7 +38,7 @@ def get_workspace(database_path: Path, workspace_id: str) -> WorkspaceRead:
             (workspace_id,),
         ).fetchone()
     if row is None:
-        raise HTTPException(status_code=404, detail="Workspace not found")
+        raise not_found("workspace", workspace_id)
     return _row_to_workspace(row)
 
 
@@ -54,14 +53,22 @@ def create_workspace(database_path: Path, payload: WorkspaceCreate) -> Workspace
             (payload.slug,),
         ).fetchone()
         if slug_match is not None:
-            raise HTTPException(status_code=409, detail="Workspace slug already exists")
+            raise conflict(
+                "workspace_slug_conflict",
+                "Workspace slug already exists",
+                {"slug": payload.slug},
+            )
 
         policy_match = connection.execute(
             "SELECT id FROM workspace_policies WHERE id = ?",
             (policy_id,),
         ).fetchone()
         if policy_match is None:
-            raise HTTPException(status_code=400, detail="Unknown policy_id")
+            raise bad_request(
+                "unknown_policy_id",
+                "Unknown policy_id",
+                {"policy_id": policy_id},
+            )
 
         connection.execute(
             '''
@@ -88,5 +95,5 @@ def create_workspace(database_path: Path, payload: WorkspaceCreate) -> Workspace
             (workspace_id,),
         ).fetchone()
     if row is None:
-        raise HTTPException(status_code=500, detail="Failed to create workspace")
+        raise internal_error("workspace_create_failed", "Failed to create workspace")
     return _row_to_workspace(row)
