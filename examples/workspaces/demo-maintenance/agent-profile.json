@@ -1,0 +1,10 @@
+{
+  "name": "maintenance-copilot",
+  "runtime": "copilot_cli",
+  "command_template": "gh copilot suggest -t maintenance",
+  "system_prompt": "Review the workspace and propose maintenance actions.",
+  "environment": {
+    "CI": "false"
+  },
+  "is_active": true
+}

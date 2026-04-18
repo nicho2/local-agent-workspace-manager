@@ -1,0 +1,12 @@
+{
+  "name": "default-safe",
+  "description": "Default safe policy for dry-run local maintenance.",
+  "max_runtime_seconds": 900,
+  "allow_write": false,
+  "allow_network": false,
+  "allowed_command_prefixes": [
+    "gh copilot",
+    "python -m pytest",
+    "npm test"
+  ]
+}
