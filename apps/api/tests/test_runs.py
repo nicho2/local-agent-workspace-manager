@@ -1,11 +1,11 @@
-def _bootstrap_workspace_and_agent(client):
+def _bootstrap_workspace_and_agent(client, workspace_root):
     policy_id = client.get("/policies").json()[0]["id"]
     workspace = client.post(
         "/workspaces",
         json={
             "name": "Maintenance",
             "slug": "maintenance",
-            "root_path": "/tmp/maintenance",
+            "root_path": str(workspace_root / "maintenance"),
             "tags": ["ops"],
             "policy_id": policy_id,
         },
@@ -24,8 +24,8 @@ def _bootstrap_workspace_and_agent(client):
     return workspace, agent
 
 
-def test_create_dry_run_and_fetch_logs_artifacts(client):
-    workspace, agent = _bootstrap_workspace_and_agent(client)
+def test_create_dry_run_and_fetch_logs_artifacts(client, workspace_root):
+    workspace, agent = _bootstrap_workspace_and_agent(client, workspace_root)
 
     run_response = client.post(
         "/runs",
@@ -52,8 +52,8 @@ def test_create_dry_run_and_fetch_logs_artifacts(client):
     assert artifacts[0]["name"] == "summary.md"
 
 
-def test_real_execution_rejected_when_globally_disabled(client):
-    workspace, agent = _bootstrap_workspace_and_agent(client)
+def test_real_execution_rejected_when_globally_disabled(client, workspace_root):
+    workspace, agent = _bootstrap_workspace_and_agent(client, workspace_root)
 
     response = client.post(
         "/runs",

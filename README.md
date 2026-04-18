@@ -42,6 +42,14 @@ pip install -e .[dev]
 python -m uvicorn app.main:app --reload
 ```
 
+Workspace paths are bounded by `LAWM_WORKSPACE_ALLOWED_ROOTS`, which defaults to
+`./examples/workspaces` for local development. Set it to a JSON array of allowed
+base directories if your workspaces live elsewhere, for example:
+
+```bash
+LAWM_WORKSPACE_ALLOWED_ROOTS='["/path/to/workspaces"]'
+```
+
 Run tests:
 
 ```bash

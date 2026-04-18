@@ -18,6 +18,7 @@
 ### Storage
 - SQLite database in `storage/sqlite/`
 - run logs in DB plus file-based artifacts in `storage/artifacts/`
+- workspace roots must be located under configured allowed roots
 
 ## 2. Architectural principles
 
@@ -53,7 +54,7 @@
 - `id`
 - `name`
 - `slug`
-- `root_path`
+- `root_path` normalized with `Path.resolve()` and bounded by allowed roots
 - `description`
 - `tags`
 - `status`
@@ -158,6 +159,7 @@ use `404`, conflicts such as duplicate names or disabled real execution use
 ## 6. Safety rules
 
 - `execution_enabled=false` by default
+- workspace `root_path` must resolve inside one of `workspace_allowed_roots`
 - runner must never use `shell=True`
 - runner must receive an explicit working directory
 - policies expose allowlist-style command prefixes

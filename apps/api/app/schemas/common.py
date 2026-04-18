@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from pydantic import BaseModel, ConfigDict, Field
 
-ErrorDetails = dict[str, str | int | float | bool | None]
+ErrorDetails = dict[str, str | int | float | bool | None | list[str]]
 
 
 def utc_now() -> datetime:

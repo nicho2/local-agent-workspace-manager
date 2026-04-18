@@ -1,11 +1,11 @@
-def _create_workspace(client):
+def _create_workspace(client, workspace_root):
     policy_id = client.get("/policies").json()[0]["id"]
     response = client.post(
         "/workspaces",
         json={
             "name": "Repo Triage",
             "slug": "repo-triage",
-            "root_path": "/tmp/repo-triage",
+            "root_path": str(workspace_root / "repo-triage"),
             "tags": ["repo"],
             "policy_id": policy_id,
         },
@@ -13,8 +13,8 @@ def _create_workspace(client):
     return response.json()
 
 
-def test_create_agent_and_interval_schedule(client):
-    workspace = _create_workspace(client)
+def test_create_agent_and_interval_schedule(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
 
     agent_response = client.post(
         "/agents",

@@ -16,8 +16,17 @@ class Settings(BaseSettings):
     database_path: Path = Field(default=REPO_ROOT / "storage" / "sqlite" / "lawm.db")
     execution_enabled: bool = False
     workspace_root: Path = Field(default=REPO_ROOT / "examples" / "workspaces")
+    workspace_allowed_roots: list[Path] = Field(
+        default_factory=lambda: [REPO_ROOT / "examples" / "workspaces"]
+    )
     logs_root: Path = Field(default=REPO_ROOT / "storage" / "logs")
     artifacts_root: Path = Field(default=REPO_ROOT / "storage" / "artifacts")
+
+    @property
+    def resolved_workspace_allowed_roots(self) -> tuple[Path, ...]:
+        return tuple(
+            allowed_root.expanduser().resolve() for allowed_root in self.workspace_allowed_roots
+        )
 
 
 @lru_cache(maxsize=1)

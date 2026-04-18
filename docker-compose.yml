@@ -8,6 +8,7 @@ services:
       LAWM_DATABASE_PATH: /data/sqlite/lawm.db
       LAWM_EXECUTION_ENABLED: "false"
       LAWM_WORKSPACE_ROOT: /workspace/examples/workspaces
+      LAWM_WORKSPACE_ALLOWED_ROOTS: '["/workspace/examples/workspaces"]'
       LAWM_LOGS_ROOT: /data/logs
       LAWM_ARTIFACTS_ROOT: /data/artifacts
     volumes:

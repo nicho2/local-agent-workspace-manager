@@ -79,7 +79,7 @@ Les erreurs produites par les services et routes MVP utilisent une forme structu
 
 Note de realisation : 2026-04-18 - Ajout d'un schema `APIError` (`code`, `message`, `details`) et d'une exception applicative centralisee pour les erreurs metier/services. Les erreurs principales 400, 404, 409 et 500 des services policies, workspaces, agents, schedules, runs et settings sont structurees sans changer les codes HTTP. Tests ajoutes pour policy inconnue, workspace introuvable et execution reelle bloquee. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 8 tests passent. `docs/spec.md` documente le contrat d'erreur.
 
-## [ ] T003 - Renforcer les limites de workspace
+## [x] T003 - Renforcer les limites de workspace
 
 ### Outcome
 La creation et la mise a jour des workspaces refusent les chemins non autorises, normalisent les chemins avec `Path`, et preservent explicitement les limites locales.
@@ -115,7 +115,7 @@ La creation et la mise a jour des workspaces refusent les chemins non autorises,
 - Un workspace hors racine autorisee est refuse.
 - Les docs de configuration de racines sont a jour.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout du setting `workspace_allowed_roots` avec valeur de developpement sure sur `examples/workspaces`, documentation `.env.example`, README, Docker Compose et spec mises a jour. La creation de workspace normalise `root_path` via `Path.resolve()` et refuse les chemins hors racines autorisees, y compris traversal. Tests ajoutes pour chemin autorise, chemin hors limite et traversal ; les tests existants utilisent des repertoires temporaires controles. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 10 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe aussi, avec seulement un avertissement local d'ecriture de cache Ruff.
 
 ## [ ] T004 - Ajouter l'edition et l'archivage des workspaces
 
