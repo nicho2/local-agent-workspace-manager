@@ -38,6 +38,7 @@ The repository is intentionally opinionated:
 
 ```bash
 cd apps/api
+pip install -e .[dev]
 python -m uvicorn app.main:app --reload
 ```
 

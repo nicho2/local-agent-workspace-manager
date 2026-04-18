@@ -3,20 +3,20 @@ name = "lawm-api"
 version = "0.1.0"
 description = "FastAPI backend for Local Agent Workspace Manager"
 readme = "README.md"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.12"
 dependencies = [
-  "fastapi",
-  "pydantic>=2.5.3,<3.0",
-  "pydantic-settings",
-  "uvicorn",
+  "fastapi>=0.111.0",
+  "pydantic>=2.12.0",
+  "pydantic-settings>=2.12.0",
+  "uvicorn>=0.30.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "pytest",
-  "httpx",
-  "ruff",
-  "mypy",
+  "pytest>=8.2.0",
+  "httpx>=0.28.0",
+  "ruff>=0.6.0",
+  "mypy>=1.11.0",
 ]
 
 [tool.pytest.ini_options]
