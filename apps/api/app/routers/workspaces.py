@@ -1,8 +1,13 @@
 from fastapi import APIRouter
 
 from app.core.config import get_settings
-from app.schemas.workspace import WorkspaceCreate, WorkspaceRead
-from app.services.workspace_service import create_workspace, get_workspace, list_workspaces
+from app.schemas.workspace import WorkspaceCreate, WorkspaceRead, WorkspaceUpdate
+from app.services.workspace_service import (
+    create_workspace,
+    get_workspace,
+    list_workspaces,
+    update_workspace,
+)
 
 router = APIRouter(prefix="/workspaces", tags=["workspaces"])
 
@@ -20,3 +25,8 @@ def get_workspace_by_id(workspace_id: str) -> WorkspaceRead:
 @router.post("", response_model=WorkspaceRead, status_code=201)
 def post_workspace(payload: WorkspaceCreate) -> WorkspaceRead:
     return create_workspace(get_settings().database_path, payload)
+
+
+@router.put("/{workspace_id}", response_model=WorkspaceRead)
+def put_workspace(workspace_id: str, payload: WorkspaceUpdate) -> WorkspaceRead:
+    return update_workspace(get_settings().database_path, workspace_id, payload)

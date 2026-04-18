@@ -126,7 +126,7 @@
 - `GET /dashboard/summary`
 - `GET|POST /policies`
 - `GET|POST /workspaces`
-- `GET /workspaces/{workspace_id}`
+- `GET|PUT /workspaces/{workspace_id}`
 - `GET|POST /agents`
 - `GET|POST /schedules`
 - `GET|POST /runs`
@@ -155,6 +155,23 @@ The `code` field is stable for UI branching, `message` is human-readable, and
 status codes remain meaningful: validation errors use `400`, missing resources
 use `404`, conflicts such as duplicate names or disabled real execution use
 `409`, and unexpected invariant failures use `500`.
+
+### Workspace updates
+
+`PUT /workspaces/{workspace_id}` accepts partial updates for:
+
+- `name`
+- `root_path`
+- `description`
+- `tags`
+- `status`
+- `policy_id`
+
+`root_path` is normalized and checked against `workspace_allowed_roots` using
+the same rule as creation. `policy_id` must reference an existing policy.
+Setting `status` to `archived` archives the workspace metadata without deleting
+runs, logs, artifacts, schedules, or agents associated with it. Successful
+updates refresh `updated_at` with a UTC ISO-8601 timestamp.
 
 ## 6. Safety rules
 

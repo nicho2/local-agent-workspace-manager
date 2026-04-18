@@ -117,7 +117,7 @@ La creation et la mise a jour des workspaces refusent les chemins non autorises,
 
 Note de realisation : 2026-04-18 - Ajout du setting `workspace_allowed_roots` avec valeur de developpement sure sur `examples/workspaces`, documentation `.env.example`, README, Docker Compose et spec mises a jour. La creation de workspace normalise `root_path` via `Path.resolve()` et refuse les chemins hors racines autorisees, y compris traversal. Tests ajoutes pour chemin autorise, chemin hors limite et traversal ; les tests existants utilisent des repertoires temporaires controles. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 10 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe aussi, avec seulement un avertissement local d'ecriture de cache Ruff.
 
-## [ ] T004 - Ajouter l'edition et l'archivage des workspaces
+## [x] T004 - Ajouter l'edition et l'archivage des workspaces
 
 ### Outcome
 L'utilisateur peut modifier les metadonnees d'un workspace et l'archiver sans supprimer l'historique ni les runs associes.
@@ -150,7 +150,7 @@ L'utilisateur peut modifier les metadonnees d'un workspace et l'archiver sans su
 - Les tests couvrent edition reussie, policy inconnue, statut invalide et archivage.
 - `docs/spec.md` liste le endpoint d'edition.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout du schema `WorkspaceUpdate`, du endpoint `PUT /workspaces/{workspace_id}` et de la logique service pour modifier `name`, `description`, `tags`, `status`, `policy_id` et `root_path` avec validation des policies et reutilisation des limites de workspace. L'archivage passe par `status=archived` sans suppression de l'historique ; test de regression avec run existant conserve. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 14 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `docs/spec.md` documente le endpoint d'edition.
 
 ## [ ] T005 - Ajouter l'edition des policies
 

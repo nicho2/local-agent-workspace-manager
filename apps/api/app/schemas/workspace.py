@@ -21,6 +21,15 @@ class WorkspaceCreate(ModelBase):
     policy_id: str | None = None
 
 
+class WorkspaceUpdate(ModelBase):
+    name: str | None = Field(default=None, min_length=3, max_length=120)
+    root_path: str | None = Field(default=None, min_length=1)
+    description: str | None = None
+    tags: list[str] | None = None
+    status: WorkspaceStatus | None = None
+    policy_id: str | None = Field(default=None, min_length=1)
+
+
 class WorkspaceRead(WorkspaceCreate):
     id: str
     policy_id: str

@@ -1,3 +1,23 @@
+from datetime import datetime
+
+
+def _create_workspace(client, workspace_root, slug="docs-vault"):
+    policy_id = client.get("/policies").json()[0]["id"]
+    response = client.post(
+        "/workspaces",
+        json={
+            "name": "Docs Vault",
+            "slug": slug,
+            "root_path": str(workspace_root / slug),
+            "description": "Workspace for documentation maintenance",
+            "tags": ["docs", "vault"],
+            "policy_id": policy_id,
+        },
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
 def test_create_and_list_workspace(client, workspace_root):
     policies = client.get("/policies")
     assert policies.status_code == 200
@@ -104,3 +124,109 @@ def test_workspace_root_path_traversal_outside_allowed_roots_is_rejected(
 
     assert response.status_code == 400
     assert response.json()["details"]["root_path"] == str((tmp_path / "escaped-workspace").resolve())
+
+
+def test_update_workspace_metadata_policy_and_root_path(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    policy_response = client.post(
+        "/policies",
+        json={
+            "name": "editable-policy",
+            "description": "Policy used by workspace update tests",
+            "max_runtime_seconds": 1200,
+            "allow_write": False,
+            "allow_network": False,
+            "allowed_command_prefixes": ["python -m pytest"],
+        },
+    )
+    assert policy_response.status_code == 201
+    policy = policy_response.json()
+    updated_root = workspace_root / "docs-vault-updated"
+
+    response = client.put(
+        f"/workspaces/{workspace['id']}",
+        json={
+            "name": "Docs Vault Updated",
+            "description": "Updated metadata",
+            "tags": ["docs", "updated"],
+            "root_path": str(updated_root),
+            "policy_id": policy["id"],
+        },
+    )
+
+    assert response.status_code == 200
+    updated = response.json()
+    assert updated["id"] == workspace["id"]
+    assert updated["name"] == "Docs Vault Updated"
+    assert updated["description"] == "Updated metadata"
+    assert updated["tags"] == ["docs", "updated"]
+    assert updated["root_path"] == str(updated_root.resolve())
+    assert updated["policy_id"] == policy["id"]
+    assert datetime.fromisoformat(updated["updated_at"]).tzinfo is not None
+
+
+def test_update_workspace_with_unknown_policy_returns_structured_error(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+
+    response = client.put(
+        f"/workspaces/{workspace['id']}",
+        json={"policy_id": "policy_missing"},
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "code": "unknown_policy_id",
+        "message": "Unknown policy_id",
+        "details": {"policy_id": "policy_missing"},
+    }
+
+
+def test_update_workspace_with_invalid_status_is_rejected(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+
+    response = client.put(
+        f"/workspaces/{workspace['id']}",
+        json={"status": "deleted"},
+    )
+
+    assert response.status_code == 422
+
+
+def test_archive_workspace_preserves_existing_run_history(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent_response = client.post(
+        "/agents",
+        json={
+            "name": "archive-check-agent",
+            "runtime": "copilot_cli",
+            "workspace_id": workspace["id"],
+            "command_template": "gh copilot suggest -t archive",
+            "environment": {},
+            "is_active": True,
+        },
+    )
+    assert agent_response.status_code == 201
+    agent = agent_response.json()
+    run_response = client.post(
+        "/runs",
+        json={
+            "workspace_id": workspace["id"],
+            "agent_profile_id": agent["id"],
+            "dry_run": True,
+            "requested_by": "pytest",
+        },
+    )
+    assert run_response.status_code == 201
+    run = run_response.json()
+
+    archive_response = client.put(
+        f"/workspaces/{workspace['id']}",
+        json={"status": "archived"},
+    )
+
+    assert archive_response.status_code == 200
+    assert archive_response.json()["status"] == "archived"
+
+    preserved_run_response = client.get(f"/runs/{run['id']}")
+    assert preserved_run_response.status_code == 200
+    assert preserved_run_response.json()["workspace_id"] == workspace["id"]

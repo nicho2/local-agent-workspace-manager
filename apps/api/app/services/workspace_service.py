@@ -6,7 +6,7 @@ from uuid import uuid4
 from app.core.config import get_settings
 from app.core.errors import bad_request, conflict, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
-from app.schemas.workspace import WorkspaceCreate, WorkspaceRead
+from app.schemas.workspace import WorkspaceCreate, WorkspaceRead, WorkspaceUpdate
 from app.services.policy_service import get_default_policy_id
 
 
@@ -123,4 +123,77 @@ def create_workspace(database_path: Path, payload: WorkspaceCreate) -> Workspace
         ).fetchone()
     if row is None:
         raise internal_error("workspace_create_failed", "Failed to create workspace")
+    return _row_to_workspace(row)
+
+
+def update_workspace(
+    database_path: Path,
+    workspace_id: str,
+    payload: WorkspaceUpdate,
+) -> WorkspaceRead:
+    fields_set = payload.model_fields_set
+    updates: list[str] = []
+    values: list[object] = []
+
+    with get_connection(database_path) as connection:
+        existing = connection.execute(
+            "SELECT * FROM workspaces WHERE id = ?",
+            (workspace_id,),
+        ).fetchone()
+        if existing is None:
+            raise not_found("workspace", workspace_id)
+
+        if "policy_id" in fields_set:
+            policy_id = payload.policy_id
+            policy_match = connection.execute(
+                "SELECT id FROM workspace_policies WHERE id = ?",
+                (policy_id,),
+            ).fetchone()
+            if policy_match is None:
+                raise bad_request(
+                    "unknown_policy_id",
+                    "Unknown policy_id",
+                    {"policy_id": policy_id},
+                )
+            updates.append("policy_id = ?")
+            values.append(policy_id)
+
+        if "root_path" in fields_set:
+            assert payload.root_path is not None
+            updates.append("root_path = ?")
+            values.append(str(_normalize_workspace_root_path(payload.root_path)))
+
+        if "name" in fields_set:
+            updates.append("name = ?")
+            values.append(payload.name)
+
+        if "description" in fields_set:
+            updates.append("description = ?")
+            values.append(payload.description)
+
+        if "tags" in fields_set:
+            updates.append("tags = ?")
+            values.append(json.dumps(payload.tags or []))
+
+        if "status" in fields_set:
+            assert payload.status is not None
+            updates.append("status = ?")
+            values.append(payload.status.value)
+
+        if updates:
+            updates.append("updated_at = ?")
+            values.append(utc_now_iso())
+            values.append(workspace_id)
+            connection.execute(
+                f"UPDATE workspaces SET {', '.join(updates)} WHERE id = ?",
+                values,
+            )
+
+        row = connection.execute(
+            "SELECT * FROM workspaces WHERE id = ?",
+            (workspace_id,),
+        ).fetchone()
+
+    if row is None:
+        raise internal_error("workspace_update_failed", "Failed to update workspace")
     return _row_to_workspace(row)
