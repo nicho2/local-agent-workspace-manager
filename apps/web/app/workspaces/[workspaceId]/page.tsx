@@ -1,9 +1,10 @@
 import Link from "next/link";
 import type { ReactElement } from "react";
 
+import { ManualRunForm } from "@/components/manual-run-form";
 import { RunTable } from "@/components/run-table";
-import { getAgents, getPolicies, getRuns, getSchedules, getWorkspace } from "@/lib/api";
-import type { AgentProfile, Run, Schedule, WorkspacePolicy } from "@/lib/types";
+import { getAgents, getPolicies, getRuns, getSchedules, getSettings, getWorkspace } from "@/lib/api";
+import type { AgentProfile, Run, Schedule, SystemSetting, WorkspacePolicy } from "@/lib/types";
 
 interface WorkspaceDetailPageProps {
   params: Promise<{
@@ -38,18 +39,26 @@ function getWorkspaceRuns(runs: Run[], workspaceId: string): Run[] {
   return runs.filter((run) => run.workspace_id === workspaceId);
 }
 
+function isExecutionEnabled(settings: SystemSetting[]): boolean {
+  return (
+    settings.find((setting) => setting.key === "runner.execution_enabled")?.value.toLowerCase() ===
+    "true"
+  );
+}
+
 export default async function WorkspaceDetailPage({
   params,
 }: WorkspaceDetailPageProps): Promise<ReactElement> {
   const { workspaceId } = await params;
 
   try {
-    const [workspace, policies, agents, schedules, runs] = await Promise.all([
+    const [workspace, policies, agents, schedules, runs, settings] = await Promise.all([
       getWorkspace(workspaceId),
       getPolicies(),
       getAgents(),
       getSchedules(),
       getRuns(),
+      getSettings(),
     ]);
 
     const policy = findWorkspacePolicy(policies, workspace.policy_id);
@@ -57,6 +66,7 @@ export default async function WorkspaceDetailPage({
     const activeAgents = workspaceAgents.filter((agent) => agent.is_active);
     const workspaceSchedules = getWorkspaceSchedules(schedules, workspace.id);
     const workspaceRuns = getWorkspaceRuns(runs, workspace.id);
+    const executionEnabled = isExecutionEnabled(settings);
 
     return (
       <main className="stack">
@@ -106,6 +116,11 @@ export default async function WorkspaceDetailPage({
         <section className="card" id="execution">
           <h3>Execution</h3>
           <p className="muted">Manual runs stay in dry-run mode by default.</p>
+          <ManualRunForm
+            agents={workspaceAgents}
+            executionEnabled={executionEnabled}
+            workspaceId={workspace.id}
+          />
           {activeAgents.length === 0 ? (
             <p>No active agent is available for this workspace.</p>
           ) : (

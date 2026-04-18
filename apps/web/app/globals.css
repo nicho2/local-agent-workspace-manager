@@ -191,6 +191,53 @@ th {
   padding: 10px;
 }
 
+.form-grid {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+  max-width: 520px;
+}
+
+.field-label {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+select {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 10px;
+}
+
+.checkbox-row {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.primary-button {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  color: #07111f;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 12px;
+  width: fit-content;
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.error-text {
+  color: var(--warning);
+  margin: 0;
+}
+
 .stack {
   display: grid;
   gap: 16px;

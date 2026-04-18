@@ -1,5 +1,11 @@
 export type RunStatus = "queued" | "running" | "completed" | "failed" | "blocked";
 
+export interface APIError {
+  code: string;
+  message: string;
+  details: Record<string, unknown>;
+}
+
 export interface WorkspacePolicy {
   id: string;
   name: string;
@@ -63,6 +69,15 @@ export interface Run {
   command_preview: string;
   started_at: string;
   finished_at?: string | null;
+}
+
+export interface RunCreate {
+  workspace_id: string;
+  agent_profile_id: string;
+  trigger?: "manual" | "schedule";
+  requested_by?: string;
+  dry_run?: boolean;
+  command_override?: string | null;
 }
 
 export interface RunLog {

@@ -33,6 +33,7 @@ Coverage baseline:
 - run detail shows metadata, command preview, logs, and artifacts
 - workspaces list links to workspace detail pages
 - workspace detail shows execution, agent, policy, scheduling, and history sections
+- manual run creation posts the expected dry-run payload
 
 As UI logic grows:
 - test API client helpers

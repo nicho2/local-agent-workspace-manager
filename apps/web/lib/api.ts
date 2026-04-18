@@ -1,8 +1,10 @@
 import type {
   AgentProfile,
+  APIError,
   DashboardSummary,
   Run,
   RunArtifact,
+  RunCreate,
   RunLog,
   Schedule,
   SystemSetting,
@@ -13,13 +15,49 @@ import type {
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
-async function fetchJson<T>(path: string): Promise<T> {
+export class ApiRequestError extends Error {
+  status: number;
+  error?: APIError;
+
+  constructor(status: number, statusText: string, error?: APIError) {
+    super(error?.message ?? `API request failed: ${status} ${statusText}`);
+    this.name = "ApiRequestError";
+    this.status = status;
+    this.error = error;
+  }
+}
+
+function isApiError(value: unknown): value is APIError {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const candidate = value as Partial<APIError>;
+  return (
+    typeof candidate.code === "string" &&
+    typeof candidate.message === "string" &&
+    typeof candidate.details === "object" &&
+    candidate.details !== null
+  );
+}
+
+async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     cache: "no-store",
+    ...init,
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    let payload: unknown;
+    try {
+      payload = await response.json();
+    } catch {
+      payload = undefined;
+    }
+    throw new ApiRequestError(
+      response.status,
+      response.statusText,
+      isApiError(payload) ? payload : undefined
+    );
   }
 
   return (await response.json()) as T;
@@ -63,6 +101,16 @@ export function getRunLogs(runId: string): Promise<RunLog[]> {
 
 export function getRunArtifacts(runId: string): Promise<RunArtifact[]> {
   return fetchJson<RunArtifact[]>(`/runs/${runId}/artifacts`);
+}
+
+export function createRun(payload: RunCreate): Promise<Run> {
+  return fetchJson<Run>("/runs", {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
 }
 
 export function getSettings(): Promise<SystemSetting[]> {

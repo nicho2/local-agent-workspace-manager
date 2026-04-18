@@ -39,8 +39,9 @@
 +-----------------------------------------------------------------------+
 | Manual run panel                                                      |
 | Agent: maintenance-copilot                                            |
-| Mode: dry-run                                                         |
+| Mode: [x] dry-run                                                     |
 | [Launch]                                                              |
+| Success opens /runs/{runId}                                           |
 +-----------------------------------------------------------------------+
 | Agent                                                                 |
 | - active and global profiles available to the workspace                |

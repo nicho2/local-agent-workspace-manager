@@ -17,6 +17,12 @@ vi.mock("next/link", () => ({
   }) => React.createElement("a", { className, href }, children),
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
 const sampleWorkspace = {
   id: "ws_docs",
   name: "Docs Vault",
@@ -53,6 +59,13 @@ const sampleAgent = {
   is_active: true,
   created_at: "2026-04-18T09:00:00+00:00",
   updated_at: "2026-04-18T09:00:00+00:00",
+};
+
+const inactiveAgent = {
+  ...sampleAgent,
+  id: "agent_inactive",
+  is_active: false,
+  name: "inactive-agent",
 };
 
 const sampleSchedule = {
@@ -116,9 +129,17 @@ describe("workspaces flow", () => {
     const fetchMock = mockFetchSequence([
       sampleWorkspace,
       [samplePolicy],
-      [sampleAgent],
+      [sampleAgent, inactiveAgent],
       [sampleSchedule],
       [sampleRun],
+      [
+        {
+          key: "runner.execution_enabled",
+          value: "false",
+          description: "Global switch for real command execution.",
+          updated_at: "2026-04-18T09:00:00+00:00",
+        },
+      ],
     ]);
 
     const html = renderToStaticMarkup(
@@ -133,6 +154,11 @@ describe("workspaces flow", () => {
     });
     expect(html).toContain("Docs Vault");
     expect(html).toContain("Execution");
+    expect(html).toContain("Launch dry-run");
+    expect(html).toContain("Dry-run");
+    expect(html).toContain("disabled globally");
+    expect(html).toContain("inactive-agent");
+    expect(html).toContain("disabled=\"\"");
     expect(html).toContain("Agent");
     expect(html).toContain("Policy");
     expect(html).toContain("Scheduling");

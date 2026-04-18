@@ -459,7 +459,7 @@ L'UI workspace permet de voir et piloter les facettes MVP : execution manuelle, 
 
 Note de realisation : 2026-04-18 - Ajout de la route `/workspaces/{workspaceId}` avec sections Execution, Agent, Policy, Scheduling et History. La page recupere workspace, policies, agents, schedules et runs via helpers centralises, filtre les donnees liees cote serveur, affiche les agents actifs disponibles pour le futur lancement manuel, la policy attachee, les schedules du workspace et les runs recents avec liens vers le detail. La liste des workspaces pointe maintenant vers le detail. Tests Vitest ajoutes pour navigation liste -> detail et presence des sections/facettes essentielles. Validation : `npm test` depuis `apps/web` : 6 tests passent ; `npm run build` depuis `apps/web` passe sans warning.
 
-## [ ] T013 - Ajouter le lancement manuel depuis l'UI
+## [x] T013 - Ajouter le lancement manuel depuis l'UI
 
 ### Outcome
 L'utilisateur peut lancer un run manuel dry-run depuis l'UI, choisir workspace et agent, puis ouvrir le detail du run cree.
@@ -495,7 +495,7 @@ L'utilisateur peut lancer un run manuel dry-run depuis l'UI, choisir workspace e
 - Les erreurs courantes sont visibles.
 - Le run cree est consultable dans l'UI.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout du helper frontend `createRun` et du composant client `ManualRunForm` sur le detail workspace. Le formulaire choisit un agent disponible, affiche les agents inactifs comme options desactivees, garde `dry_run=true` coche et verrouille, indique l'etat global d'execution, poste un run manuel `requested_by=web-ui`, puis redirige vers `/runs/{runId}` apres creation. Les erreurs API structurees sont converties en message visible. Tests Vitest ajoutes pour le contrat POST de creation et le rendu du lancement dry-run dans le parcours workspace. Validation : `npm test` depuis `apps/web` : 7 tests passent ; `npm run build` depuis `apps/web` passe sans warning.
 
 ## [ ] T014 - Ajouter les formulaires MVP de creation et edition
 
