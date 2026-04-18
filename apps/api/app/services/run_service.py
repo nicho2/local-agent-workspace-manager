@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from sqlite3 import Connection
 from uuid import uuid4
 
 from app.core.config import get_settings
@@ -67,10 +68,20 @@ def get_run(database_path: Path, run_id: str) -> RunRead:
     return _row_to_run(row)
 
 
+def _ensure_run_exists(connection: Connection, run_id: str) -> None:
+    row = connection.execute(
+        "SELECT id FROM runs WHERE id = ?",
+        (run_id,),
+    ).fetchone()
+    if row is None:
+        raise not_found("run", run_id)
+
+
 def list_run_logs(database_path: Path, run_id: str) -> list[RunLogRead]:
     with get_connection(database_path) as connection:
+        _ensure_run_exists(connection, run_id)
         rows = connection.execute(
-            "SELECT * FROM run_logs WHERE run_id = ? ORDER BY timestamp ASC",
+            "SELECT * FROM run_logs WHERE run_id = ? ORDER BY timestamp ASC, rowid ASC",
             (run_id,),
         ).fetchall()
     return [_row_to_log(row) for row in rows]
@@ -78,6 +89,7 @@ def list_run_logs(database_path: Path, run_id: str) -> list[RunLogRead]:
 
 def list_run_artifacts(database_path: Path, run_id: str) -> list[RunArtifactRead]:
     with get_connection(database_path) as connection:
+        _ensure_run_exists(connection, run_id)
         rows = connection.execute(
             "SELECT * FROM run_artifacts WHERE run_id = ? ORDER BY created_at ASC",
             (run_id,),

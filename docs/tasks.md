@@ -262,7 +262,7 @@ Les schedules peuvent etre modifies, actives ou desactives, avec recalcul cohere
 
 Note de realisation : 2026-04-18 - Ajout du schema `ScheduleUpdate`, du endpoint `PUT /schedules/{schedule_id}` et de la logique service d'edition partielle avec validation des references workspace/agent, recalcul de `next_run_at` pour les schedules interval actives, et remise a `null` quand `enabled=false`. `mode=interval` exige `interval_minutes`; `mode=cron` exige `cron_expression`, mais le MVP ne parse pas encore cron et documente `next_run_at=null` pour ce mode. Tests ajoutes pour activation, desactivation, interval invalide et references inconnues. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 27 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `docs/spec.md` documente le contrat.
 
-## [ ] T008 - Completer le contrat d'historique des runs
+## [x] T008 - Completer le contrat d'historique des runs
 
 ### Outcome
 L'API expose un historique de runs utilisable par l'UI MVP, avec detail, logs et artifacts coherents.
@@ -297,7 +297,7 @@ L'API expose un historique de runs utilisable par l'UI MVP, avec detail, logs et
 - Les types frontend refletent le contrat.
 - `docs/spec.md` est a jour.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Les endpoints detail, logs et artifacts de runs retournent maintenant une erreur structuree 404 quand le run n'existe pas. Les logs sont listes par ordre chronologique avec ordre d'insertion stable pour timestamps identiques, et les tests verifient logs/artifacts utiles pour l'UI. Types et helpers frontend ajoutes pour `RunLog`, `RunArtifact`, `getRuns`, `getRun`, `getRunLogs` et `getRunArtifacts`. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 28 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `npm run build` cote web reste bloque par l'erreur preexistante `app/layout.tsx: Cannot find namespace 'JSX'`. `docs/spec.md` documente le contrat d'historique.
 
 ## [ ] T009 - Introduire un runner reel garde par settings et policy
 

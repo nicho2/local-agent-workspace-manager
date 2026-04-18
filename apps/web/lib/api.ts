@@ -1,6 +1,9 @@
 import type {
   AgentProfile,
   DashboardSummary,
+  Run,
+  RunArtifact,
+  RunLog,
   Schedule,
   SystemSetting,
   Workspace,
@@ -35,6 +38,22 @@ export function getAgents(): Promise<AgentProfile[]> {
 
 export function getSchedules(): Promise<Schedule[]> {
   return fetchJson<Schedule[]>("/schedules");
+}
+
+export function getRuns(): Promise<Run[]> {
+  return fetchJson<Run[]>("/runs");
+}
+
+export function getRun(runId: string): Promise<Run> {
+  return fetchJson<Run>(`/runs/${runId}`);
+}
+
+export function getRunLogs(runId: string): Promise<RunLog[]> {
+  return fetchJson<RunLog[]>(`/runs/${runId}/logs`);
+}
+
+export function getRunArtifacts(runId: string): Promise<RunArtifact[]> {
+  return fetchJson<RunArtifact[]>(`/runs/${runId}/artifacts`);
 }
 
 export function getSettings(): Promise<SystemSetting[]> {

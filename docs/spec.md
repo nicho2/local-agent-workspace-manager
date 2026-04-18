@@ -231,6 +231,19 @@ is introduced. When an interval schedule is enabled, `next_run_at` is recalculat
 from the current UTC time. When any schedule is disabled, `next_run_at` is set to
 `null`. Successful updates refresh `updated_at` with a UTC ISO-8601 timestamp.
 
+### Run history
+
+`GET /runs` returns the 20 most recent runs ordered by `started_at` descending.
+`GET /runs/{run_id}` returns run metadata. `GET /runs/{run_id}/logs` returns log
+entries ordered chronologically by `timestamp`, with insertion order preserved
+for entries that share the same timestamp. `GET /runs/{run_id}/artifacts`
+returns artifacts ordered by `created_at`.
+
+Run logs expose `id`, `run_id`, `level`, `message`, and `timestamp`. Run
+artifacts expose `id`, `run_id`, `name`, `relative_path`, `media_type`, and
+`created_at`. Detail, logs, and artifacts endpoints all return structured `404`
+errors when the run does not exist.
+
 ## 6. Safety rules
 
 - `execution_enabled=false` by default

@@ -53,6 +53,23 @@ export interface Run {
   finished_at?: string | null;
 }
 
+export interface RunLog {
+  id: string;
+  run_id: string;
+  level: string;
+  message: string;
+  timestamp: string;
+}
+
+export interface RunArtifact {
+  id: string;
+  run_id: string;
+  name: string;
+  relative_path: string;
+  media_type: string;
+  created_at: string;
+}
+
 export interface DashboardSummary {
   workspaces: number;
   agents: number;
