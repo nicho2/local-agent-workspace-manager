@@ -1,7 +1,9 @@
+import type { ReactElement } from "react";
+
 import { WorkspaceTable } from "@/components/workspace-table";
 import { getWorkspaces } from "@/lib/api";
 
-export default async function WorkspacesPage(): Promise<JSX.Element> {
+export default async function WorkspacesPage(): Promise<ReactElement> {
   const workspaces = await getWorkspaces();
 
   return (

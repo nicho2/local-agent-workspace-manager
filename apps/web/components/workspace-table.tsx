@@ -1,10 +1,12 @@
+import type { ReactElement } from "react";
+
 import type { Workspace } from "@/lib/types";
 
 interface WorkspaceTableProps {
   workspaces: Workspace[];
 }
 
-export function WorkspaceTable({ workspaces }: WorkspaceTableProps): JSX.Element {
+export function WorkspaceTable({ workspaces }: WorkspaceTableProps): ReactElement {
   return (
     <section className="card">
       <h3>Workspaces</h3>

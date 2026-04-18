@@ -1,7 +1,9 @@
+import type { ReactElement } from "react";
+
 import { StatCard } from "@/components/stat-card";
 import { getDashboardSummary } from "@/lib/api";
 
-export default async function DashboardPage(): Promise<JSX.Element> {
+export default async function DashboardPage(): Promise<ReactElement> {
   const summary = await getDashboardSummary();
 
   return (

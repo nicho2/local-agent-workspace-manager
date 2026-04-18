@@ -1,6 +1,8 @@
+import type { ReactElement } from "react";
+
 import { getSettings } from "@/lib/api";
 
-export default async function SettingsPage(): Promise<JSX.Element> {
+export default async function SettingsPage(): Promise<ReactElement> {
   const settings = await getSettings();
 
   return (

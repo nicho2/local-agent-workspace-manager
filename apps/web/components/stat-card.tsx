@@ -1,10 +1,12 @@
+import type { ReactElement } from "react";
+
 interface StatCardProps {
   title: string;
   value: string | number;
   hint?: string;
 }
 
-export function StatCard({ title, value, hint }: StatCardProps): JSX.Element {
+export function StatCard({ title, value, hint }: StatCardProps): ReactElement {
   return (
     <section className="card">
       <div className="muted">{title}</div>

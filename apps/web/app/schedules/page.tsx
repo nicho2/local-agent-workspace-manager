@@ -1,6 +1,8 @@
+import type { ReactElement } from "react";
+
 import { getAgents, getSchedules } from "@/lib/api";
 
-export default async function SchedulesPage(): Promise<JSX.Element> {
+export default async function SchedulesPage(): Promise<ReactElement> {
   const [schedules, agents] = await Promise.all([getSchedules(), getAgents()]);
   const agentById = new Map(agents.map((agent) => [agent.id, agent.name]));
 

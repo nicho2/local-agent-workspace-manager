@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactElement } from "react";
 
 const items = [
   { href: "/", label: "Dashboard" },
@@ -7,7 +8,7 @@ const items = [
   { href: "/settings", label: "Settings" },
 ];
 
-export function TopNav(): JSX.Element {
+export function TopNav(): ReactElement {
   return (
     <nav className="top-nav">
       {items.map((item) => (

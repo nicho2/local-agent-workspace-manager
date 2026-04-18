@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import type { ReactElement, ReactNode } from "react";
 
 import { TopNav } from "@/components/top-nav";
 
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>): JSX.Element {
+}: Readonly<{ children: ReactNode }>): ReactElement {
   return (
     <html lang="en">
       <body>
