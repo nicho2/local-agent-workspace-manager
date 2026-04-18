@@ -1,6 +1,22 @@
 from datetime import datetime
 
 
+def _create_policy(client, name="test-policy"):
+    response = client.post(
+        "/policies",
+        json={
+            "name": name,
+            "description": "Policy created by tests",
+            "max_runtime_seconds": 900,
+            "allow_write": False,
+            "allow_network": False,
+            "allowed_command_prefixes": ["python -m pytest"],
+        },
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
 def _create_workspace(client, workspace_root, slug="docs-vault"):
     policy_id = client.get("/policies").json()[0]["id"]
     response = client.post(
@@ -48,6 +64,72 @@ def test_create_and_list_workspace(client, workspace_root):
     detail = client.get(f"/workspaces/{workspace['id']}")
     assert detail.status_code == 200
     assert detail.json()["name"] == "Docs Vault"
+
+
+def test_update_policy(client):
+    policy = _create_policy(client)
+
+    response = client.put(
+        f"/policies/{policy['id']}",
+        json={
+            "name": "updated-policy",
+            "description": "Updated policy",
+            "max_runtime_seconds": 1200,
+            "allow_write": True,
+            "allow_network": True,
+            "allowed_command_prefixes": ["python -m pytest", "npm test"],
+        },
+    )
+
+    assert response.status_code == 200
+    updated = response.json()
+    assert updated["id"] == policy["id"]
+    assert updated["name"] == "updated-policy"
+    assert updated["description"] == "Updated policy"
+    assert updated["max_runtime_seconds"] == 1200
+    assert updated["allow_write"] is True
+    assert updated["allow_network"] is True
+    assert updated["allowed_command_prefixes"] == ["python -m pytest", "npm test"]
+    assert datetime.fromisoformat(updated["updated_at"]).tzinfo is not None
+
+
+def test_update_policy_name_conflict_returns_structured_error(client):
+    first = _create_policy(client, "first-policy")
+    second = _create_policy(client, "second-policy")
+
+    response = client.put(
+        f"/policies/{second['id']}",
+        json={"name": first["name"]},
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {
+        "code": "policy_name_conflict",
+        "message": "Policy name already exists",
+        "details": {"name": first["name"]},
+    }
+
+
+def test_update_policy_rejects_invalid_runtime_limit(client):
+    policy = _create_policy(client)
+
+    response = client.put(
+        f"/policies/{policy['id']}",
+        json={"max_runtime_seconds": 0},
+    )
+
+    assert response.status_code == 422
+
+
+def test_update_policy_rejects_empty_command_prefix(client):
+    policy = _create_policy(client)
+
+    response = client.put(
+        f"/policies/{policy['id']}",
+        json={"allowed_command_prefixes": [""]},
+    )
+
+    assert response.status_code == 422
 
 
 def test_create_workspace_with_unknown_policy_returns_structured_error(client, workspace_root):

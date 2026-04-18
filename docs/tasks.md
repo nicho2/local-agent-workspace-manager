@@ -152,7 +152,7 @@ L'utilisateur peut modifier les metadonnees d'un workspace et l'archiver sans su
 
 Note de realisation : 2026-04-18 - Ajout du schema `WorkspaceUpdate`, du endpoint `PUT /workspaces/{workspace_id}` et de la logique service pour modifier `name`, `description`, `tags`, `status`, `policy_id` et `root_path` avec validation des policies et reutilisation des limites de workspace. L'archivage passe par `status=archived` sans suppression de l'historique ; test de regression avec run existant conserve. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 14 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `docs/spec.md` documente le endpoint d'edition.
 
-## [ ] T005 - Ajouter l'edition des policies
+## [x] T005 - Ajouter l'edition des policies
 
 ### Outcome
 Les policies peuvent etre modifiees apres creation, avec validation des limites d'execution et prefixes de commande.
@@ -186,7 +186,7 @@ Les policies peuvent etre modifiees apres creation, avec validation des limites 
 - Les validations critiques sont testees.
 - Le contrat est documente.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout du schema `WorkspacePolicyUpdate`, du endpoint `PUT /policies/{policy_id}` et de la logique service d'edition partielle avec mise a jour de `updated_at`. Le nom reste unique, `max_runtime_seconds` conserve les bornes 30..7200 et les prefixes de commande doivent etre des entrees non vides. Tests ajoutes pour edition reussie, conflit de nom, limite d'execution invalide et prefixe vide. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 18 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local d'ecriture de cache Ruff. `docs/spec.md` documente le contrat.
 
 ## [ ] T006 - Ajouter l'edition et l'activation des agents
 

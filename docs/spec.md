@@ -125,6 +125,7 @@
 - `GET /health`
 - `GET /dashboard/summary`
 - `GET|POST /policies`
+- `PUT /policies/{policy_id}`
 - `GET|POST /workspaces`
 - `GET|PUT /workspaces/{workspace_id}`
 - `GET|POST /agents`
@@ -172,6 +173,22 @@ the same rule as creation. `policy_id` must reference an existing policy.
 Setting `status` to `archived` archives the workspace metadata without deleting
 runs, logs, artifacts, schedules, or agents associated with it. Successful
 updates refresh `updated_at` with a UTC ISO-8601 timestamp.
+
+### Policy updates
+
+`PUT /policies/{policy_id}` accepts partial updates for:
+
+- `name`
+- `description`
+- `max_runtime_seconds`
+- `allow_write`
+- `allow_network`
+- `allowed_command_prefixes`
+
+`name` remains unique. `max_runtime_seconds` must stay between `30` and
+`7200` seconds. Command prefixes are explicit allowlist entries and cannot be
+empty strings. Successful updates refresh `updated_at` with a UTC ISO-8601
+timestamp.
 
 ## 6. Safety rules
 

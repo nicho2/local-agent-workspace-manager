@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from app.core.errors import conflict, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
-from app.schemas.policy import WorkspacePolicyCreate, WorkspacePolicyRead
+from app.schemas.policy import WorkspacePolicyCreate, WorkspacePolicyRead, WorkspacePolicyUpdate
 
 
 def _row_to_policy(row: object) -> WorkspacePolicyRead:
@@ -92,4 +92,74 @@ def create_policy(database_path: Path, payload: WorkspacePolicyCreate) -> Worksp
         ).fetchone()
     if row is None:
         raise internal_error("policy_create_failed", "Failed to create policy")
+    return _row_to_policy(row)
+
+
+def update_policy(
+    database_path: Path,
+    policy_id: str,
+    payload: WorkspacePolicyUpdate,
+) -> WorkspacePolicyRead:
+    fields_set = payload.model_fields_set
+    updates: list[str] = []
+    values: list[object] = []
+
+    with get_connection(database_path) as connection:
+        existing = connection.execute(
+            "SELECT * FROM workspace_policies WHERE id = ?",
+            (policy_id,),
+        ).fetchone()
+        if existing is None:
+            raise not_found("policy", policy_id)
+
+        if "name" in fields_set:
+            name_match = connection.execute(
+                "SELECT id FROM workspace_policies WHERE name = ? AND id != ?",
+                (payload.name, policy_id),
+            ).fetchone()
+            if name_match is not None:
+                raise conflict(
+                    "policy_name_conflict",
+                    "Policy name already exists",
+                    {"name": payload.name},
+                )
+            updates.append("name = ?")
+            values.append(payload.name)
+
+        if "description" in fields_set:
+            updates.append("description = ?")
+            values.append(payload.description)
+
+        if "max_runtime_seconds" in fields_set:
+            updates.append("max_runtime_seconds = ?")
+            values.append(payload.max_runtime_seconds)
+
+        if "allow_write" in fields_set:
+            updates.append("allow_write = ?")
+            values.append(int(bool(payload.allow_write)))
+
+        if "allow_network" in fields_set:
+            updates.append("allow_network = ?")
+            values.append(int(bool(payload.allow_network)))
+
+        if "allowed_command_prefixes" in fields_set:
+            updates.append("allowed_command_prefixes = ?")
+            values.append(json.dumps(payload.allowed_command_prefixes or []))
+
+        if updates:
+            updates.append("updated_at = ?")
+            values.append(utc_now_iso())
+            values.append(policy_id)
+            connection.execute(
+                f"UPDATE workspace_policies SET {', '.join(updates)} WHERE id = ?",
+                values,
+            )
+
+        row = connection.execute(
+            "SELECT * FROM workspace_policies WHERE id = ?",
+            (policy_id,),
+        ).fetchone()
+
+    if row is None:
+        raise internal_error("policy_update_failed", "Failed to update policy")
     return _row_to_policy(row)
