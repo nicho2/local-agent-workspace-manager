@@ -7,7 +7,7 @@ The repository is intentionally opinionated:
 - **Backend**: FastAPI / Pydantic v2
 - **Persistence**: SQLite
 - **Execution model**: controlled subprocess runner, dry-run by default
-- **Testing**: pytest for backend, Vitest-ready frontend structure
+- **Testing**: pytest for backend, Vitest for frontend flow checks
 
 ## Objectives
 
@@ -68,6 +68,14 @@ pytest
 cd apps/web
 npm install
 npm run dev
+```
+
+Run frontend checks:
+
+```bash
+cd apps/web
+npm test
+npm run build
 ```
 
 ### Full stack via Docker

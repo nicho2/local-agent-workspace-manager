@@ -22,7 +22,17 @@ Coverage baseline for this starter:
 
 ## Frontend
 
-The starter includes a Vitest-ready structure. As UI logic grows:
+Use `vitest run` for lightweight frontend checks. The current suite renders
+server components to static HTML with mocked API responses so the MVP navigation
+and run-history flow stay covered without adding a browser dependency.
+
+Coverage baseline:
+- top navigation links to the main MVP sections
+- dashboard recent runs link to run detail pages
+- runs list shows status, trigger, dry-run state, and detail links
+- run detail shows metadata, command preview, logs, and artifacts
+
+As UI logic grows:
 - test API client helpers
 - test client-side components with meaningful state
 - keep presentation-only components thin
