@@ -1,4 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+
+from app.core.config import get_settings
+from app.db.database import get_connection
+from app.services.schedule_worker_service import process_due_schedules
 
 
 def _create_workspace(client, workspace_root):
@@ -181,3 +185,68 @@ def test_update_schedule_rejects_unknown_references(client, workspace_root):
         "message": "Unknown agent_profile_id",
         "details": {"agent_profile_id": "agent_missing"},
     }
+
+
+def test_schedule_worker_processes_due_interval_once(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent = _create_agent(client, workspace["id"])
+    schedule = _create_interval_schedule(client, workspace["id"], agent["id"])
+    database_path = get_settings().database_path
+    due_at = datetime(2026, 4, 18, 8, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 4, 18, 9, 0, tzinfo=timezone.utc)
+
+    with get_connection(database_path) as connection:
+        connection.execute(
+            "UPDATE schedules SET next_run_at = ? WHERE id = ?",
+            (due_at.isoformat(), schedule["id"]),
+        )
+
+    result = process_due_schedules(database_path, now=now)
+
+    assert result.processed_count == 1
+    assert len(result.created_run_ids) == 1
+
+    runs = client.get("/runs").json()
+    assert len(runs) == 1
+    assert runs[0]["id"] == result.created_run_ids[0]
+    assert runs[0]["trigger"] == "schedule"
+    assert runs[0]["dry_run"] is True
+    assert runs[0]["status"] == "completed"
+
+    schedules = client.get("/schedules").json()
+    updated_schedule = next(item for item in schedules if item["id"] == schedule["id"])
+    assert datetime.fromisoformat(updated_schedule["next_run_at"]) == now + timedelta(minutes=60)
+
+    second_result = process_due_schedules(database_path, now=now)
+    assert second_result.processed_count == 0
+    assert client.get("/runs").json() == runs
+
+
+def test_schedule_worker_ignores_disabled_and_not_due_schedules(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent = _create_agent(client, workspace["id"])
+    disabled_schedule = _create_interval_schedule(
+        client,
+        workspace["id"],
+        agent["id"],
+        enabled=False,
+    )
+    future_schedule = _create_interval_schedule(client, workspace["id"], agent["id"])
+    database_path = get_settings().database_path
+    now = datetime(2026, 4, 18, 9, 0, tzinfo=timezone.utc)
+
+    with get_connection(database_path) as connection:
+        connection.execute(
+            "UPDATE schedules SET next_run_at = ? WHERE id = ?",
+            ((now - timedelta(hours=1)).isoformat(), disabled_schedule["id"]),
+        )
+        connection.execute(
+            "UPDATE schedules SET next_run_at = ? WHERE id = ?",
+            ((now + timedelta(hours=1)).isoformat(), future_schedule["id"]),
+        )
+
+    result = process_due_schedules(database_path, now=now)
+
+    assert result.processed_count == 0
+    assert result.created_run_ids == []
+    assert client.get("/runs").json() == []

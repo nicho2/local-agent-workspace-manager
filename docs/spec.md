@@ -231,6 +231,21 @@ is introduced. When an interval schedule is enabled, `next_run_at` is recalculat
 from the current UTC time. When any schedule is disabled, `next_run_at` is set to
 `null`. Successful updates refresh `updated_at` with a UTC ISO-8601 timestamp.
 
+### Schedule worker
+
+The local schedule worker is disabled by default through
+`schedule_worker_enabled=false`. When enabled, the FastAPI lifespan starts a
+single-process polling loop that calls `process_due_schedules` every
+`schedule_worker_poll_seconds` seconds.
+
+For the MVP, the worker processes enabled `interval` schedules whose
+`next_run_at` is due. Each due schedule is claimed with a conditional database
+update before run creation, which prevents repeated processing by the local
+worker for the same due timestamp. The worker triggers runs with
+`trigger=schedule`, `requested_by=schedule-worker`, and `dry_run=true`, then
+advances `next_run_at` by the schedule interval from the processing time.
+Disabled schedules, non-due schedules, and `cron` schedules do not create runs.
+
 ### Run history
 
 `GET /runs` returns the 20 most recent runs ordered by `started_at` descending.

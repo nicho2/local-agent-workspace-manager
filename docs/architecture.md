@@ -16,13 +16,15 @@ flowchart LR
   Examples[(Workspace roots)]
   Runner[Controlled runner]
   Schedules[Schedule service]
+  ScheduleWorker[Optional schedule worker]
 
   User --> Web
   Web --> API
   API --> DB
   API --> Artifacts
   API --> Schedules
-  Schedules --> API
+  ScheduleWorker --> Schedules
+  ScheduleWorker --> API
   API --> Runner
   Runner --> Examples
   Runner --> Artifacts
@@ -62,6 +64,15 @@ sequenceDiagram
 - mounted local `storage/`
 - mounted local `examples/`
 
+### Schedule processing
+
+The API can start an optional in-process schedule worker when
+`LAWM_SCHEDULE_WORKER_ENABLED=true`. The worker polls SQLite at the configured
+interval, claims due interval schedules with a conditional `next_run_at` update,
+and creates dry-run runs with `trigger=schedule`. It is intentionally
+single-machine and single-process for the MVP; distributed scheduling and full
+cron parsing remain future work.
+
 ## Design choices
 
 - monorepo for coherence
@@ -80,4 +91,6 @@ Therefore:
   workspace policy command-prefix allowlists
 - controlled subprocess runs use explicit argument lists, workspace `cwd`,
   timeout, stdout/stderr capture, and no shell
+- scheduled runs are dry-run by default and the worker is disabled unless
+  explicitly enabled in configuration
 - future hardening should consider per-run containerization or OS-level sandboxing

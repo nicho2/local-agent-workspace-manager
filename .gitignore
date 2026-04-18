@@ -22,3 +22,4 @@ storage/artifacts/*
 /.idea/
 /local-agent-workspace-manager-starter.zip
 /apps/api/lawm_api.egg-info/
+/apps/api/pytest-tmp/

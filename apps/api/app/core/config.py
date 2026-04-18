@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     )
     logs_root: Path = Field(default=REPO_ROOT / "storage" / "logs")
     artifacts_root: Path = Field(default=REPO_ROOT / "storage" / "artifacts")
+    schedule_worker_enabled: bool = False
+    schedule_worker_poll_seconds: int = Field(default=60, ge=5, le=3600)
 
     @property
     def resolved_workspace_allowed_roots(self) -> tuple[Path, ...]:

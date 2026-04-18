@@ -50,6 +50,11 @@ base directories if your workspaces live elsewhere, for example:
 LAWM_WORKSPACE_ALLOWED_ROOTS='["/path/to/workspaces"]'
 ```
 
+Scheduled runs are processed by a local background worker only when
+`LAWM_SCHEDULE_WORKER_ENABLED=true`. The worker is disabled by default, polls
+every `LAWM_SCHEDULE_WORKER_POLL_SECONDS` seconds, and triggers due interval
+schedules as dry-runs.
+
 Run tests:
 
 ```bash
