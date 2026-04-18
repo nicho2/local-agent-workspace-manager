@@ -578,7 +578,7 @@ L'utilisateur peut consulter et modifier les settings MVP, notamment le flag glo
 
 Note de realisation : 2026-04-18 - Le setting persistant `runner.execution_enabled` devient la source operationnelle pour le dashboard et le runner, avec valeur initiale seedee depuis `LAWM_EXECUTION_ENABLED` seulement a la creation de la base. Tests backend ajoutes pour mise a jour du setting, `updated_at`, 404 structuree et reflet dashboard. Ajout du helper frontend `updateSetting` et du composant Settings avec avertissement explicite avant activation globale ; la page affiche aussi la table des settings. Tests Vitest ajoutes pour le rendu Settings et le contrat PUT. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 36 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement l'avertissement local de cache Ruff ; `npm test` depuis `apps/web` : 12 tests passent ; `npm run build` depuis `apps/web` passe sans warning.
 
-## [ ] T016 - Ajouter une seed demo reproductible
+## [x] T016 - Ajouter une seed demo reproductible
 
 ### Outcome
 Un utilisateur peut initialiser des donnees demo locales pour valider rapidement le scenario MVP sans tout saisir a la main.
@@ -613,7 +613,7 @@ Un utilisateur peut initialiser des donnees demo locales pour valider rapidement
 - Relancer la seed ne duplique pas les donnees.
 - Le README explique comment tester le scenario demo.
 
-Note de realisation :
+Note de realisation : 2026-04-18 - Ajout de `scripts/seed_demo.py`, seed idempotente qui initialise la base, reutilise la policy `default-safe`, cree les deux workspaces demo sous `examples/workspaces`, un agent actif par workspace et deux schedules interval desactives. La seed reutilise les services existants pour conserver la validation des racines autorisees et cherche les enregistrements existants par cles naturelles afin de ne pas dupliquer ni ecraser les donnees demo. Test backend ajoute pour executer la seed deux fois sur une base temporaire et verifier l'absence de doublons. Validation : script lance depuis la racine avec `LAWM_DATABASE_PATH=storage/sqlite/seed-demo-validation.db` puis base temporaire supprimee ; `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 37 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests ..\..\scripts\seed_demo.py` passe avec seulement l'avertissement local de cache Ruff. `README.md` et `docs/spec.md` documentent la commande et le comportement.
 
 ## [ ] T017 - Verifier le parcours MVP de bout en bout
 

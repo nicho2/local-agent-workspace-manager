@@ -62,6 +62,17 @@ cd apps/api
 pytest
 ```
 
+Seed reproducible demo data from the repository root:
+
+```bash
+py -3.12 scripts/seed_demo.py
+```
+
+The seed is idempotent. It ensures the safe default policy, two example
+workspaces under `examples/workspaces`, one active agent per workspace, and two
+disabled interval schedules. Existing demo records are reused rather than
+overwritten.
+
 ### Frontend
 
 ```bash

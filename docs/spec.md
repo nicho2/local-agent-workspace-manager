@@ -256,6 +256,22 @@ execution and dashboard status. It is seeded from `LAWM_EXECUTION_ENABLED` on a
 new database, remains `false` by default, and can later be changed explicitly
 through the settings API. Changing the setting does not launch any run.
 
+### Demo seed
+
+`scripts/seed_demo.py` initializes a reproducible local demo dataset. It is
+idempotent and creates only missing records:
+
+- the existing `default-safe` policy
+- `Demo Maintenance` under `examples/workspaces/demo-maintenance`
+- `Repo Triage` under `examples/workspaces/repo-triage`
+- one active `copilot_cli` agent per demo workspace
+- one disabled interval schedule per demo workspace
+
+The seed uses the same service-layer validation as the API, so workspace paths
+remain bounded by `workspace_allowed_roots`. Existing demo records are reused
+by natural keys such as workspace slug, agent name/workspace, and schedule
+name/workspace/agent; the script does not overwrite existing user edits.
+
 ### Run history
 
 `GET /runs` returns the 20 most recent runs ordered by `started_at` descending.
