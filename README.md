@@ -44,10 +44,18 @@ python -m uvicorn app.main:app --reload
 
 Workspace paths are bounded by `LAWM_WORKSPACE_ALLOWED_ROOTS`, which defaults to
 `./examples/workspaces` for local development. Set it to a JSON array of allowed
-base directories if your workspaces live elsewhere, for example:
+base directories in the repository root `.env` if your workspaces live
+elsewhere. Relative paths in this file are resolved from the repository root,
+for example:
 
 ```bash
 LAWM_WORKSPACE_ALLOWED_ROOTS='["/path/to/workspaces"]'
+```
+
+On Windows, prefer forward slashes or escaped backslashes inside the JSON value:
+
+```env
+LAWM_WORKSPACE_ALLOWED_ROOTS=["./examples/workspaces","E:/temp"]
 ```
 
 The API allows browser requests from the local Next.js dev server by default:
