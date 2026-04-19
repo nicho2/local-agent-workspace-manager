@@ -82,6 +82,48 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - preserve auditability where possible, or document which records are permanently removed
 - add backend service tests for dependency handling and frontend tests for confirmation/error flows
 
+### P2-012 Runtime capability presets
+- define a central capability model for supported runtimes
+- include default command template, dry-run support, write/network expectations, environment hints, and recommended policy prefixes
+- expose presets to the UI without duplicating runtime knowledge in components
+- use presets as the basis for safer agent creation and future guided setup
+- document the supported runtime capability contract
+
+### P2-013 Guided workspace setup wizard
+- provide a guided path to create a ready-to-run workspace setup
+- combine directory selection, workspace metadata, policy choice, agent preset, and safety recap
+- support common use cases such as documentation maintenance, repository triage, Obsidian vault cleanup, and backlog review
+- keep the existing granular create/edit forms available for advanced use
+- add tests for the happy path and validation failures
+
+### P2-014 Run safety preview before launch
+- show a clear pre-run summary before creating a manual run
+- include workspace, agent, exact command, dry-run/real mode, policy, allowed prefixes, write/network flags, and expected blocking reasons
+- require explicit confirmation before any real execution request
+- reuse backend validation logic where possible so the preview matches actual run behavior
+- test dry-run, blocked real execution, and allowed real execution preview states
+
+### P2-015 Safety center dashboard
+- add a safety-oriented view summarizing execution posture
+- show real-execution status, allowed workspace roots, permissive policies, active agents, active schedules, and recent blocked/failed runs
+- highlight risky configuration combinations without changing settings automatically
+- link each finding to the relevant settings, policy, agent, schedule, or run detail page
+- document the safety center as an operational review tool
+
+### P2-016 Human-readable audit timeline
+- add a timeline view for run detail pages
+- translate technical logs into key audit steps such as request received, workspace validated, agent validated, policy checked, execution blocked/started/completed, and artifact created
+- preserve raw logs for detailed inspection
+- ensure blocked and failed runs explain the decisive reason
+- add backend or frontend tests depending on where the timeline is derived
+
+### P2-017 Empty-state onboarding and demo seed shortcut
+- improve empty states for first use
+- explain dry-run defaults, allowed roots, demo data, and the next recommended action
+- provide a safe shortcut or documented path to initialize demo data
+- guide users from an empty dashboard to workspace creation or demo exploration
+- add frontend tests for empty dashboard/workspace states
+
 ## Delivered historical backlog
 
 ## P0 — foundation

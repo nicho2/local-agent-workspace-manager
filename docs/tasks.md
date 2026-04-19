@@ -691,3 +691,448 @@ La documentation de fin MVP est coherente avec le produit livre, les limites con
 - `docs/tasks.md` ne contient plus de tache MVP non terminee.
 
 Note de realisation : 2026-04-19 - Documentation de fin MVP stabilisee : README, PRD, spec, architecture, backlog et strategie de test alignes avec le produit livre. Les docs distinguent maintenant explicitement le MVP livre, les limites connues (cron non execute, worker local interval, execution reelle gardee, absence de sandbox/RBAC/secrets) et le backlog post-MVP. Validation : relecture des docs modifiees et verification du diff ; aucun test code lance car la tache ne modifie que la documentation.
+
+## [ ] T019 - Definir les presets de capacites runtime
+
+### Outcome
+Les runtimes supportes ont une definition centrale exploitable par l'UI et les services : commande par defaut, besoins de policy, attentes dry-run, ecriture/reseau et variables d'environnement.
+
+### Scope
+- In scope : modele de capabilities runtime, presets initiaux, helper API/UI si necessaire, documentation du contrat.
+- Out of scope : integration runtime reelle Copilot/Codex, execution reseau avancee, secrets.
+
+### Files likely affected
+- `apps/api/app/schemas/agent.py`
+- `apps/api/app/services/agent_service.py`
+- `apps/api/app/routers/agents.py`
+- `apps/api/tests/test_agents_and_schedules.py`
+- `apps/web/lib/types.ts`
+- `apps/web/lib/api.ts`
+- `docs/spec.md`
+- `docs/backlog.md`
+
+### Constraints
+- Ne pas dupliquer la connaissance runtime dans plusieurs composants.
+- Les commandes par defaut doivent rester compatibles avec les policies deny-by-default.
+- Ne pas activer l'execution reelle par effet de bord.
+
+### Implementation notes
+- Commencer par `copilot_cli`, `codex` et `local_command`.
+- Inclure les prefixes de commande recommandes.
+- Prevoir un contrat stable pour la future creation guidee.
+
+### Validation
+- `cd apps/api && pytest`
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+
+### Done when
+- Les presets runtime sont accessibles au frontend.
+- Les tests couvrent les runtimes supportes.
+- La spec documente le contrat de capabilities.
+
+Note de realisation :
+
+## [ ] T020 - Pre-remplir les commandes agent selon le runtime
+
+### Outcome
+Lors de la creation ou edition d'un agent, le choix du runtime propose automatiquement un `command_template` coherent, sans ecraser une saisie utilisateur deja modifiee.
+
+### Scope
+- In scope : formulaire agent, logique de champ touche/non touche, tests UI, documentation courte.
+- Out of scope : assistant complet de creation workspace, validation exhaustive des commandes shell.
+
+### Files likely affected
+- `apps/web/components/*agent*.tsx`
+- `apps/web/lib/types.ts`
+- `apps/web/lib/api.ts`
+- `apps/web/app/workspaces/page.tsx`
+- `apps/web/tests/*`
+- `docs/wireframes.md`
+
+### Constraints
+- Eviter `any`.
+- Garder les appels API centralises.
+- Ne pas masquer la commande exacte qui sera executee ou simulee.
+
+### Implementation notes
+- Utiliser les presets de T019.
+- Ne remplacer la commande automatiquement que si le champ est vide ou encore non modifie.
+- Si un changement de runtime risque d'ecraser une commande manuelle, demander confirmation ou conserver la commande existante.
+
+### Validation
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+
+### Done when
+- Le runtime selectionne remplit une commande par defaut.
+- Une commande modifiee manuellement n'est pas perdue silencieusement.
+- Les tests couvrent les deux comportements.
+
+Note de realisation :
+
+## [ ] T021 - Ajouter un selecteur de repertoire pour le root path
+
+### Outcome
+La creation d'un workspace permet de choisir le `root_path` via une boite de selection de repertoire, avec saisie manuelle de secours.
+
+### Scope
+- In scope : UI de selection repertoire, fallback texte, affichage des erreurs structurees, tests frontend.
+- Out of scope : extension desktop native complexe, contournement des limites navigateur, modification des garde-fous backend hors regression.
+
+### Files likely affected
+- `apps/web/components/*workspace*.tsx`
+- `apps/web/app/workspaces/page.tsx`
+- `apps/web/lib/types.ts`
+- `apps/web/tests/*`
+- `docs/wireframes.md`
+
+### Constraints
+- Le backend reste l'autorite pour `LAWM_WORKSPACE_ALLOWED_ROOTS`.
+- La selection ne doit pas encourager a choisir une racine trop large.
+- Garder une saisie manuelle pour les navigateurs/environnements non compatibles.
+
+### Implementation notes
+- Utiliser les capacites navigateur disponibles si elles existent.
+- Afficher clairement le chemin choisi avant creation.
+- En cas de refus backend, expliquer que le chemin doit etre sous une racine autorisee.
+
+### Validation
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+- `cd apps/api && pytest` si le contrat backend change.
+
+### Done when
+- Un utilisateur peut choisir un repertoire sans le saisir a la main.
+- Le fallback texte reste disponible.
+- Les erreurs de racines autorisees restent visibles.
+
+Note de realisation :
+
+## [ ] T022 - Reorganiser la creation workspace en onglets
+
+### Outcome
+La page de creation/edition liee aux workspaces separe clairement Workspace, Policy et Agent en onglets, tout en permettant de configurer un ensemble coherent.
+
+### Scope
+- In scope : onglets UI, navigation clavier/souris, conservation des formulaires existants, tests de rendu et navigation.
+- Out of scope : wizard complet, refonte visuelle globale, creation automatique de templates.
+
+### Files likely affected
+- `apps/web/app/workspaces/page.tsx`
+- `apps/web/components/*`
+- `apps/web/app/globals.css`
+- `apps/web/tests/*`
+- `docs/wireframes.md`
+
+### Constraints
+- Les composants restent petits.
+- Les appels API restent dans `lib/api.ts`.
+- L'UI doit rester lisible mobile et desktop.
+
+### Implementation notes
+- Garder les formulaires existants mais les deplacer dans des panneaux d'onglets.
+- Rendre les dependances explicites, par exemple policy a creer/choisir avant association.
+- Eviter de cacher les erreurs de validation dans un onglet non visible.
+
+### Validation
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+
+### Done when
+- Workspace, Policy et Agent sont accessibles via onglets.
+- Les workflows existants de creation/edition fonctionnent encore.
+- Les tests couvrent la navigation entre onglets.
+
+Note de realisation :
+
+## [ ] T023 - Introduire i18n francais anglais
+
+### Outcome
+Le site suit une logique i18n et permet de choisir la langue francais/anglais depuis le dashboard.
+
+### Scope
+- In scope : structure i18n, dictionnaires `fr` et `en`, selecteur dashboard, persistance du choix, migration des libelles principaux.
+- Out of scope : traduction exhaustive de logs techniques, detection automatique avancee, gestion multi-utilisateur.
+
+### Files likely affected
+- `apps/web/app/page.tsx`
+- `apps/web/components/*`
+- `apps/web/lib/*`
+- `apps/web/app/globals.css`
+- `apps/web/tests/*`
+- `docs/spec.md`
+- `docs/wireframes.md`
+
+### Constraints
+- Ne pas hard-coder de nouveau texte utilisateur hors dictionnaire.
+- Eviter `any`.
+- Le choix de langue doit etre stable entre pages.
+
+### Implementation notes
+- Commencer par navigation, dashboard, workspaces, runs, schedules, settings et formulaires MVP.
+- Choisir une persistance simple et documentee : local storage ou setting selon l'architecture retenue.
+- Garder les messages d'erreur API affichables meme si non traduits integralement.
+
+### Validation
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+
+### Done when
+- Le dashboard permet de passer de `fr` a `en`.
+- Les pages principales utilisent les dictionnaires.
+- Les tests couvrent le changement de langue.
+
+Note de realisation :
+
+## [ ] T024 - Ajouter une previsualisation securite avant lancement
+
+### Outcome
+Avant un run manuel, l'utilisateur voit un recapitulatif clair de ce qui va se passer et des garde-fous qui s'appliquent.
+
+### Scope
+- In scope : preview workspace/agent/commande/mode/policy/prefixes/ecriture/reseau, confirmation explicite pour execution reelle, tests.
+- Out of scope : simulation complete d'execution, streaming temps reel, modification profonde du runner.
+
+### Files likely affected
+- `apps/api/app/services/run_service.py`
+- `apps/api/app/routers/runs.py`
+- `apps/api/app/schemas/run.py`
+- `apps/api/tests/test_runs.py`
+- `apps/web/components/*run*.tsx`
+- `apps/web/lib/api.ts`
+- `apps/web/lib/types.ts`
+- `docs/spec.md`
+- `docs/wireframes.md`
+
+### Constraints
+- La preview doit correspondre au comportement reel de `POST /runs`.
+- Toute execution reelle doit demander une confirmation explicite.
+- Les defaults de securite restent inchanges.
+
+### Implementation notes
+- Reutiliser autant que possible les validations du service de run.
+- Afficher les raisons probables de blocage avant creation.
+- Garder le dry-run comme chemin le plus simple.
+
+### Validation
+- `cd apps/api && pytest`
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+
+### Done when
+- Le lancement manuel affiche une preview securite.
+- Les cas dry-run, execution reelle bloquee et execution reelle autorisee sont couverts.
+- La documentation de contrat est a jour si un endpoint de preview est ajoute.
+
+Note de realisation :
+
+## [ ] T025 - Ajouter une timeline d'audit lisible sur le detail run
+
+### Outcome
+Le detail d'un run affiche une timeline humaine des etapes d'audit, en complement des logs bruts.
+
+### Scope
+- In scope : derivation ou persistence des evenements d'audit, UI timeline, explication des blocages/echecs, tests.
+- Out of scope : observabilite distribuee, streaming live, refonte totale des logs.
+
+### Files likely affected
+- `apps/api/app/schemas/run.py`
+- `apps/api/app/services/run_service.py`
+- `apps/api/app/routers/runs.py`
+- `apps/api/tests/test_runs.py`
+- `apps/web/app/runs/[runId]/page.tsx`
+- `apps/web/components/*`
+- `apps/web/lib/types.ts`
+- `docs/spec.md`
+- `docs/wireframes.md`
+
+### Constraints
+- Les logs bruts doivent rester disponibles.
+- La timeline ne doit pas inventer d'etape non verifiee.
+- Les runs blocked/failed doivent montrer la raison decisive.
+
+### Implementation notes
+- Commencer par une timeline derivee des donnees existantes si suffisant.
+- Ajouter un contrat dedie seulement si la derivation frontend devient fragile.
+- Couvrir au moins completed, blocked et failed.
+
+### Validation
+- `cd apps/api && pytest` si contrat backend ajoute/modifie.
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+
+### Done when
+- Le detail run contient une timeline claire.
+- Les logs existants restent consultables.
+- Les tests couvrent les statuts principaux.
+
+Note de realisation :
+
+## [ ] T026 - Ajouter un Safety Center
+
+### Outcome
+Une page de controle securite resume la posture locale : execution reelle, racines autorisees, policies permissives, agents actifs, schedules actifs et runs bloques/echoues.
+
+### Scope
+- In scope : endpoint ou aggregation existante, page UI, liens vers ressources concernees, tests, documentation.
+- Out of scope : correction automatique de configuration, scoring securite complexe, RBAC.
+
+### Files likely affected
+- `apps/api/app/schemas/*`
+- `apps/api/app/services/*`
+- `apps/api/app/routers/*`
+- `apps/api/tests/*`
+- `apps/web/app/safety/page.tsx`
+- `apps/web/components/*`
+- `apps/web/lib/api.ts`
+- `apps/web/lib/types.ts`
+- `docs/spec.md`
+- `docs/wireframes.md`
+
+### Constraints
+- La page ne doit pas activer/desactiver des settings par surprise.
+- Les constats doivent pointer vers les pages d'action existantes.
+- Ne pas masquer le fait que l'application n'est pas une sandbox.
+
+### Implementation notes
+- Commencer par lecture seule.
+- Mettre en avant les policies avec write/network autorises et les schedules actifs.
+- Afficher les derniers runs `blocked` et `failed`.
+
+### Validation
+- `cd apps/api && pytest`
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+
+### Done when
+- Le Safety Center est accessible depuis la navigation.
+- Les principaux signaux de securite sont visibles et lies.
+- Les tests couvrent l'etat nominal et les alertes principales.
+
+Note de realisation :
+
+## [ ] T027 - Ameliorer les etats vides et l'onboarding
+
+### Outcome
+Lors d'une premiere ouverture ou d'une base vide, l'utilisateur comprend les prochaines actions possibles : creer un workspace, charger la demo, verifier les racines autorisees et rester en dry-run.
+
+### Scope
+- In scope : etats vides dashboard/workspaces/runs/schedules, raccourci ou instruction de seed demo, textes de securite, tests UI.
+- Out of scope : assistant complet, import donnees personnelles, execution automatique du seed sans confirmation.
+
+### Files likely affected
+- `apps/web/app/page.tsx`
+- `apps/web/app/workspaces/page.tsx`
+- `apps/web/app/runs/page.tsx`
+- `apps/web/app/schedules/page.tsx`
+- `apps/web/components/*`
+- `apps/web/tests/*`
+- `README.md`
+- `docs/testing-strategy.md`
+- `docs/wireframes.md`
+
+### Constraints
+- Ne pas executer de script local destructif depuis l'UI sans design explicite.
+- Les messages doivent rappeler le dry-run par defaut.
+- Garder l'UI concise.
+
+### Implementation notes
+- Preferer d'abord un CTA documente vers `scripts/seed_demo.py`.
+- Afficher la racine autorisee actuelle si disponible.
+- Proposer des liens vers creation workspace et settings.
+
+### Validation
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+
+### Done when
+- Les pages vides ne ressemblent plus a des erreurs.
+- Un nouvel utilisateur sait comment demarrer.
+- Les tests couvrent au moins dashboard et workspaces vides.
+
+Note de realisation :
+
+## [ ] T028 - Ajouter un assistant de creation workspace guidee
+
+### Outcome
+Un utilisateur peut creer un setup pret a l'emploi via un parcours guide : dossier, usage, policy, agent, commande et recapitulatif securite.
+
+### Scope
+- In scope : wizard UI, presets d'usage, creation coordonnee workspace/policy/agent, recap securite, tests.
+- Out of scope : templates marketplace, schedules avances, execution reelle automatique.
+
+### Files likely affected
+- `apps/web/app/workspaces/page.tsx`
+- `apps/web/components/*wizard*.tsx`
+- `apps/web/lib/api.ts`
+- `apps/web/lib/types.ts`
+- `apps/web/tests/*`
+- `docs/wireframes.md`
+- `docs/spec.md`
+
+### Constraints
+- Garder les formulaires avances existants.
+- Ne jamais activer l'execution reelle par defaut.
+- Les presets doivent rester explicites et modifiables avant creation.
+
+### Implementation notes
+- S'appuyer sur les presets runtime, les onglets et le selecteur de repertoire.
+- Couvrir des usages initiaux : documentation maintenance, repo triage, Obsidian cleanup, backlog review.
+- Afficher une etape finale de verification securite avant creation.
+
+### Validation
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+- `cd apps/api && pytest` si un contrat de creation coordonnee est ajoute.
+
+### Done when
+- Un setup complet peut etre cree depuis le wizard.
+- Les objets crees restent editables dans les formulaires existants.
+- Les tests couvrent le happy path et une erreur de validation.
+
+Note de realisation :
+
+## [ ] T029 - Ajouter suppression controlee des workspaces, policies et agents
+
+### Outcome
+L'utilisateur peut supprimer explicitement un workspace et ses dependances, ainsi que supprimer ou modifier policies et agents avec des regles de dependances documentees.
+
+### Scope
+- In scope : ADR suppression, endpoints/service delete, confirmations UI, gestion dependances, tests backend/frontend, documentation.
+- Out of scope : restauration apres suppression definitive, corbeille multi-utilisateur, retention legale.
+
+### Files likely affected
+- `docs/adr/*`
+- `apps/api/app/services/workspace_service.py`
+- `apps/api/app/services/policy_service.py`
+- `apps/api/app/services/agent_service.py`
+- `apps/api/app/routers/*.py`
+- `apps/api/tests/*.py`
+- `apps/web/components/*`
+- `apps/web/lib/api.ts`
+- `apps/web/lib/types.ts`
+- `docs/spec.md`
+- `docs/wireframes.md`
+
+### Constraints
+- Ne pas supprimer silencieusement des logs/artifacts sans confirmation forte.
+- Definir clairement cascade, blocage ou archivage pour chaque dependance.
+- Preserver les guardrails et l'audit autant que possible.
+
+### Implementation notes
+- Commencer par une ADR : soft delete vs hard delete, cascade, artifacts disque, historique.
+- Afficher un recap exact des elements qui seront supprimes.
+- Preferer archive comme option non destructive quand possible.
+
+### Validation
+- `cd apps/api && pytest`
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+
+### Done when
+- Les regles de suppression sont documentees.
+- Les endpoints et l'UI protegent les actions destructives.
+- Les tests couvrent suppression workspace avec dependances, policy referencee et agent reference.
+
+Note de realisation :
