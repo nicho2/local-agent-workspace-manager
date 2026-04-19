@@ -22,7 +22,16 @@ class RunnerResult:
 
 
 def _split_command(command: str) -> list[str]:
-    return shlex.split(command, posix=os.name != "nt")
+    args = shlex.split(command, posix=os.name != "nt")
+    if os.name == "nt":
+        return [_strip_wrapping_quotes(arg) for arg in args]
+    return args
+
+
+def _strip_wrapping_quotes(value: str) -> str:
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+        return value[1:-1]
+    return value
 
 
 def _truncate_output(output: str | None) -> str:

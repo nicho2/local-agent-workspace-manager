@@ -209,7 +209,7 @@ def test_missing_run_detail_logs_and_artifacts_return_structured_404(client):
 
 
 def test_allowed_real_execution_completes(client_execution_enabled, workspace_root):
-    command = f"{sys.executable} -c print('runner-ok')"
+    command = f"{sys.executable} -c \"print('runner-ok')\""
     policy = _create_policy(client_execution_enabled, [f"{sys.executable} -c"])
     workspace = _create_workspace(
         client_execution_enabled,
@@ -246,7 +246,7 @@ def test_real_execution_with_disallowed_command_is_blocked(
     client_execution_enabled,
     workspace_root,
 ):
-    command = f"{sys.executable} -c print('blocked')"
+    command = f"{sys.executable} -c \"print('blocked')\""
     policy = _create_policy(client_execution_enabled, ["not-the-python-prefix"])
     workspace = _create_workspace(
         client_execution_enabled,
@@ -280,7 +280,7 @@ def test_real_execution_with_disallowed_command_is_blocked(
 
 
 def test_allowed_real_execution_non_zero_exit_fails(client_execution_enabled, workspace_root):
-    command = f"{sys.executable} -c __import__('sys').exit(2)"
+    command = f"{sys.executable} -c \"__import__('sys').exit(2)\""
     policy = _create_policy(client_execution_enabled, [f"{sys.executable} -c"])
     workspace = _create_workspace(
         client_execution_enabled,
@@ -315,7 +315,7 @@ def test_allowed_real_execution_non_zero_exit_fails(client_execution_enabled, wo
 
 def test_runner_timeout_returns_failed(tmp_path):
     result = run_controlled_command(
-        command=f"{sys.executable} -c __import__('time').sleep(2)",
+        command=f"{sys.executable} -c \"__import__('time').sleep(2)\"",
         cwd=tmp_path,
         timeout_seconds=1,
         allowed_command_prefixes=[f"{sys.executable} -c"],
