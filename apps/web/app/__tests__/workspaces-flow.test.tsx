@@ -164,6 +164,8 @@ describe("workspaces flow", () => {
     expect(html).toContain("Create workspace");
     expect(html).toContain("Create policy");
     expect(html).toContain("Create agent");
+    expect(html).toContain("Choose directory");
+    expect(html).toContain("Manual entry stays available.");
     expect(html).toContain("copilot --agent wiki-maintenance");
   });
 

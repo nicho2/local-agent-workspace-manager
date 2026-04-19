@@ -15,6 +15,14 @@ unless it fixes a regression in the delivered safety or audit behavior.
 
 ## Post-MVP delivered
 
+### P2-007 Workspace root directory picker
+- workspace creation/editing includes a directory picker action next to
+  `root_path`
+- manual path entry remains available for browsers that cannot expose an
+  absolute selected path
+- backend structured errors for paths outside allowed roots are surfaced with
+  the allowed roots context when available
+
 ### P2-012 Runtime capability presets
 - central runtime capability presets are available through
   `GET /agents/runtime-presets`
@@ -61,13 +69,6 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - export/import of audit records
 - richer filtering and pagination for run history
 - CI coverage for full-stack smoke checks
-
-### P2-007 Workspace root directory picker
-- replace manual-only `root_path` entry during workspace creation with a directory selection dialog
-- keep a fallback text input for environments where native directory selection is unavailable
-- validate the selected path against `LAWM_WORKSPACE_ALLOWED_ROOTS` before creation
-- surface structured validation errors clearly in the UI
-- add frontend coverage for selection/fallback behavior and backend regression coverage for path bounds if the contract changes
 
 ### P2-008 Internationalization and language switch
 - add an i18n structure for user-facing UI copy

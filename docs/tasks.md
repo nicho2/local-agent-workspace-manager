@@ -771,7 +771,7 @@ Lors de la creation ou edition d'un agent, le choix du runtime propose automatiq
 
 Note de realisation : 2026-04-19 - La page Workspaces charge maintenant les presets runtime et les transmet au formulaire Agent. Le choix du runtime pre-remplit `command_template` avec la commande par defaut tant que le champ est vide ou non modifie ; une commande saisie manuellement est conservee lors d'un changement de runtime. Le preset `copilot_cli` propose maintenant la commande `copilot --agent wiki-maintenance --autopilot --yolo --max-autopilot-continues 6 --prompt "Lance la maintenance standard du coffre"` et le prefixe de policy recommande `copilot --agent`. Tests frontend ajoutes pour la population par defaut et la preservation des saisies utilisateur ; wireframes et backlog mis a jour. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp tests/test_agents_and_schedules.py` depuis `apps/api` : 11 tests passent ; `npm test` depuis `apps/web` : 15 tests passent ; `npm run build` depuis `apps/web` passe.
 
-## [ ] T021 - Ajouter un selecteur de repertoire pour le root path
+## [x] T021 - Ajouter un selecteur de repertoire pour le root path
 
 ### Outcome
 La creation d'un workspace permet de choisir le `root_path` via une boite de selection de repertoire, avec saisie manuelle de secours.
@@ -807,7 +807,7 @@ La creation d'un workspace permet de choisir le `root_path` via une boite de sel
 - Le fallback texte reste disponible.
 - Les erreurs de racines autorisees restent visibles.
 
-Note de realisation :
+Note de realisation : 2026-04-19 - Ajout d'un bouton `Choose directory` dans le formulaire Workspace, avec saisie manuelle `root_path` conservee en fallback. Le helper frontend utilise `showDirectoryPicker` quand disponible, remplit le chemin quand l'environnement expose un chemin absolu, et affiche un message clair si le navigateur ne fournit que le nom du dossier ou si le picker est indisponible. Les erreurs structurees `workspace_root_outside_allowed_roots` affichent maintenant les racines autorisees quand le backend les retourne. Tests frontend ajoutes pour selection avec chemin, picker indisponible, chemin masque par le navigateur, et rendu du fallback manuel. Validation : `npm test` depuis `apps/web` : 18 tests passent ; `npm run build` depuis `apps/web` passe. Aucun test API lance car le contrat backend ne change pas.
 
 ## [ ] T022 - Reorganiser la creation workspace en onglets
 

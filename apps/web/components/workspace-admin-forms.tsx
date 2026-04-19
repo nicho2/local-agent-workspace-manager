@@ -13,6 +13,7 @@ import {
   updatePolicy,
   updateWorkspace,
 } from "@/lib/api";
+import { chooseWorkspaceDirectory } from "@/lib/directory-picker";
 import { nextCommandTemplate } from "@/lib/runtime-presets";
 import type {
   AgentProfile,
@@ -43,6 +44,15 @@ function optionalText(value: FormDataEntryValue | null): string | null {
 
 function formatError(error: unknown): string {
   if (error instanceof ApiRequestError && error.error) {
+    if (error.error.code === "workspace_root_outside_allowed_roots") {
+      const allowedRoots = error.error.details.allowed_roots;
+      if (
+        Array.isArray(allowedRoots) &&
+        allowedRoots.every((root): root is string => typeof root === "string")
+      ) {
+        return `${error.error.message}. Choose a directory under: ${allowedRoots.join(", ")}.`;
+      }
+    }
     return error.error.message;
   }
   if (error instanceof Error) {
@@ -59,6 +69,8 @@ export function WorkspaceAdminForms({
 }: WorkspaceAdminFormsProps): ReactElement {
   const router = useRouter();
   const [workspaceId, setWorkspaceId] = useState("");
+  const [workspaceRootPath, setWorkspaceRootPath] = useState("");
+  const [directoryPickerMessage, setDirectoryPickerMessage] = useState<string | null>(null);
   const [policyId, setPolicyId] = useState("");
   const [agentId, setAgentId] = useState("");
   const [agentRuntime, setAgentRuntime] = useState<AgentRuntime>(
@@ -101,6 +113,30 @@ export function WorkspaceAdminForms({
       nextCommandTemplate(runtimePresets, defaultRuntime, "", false)
     );
     setAgentCommandTouched(false);
+  }
+
+  function selectWorkspace(nextWorkspaceId: string): void {
+    setWorkspaceId(nextWorkspaceId);
+    const nextWorkspace = workspaces.find((workspace) => workspace.id === nextWorkspaceId);
+    setWorkspaceRootPath(nextWorkspace?.root_path ?? "");
+    setDirectoryPickerMessage(null);
+  }
+
+  async function chooseRootPath(): Promise<void> {
+    setError(null);
+    try {
+      const selection = await chooseWorkspaceDirectory(window);
+      setDirectoryPickerMessage(selection.message);
+      if (selection.path) {
+        setWorkspaceRootPath(selection.path);
+      }
+    } catch (selectionError) {
+      if (selectionError instanceof DOMException && selectionError.name === "AbortError") {
+        setDirectoryPickerMessage("Directory selection cancelled.");
+        return;
+      }
+      setError(formatError(selectionError));
+    }
   }
 
   function selectAgentRuntime(runtime: AgentRuntime): void {
@@ -223,7 +259,7 @@ export function WorkspaceAdminForms({
           </label>
           <select
             id="workspace-select"
-            onChange={(event) => setWorkspaceId(event.target.value)}
+            onChange={(event) => selectWorkspace(event.target.value)}
             value={workspaceId}
           >
             <option value="">New workspace</option>
@@ -248,10 +284,19 @@ export function WorkspaceAdminForms({
           <label className="field-label" htmlFor="workspace-root-path">
             Root path
           </label>
+          <div className="inline-control">
+            <button className="secondary-button" onClick={chooseRootPath} type="button">
+              Choose directory
+            </button>
+            <span className="muted">Manual entry stays available.</span>
+          </div>
+          {directoryPickerMessage ? <p className="muted">{directoryPickerMessage}</p> : null}
           <input
-            defaultValue={selectedWorkspace?.root_path ?? ""}
             id="workspace-root-path"
             name="root_path"
+            onChange={(event) => setWorkspaceRootPath(event.target.value)}
+            placeholder="E:/workspaces/docs-vault"
+            value={workspaceRootPath}
           />
           <label className="field-label" htmlFor="workspace-policy">
             Policy

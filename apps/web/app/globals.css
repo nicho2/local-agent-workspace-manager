@@ -230,11 +230,29 @@ textarea {
   gap: 8px;
 }
 
+.inline-control {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .primary-button {
   background: var(--accent);
   border: 1px solid var(--accent);
   border-radius: 8px;
   color: #07111f;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 12px;
+  width: fit-content;
+}
+
+.secondary-button {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
   cursor: pointer;
   font-weight: 700;
   padding: 10px 12px;
