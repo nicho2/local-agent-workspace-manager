@@ -115,6 +115,7 @@ docker compose up --build
 - `docs/backlog.md`
 - `docs/testing-strategy.md`
 - `docs/codex-task-template.md`
+- `docs/obsidian-vault-maintenance-copilot.md`
 - `docs/adr/*`
 
 ## Current implementation status
