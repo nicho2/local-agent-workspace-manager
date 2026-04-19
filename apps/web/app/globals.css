@@ -228,6 +228,32 @@ textarea {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.tab-button {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 12px;
+}
+
+.tab-button-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tab-panel {
+  display: block;
+}
+
 .checkbox-row {
   align-items: center;
   display: flex;

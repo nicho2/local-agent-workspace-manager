@@ -168,6 +168,14 @@ describe("workspaces flow", () => {
     expect(html).toContain("Create workspace");
     expect(html).toContain("Create policy");
     expect(html).toContain("Create agent");
+    expect(html).toContain('role="tablist"');
+    expect(html).toContain('id="workspace-admin-tab"');
+    expect(html).toContain('id="policy-admin-tab"');
+    expect(html).toContain('id="agent-admin-tab"');
+    expect(html).toContain('id="workspace-admin-panel"');
+    expect(html).toContain('id="policy-admin-panel"');
+    expect(html).toContain('id="agent-admin-panel"');
+    expect(html).toContain('aria-selected="true"');
     expect(html).toContain("Choose directory");
     expect(html).toContain("Manual entry stays available.");
     expect(html).toContain("copilot --agent wiki-maintenance");

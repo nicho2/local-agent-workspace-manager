@@ -22,7 +22,8 @@
 ```text
 +-----------------------------------------------------------------------+
 | Create and edit                                                       |
-| Workspace form | Policy form | Agent form                             |
+| [Workspace] [Policy] [Agent]                                          |
+| Active tab shows one focused form                                     |
 | Workspace root path: [Choose directory] + manual path fallback        |
 | Agent runtime selection pre-fills command template until user edits it |
 +-----------------------------------------------------------------------+

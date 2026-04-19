@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { FormEvent, ReactElement } from "react";
+import type { FormEvent, KeyboardEvent, ReactElement } from "react";
 import { useMemo, useState } from "react";
 
 import {
@@ -13,6 +13,7 @@ import {
   updatePolicy,
   updateWorkspace,
 } from "@/lib/api";
+import { adminTabs, getAdjacentAdminTab, type AdminTabId } from "@/lib/admin-tabs";
 import { chooseWorkspaceDirectory } from "@/lib/directory-picker";
 import { nextCommandTemplate } from "@/lib/runtime-presets";
 import type {
@@ -70,6 +71,7 @@ export function WorkspaceAdminForms({
   workspaces,
 }: WorkspaceAdminFormsProps): ReactElement {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<AdminTabId>("workspace");
   const [workspaceId, setWorkspaceId] = useState("");
   const [workspaceRootPath, setWorkspaceRootPath] = useState("");
   const [workspaceAllowedRoot, setWorkspaceAllowedRoot] = useState(
@@ -101,6 +103,25 @@ export function WorkspaceAdminForms({
     () => agents.find((agent) => agent.id === agentId),
     [agentId, agents]
   );
+
+  function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>): void {
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveTab((currentTab) => getAdjacentAdminTab(currentTab, "next"));
+    }
+    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveTab((currentTab) => getAdjacentAdminTab(currentTab, "previous"));
+    }
+    if (event.key === "Home") {
+      event.preventDefault();
+      setActiveTab("workspace");
+    }
+    if (event.key === "End") {
+      event.preventDefault();
+      setActiveTab("agent");
+    }
+  }
 
   function selectAgent(nextAgentId: string): void {
     setAgentId(nextAgentId);
@@ -283,7 +304,32 @@ export function WorkspaceAdminForms({
       {message ? <p className="success-text">{message}</p> : null}
       {error ? <p className="error-text">{error}</p> : null}
 
-      <div className="form-columns">
+      <div aria-label="Create and edit workspace resources" className="admin-tabs" role="tablist">
+        {adminTabs.map((tab) => (
+          <button
+            aria-controls={`${tab.id}-admin-panel`}
+            aria-selected={activeTab === tab.id}
+            className={activeTab === tab.id ? "tab-button tab-button-active" : "tab-button"}
+            id={`${tab.id}-admin-tab`}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            onKeyDown={handleTabKeyDown}
+            role="tab"
+            tabIndex={activeTab === tab.id ? 0 : -1}
+            type="button"
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div
+        aria-labelledby="workspace-admin-tab"
+        className="tab-panel"
+        hidden={activeTab !== "workspace"}
+        id="workspace-admin-panel"
+        role="tabpanel"
+      >
         <form className="form-grid" key={`workspace-${workspaceId}`} onSubmit={submitWorkspace}>
           <h4>Workspace</h4>
           <label className="field-label" htmlFor="workspace-select">
@@ -407,7 +453,15 @@ export function WorkspaceAdminForms({
             {selectedWorkspace ? "Update workspace" : "Create workspace"}
           </button>
         </form>
+      </div>
 
+      <div
+        aria-labelledby="policy-admin-tab"
+        className="tab-panel"
+        hidden={activeTab !== "policy"}
+        id="policy-admin-panel"
+        role="tabpanel"
+      >
         <form className="form-grid" key={`policy-${policyId}`} onSubmit={submitPolicy}>
           <h4>Policy</h4>
           <label className="field-label" htmlFor="policy-select">
@@ -472,7 +526,15 @@ export function WorkspaceAdminForms({
             {selectedPolicy ? "Update policy" : "Create policy"}
           </button>
         </form>
+      </div>
 
+      <div
+        aria-labelledby="agent-admin-tab"
+        className="tab-panel"
+        hidden={activeTab !== "agent"}
+        id="agent-admin-panel"
+        role="tabpanel"
+      >
         <form className="form-grid" key={`agent-${agentId}`} onSubmit={submitAgent}>
           <h4>Agent</h4>
           <label className="field-label" htmlFor="agent-select">

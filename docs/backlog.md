@@ -40,6 +40,13 @@ unless it fixes a regression in the delivered safety or audit behavior.
   untouched
 - manually edited command templates are preserved when switching runtime
 
+### P2-010 Tabbed workspace creation flow
+- workspace creation/editing now uses accessible tabs for Workspace, Policy,
+  and Agent setup
+- the active tab presents one focused form while preserving the existing
+  create/edit workflows
+- keyboard navigation supports arrow keys plus Home/End
+
 ## Post-MVP backlog
 
 ### P2-001 Full cron scheduling
@@ -79,13 +86,6 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - persist the selected language locally or through settings, depending on the chosen architecture
 - ensure navigation, dashboard, workspace, run, schedule, settings, and form labels use translation keys instead of hard-coded copy
 - document the i18n approach and add tests for language switching on key pages
-
-### P2-010 Tabbed workspace creation flow
-- split the current workspace creation page into clear tabs for workspace, policy, and agent setup
-- keep each form focused while preserving the ability to create a complete workspace setup from one area
-- make dependencies explicit, for example selecting or creating a policy before attaching it to a workspace
-- keep validation and API calls centralized in `lib/api.ts`
-- add responsive UI tests for tab navigation and form submission paths
 
 ### P2-011 Delete and edit management for workspaces, policies, and agents
 - add explicit delete actions for workspaces, policies, and agents

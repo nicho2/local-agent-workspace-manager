@@ -809,7 +809,7 @@ La creation d'un workspace permet de choisir le `root_path` via une boite de sel
 
 Note de realisation : 2026-04-19 - Ajout d'un bouton `Choose directory` dans le formulaire Workspace, avec saisie manuelle `root_path` conservee en fallback. Le helper frontend utilise `showDirectoryPicker` quand disponible, remplit le chemin quand l'environnement expose un chemin absolu, et affiche un message clair si le navigateur ne fournit que le nom du dossier ou si le picker est indisponible. Correction du cas navigateur qui masque le chemin complet : `GET /workspaces/allowed-roots` expose les racines autorisees et l'UI permet de composer `racine autorisee + dossier selectionne`, par exemple `E:/temp/test-slug`, sans affaiblir la validation backend. Les erreurs structurees `workspace_root_outside_allowed_roots` affichent les racines autorisees quand le backend les retourne. Tests ajoutes pour endpoint allowed-roots, selection avec chemin, picker indisponible, chemin masque par le navigateur, helper API et rendu du fallback manuel. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-workspaces tests/test_policies_and_workspaces.py` depuis `apps/api` : 14 tests passent ; `npm test` depuis `apps/web` : 19 tests passent ; `npm run build` depuis `apps/web` passe. Une premiere tentative pytest avec `--basetemp .\pytest-tmp` a echoue avant execution des tests car ce dossier local etait verrouille par Windows.
 
-## [ ] T022 - Reorganiser la creation workspace en onglets
+## [x] T022 - Reorganiser la creation workspace en onglets
 
 ### Outcome
 La page de creation/edition liee aux workspaces separe clairement Workspace, Policy et Agent en onglets, tout en permettant de configurer un ensemble coherent.
@@ -844,7 +844,7 @@ La page de creation/edition liee aux workspaces separe clairement Workspace, Pol
 - Les workflows existants de creation/edition fonctionnent encore.
 - Les tests couvrent la navigation entre onglets.
 
-Note de realisation :
+Note de realisation : 2026-04-19 - La zone `Create and edit` est maintenant organisee en onglets accessibles `Workspace`, `Policy` et `Agent`. Les formulaires existants sont conserves dans des panneaux dedies, les messages de succes/erreur restent visibles au-dessus des onglets, et la navigation clavier supporte fleches, Home et End. Les appels API restent centralises dans `lib/api.ts`; aucun contrat backend n'a ete modifie pour cette tache. Tests ajoutes pour l'ordre/navigation des onglets et le rendu des panneaux. Validation : `npm test` depuis `apps/web` : 21 tests passent ; `npm run build` depuis `apps/web` passe. Une premiere tentative de build a echoue sur un verrou Windows transitoire de `.next/trace`, puis le relancement a reussi.
 
 ## [ ] T023 - Introduire i18n francais anglais
 
