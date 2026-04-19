@@ -35,3 +35,7 @@ class WorkspaceRead(WorkspaceCreate):
     policy_id: str
     created_at: datetime
     updated_at: datetime
+
+
+class WorkspaceAllowedRootsRead(ModelBase):
+    allowed_roots: list[str]

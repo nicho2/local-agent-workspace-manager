@@ -198,6 +198,10 @@ th {
   max-width: 520px;
 }
 
+.compact-form-grid {
+  margin-bottom: 0;
+}
+
 .field-label {
   color: var(--muted);
   font-weight: 600;

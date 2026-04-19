@@ -1,4 +1,5 @@
 export interface DirectorySelection {
+  directoryName: string | null;
   message: string;
   path: string | null;
   supported: boolean;
@@ -25,7 +26,7 @@ function asDirectoryPickerWindow(value: unknown): DirectoryPickerWindow {
   const showDirectoryPicker = candidate.showDirectoryPicker as () => Promise<DirectoryHandle>;
 
   return {
-    showDirectoryPicker,
+    showDirectoryPicker: () => showDirectoryPicker.call(value),
   };
 }
 
@@ -43,6 +44,7 @@ export async function chooseWorkspaceDirectory(
 
   if (!directoryPickerWindow.showDirectoryPicker) {
     return {
+      directoryName: null,
       message: "Directory picker is unavailable here. Enter the root path manually.",
       path: null,
       supported: false,
@@ -54,6 +56,7 @@ export async function chooseWorkspaceDirectory(
 
   if (path) {
     return {
+      directoryName: handle.name ?? null,
       message: `Selected directory: ${path}`,
       path,
       supported: true,
@@ -62,6 +65,7 @@ export async function chooseWorkspaceDirectory(
 
   const folderName = handle.name ?? "selected folder";
   return {
+    directoryName: folderName,
     message: `Selected ${folderName}, but this browser did not expose its full path. Enter the root path manually.`,
     path: null,
     supported: true,

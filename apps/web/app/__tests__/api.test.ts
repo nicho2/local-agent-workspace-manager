@@ -7,6 +7,7 @@ import {
   createSchedule,
   createWorkspace,
   getRuntimePresets,
+  getWorkspaceAllowedRoots,
   updateSchedule,
   updateSetting,
   updateWorkspace,
@@ -235,6 +236,19 @@ describe("api client", () => {
       cache: "no-store",
     });
     expect(presets[0].runtime).toBe("local_command");
+  });
+
+  it("fetches workspace allowed roots", async () => {
+    const fetchMock = stubJsonResponse({
+      allowed_roots: ["E:/workspaces", "E:/temp"],
+    });
+
+    const allowedRoots = await getWorkspaceAllowedRoots();
+
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/workspaces/allowed-roots", {
+      cache: "no-store",
+    });
+    expect(allowedRoots.allowed_roots).toEqual(["E:/workspaces", "E:/temp"]);
   });
 
   it("updates settings with the expected PUT contract", async () => {

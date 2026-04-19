@@ -145,6 +145,7 @@ describe("workspaces flow", () => {
       [samplePolicy],
       [sampleAgent],
       sampleRuntimePresets,
+      { allowed_roots: ["E:/workspaces", "E:/temp"] },
     ]);
 
     const html = renderToStaticMarkup(await WorkspacesPage());
@@ -156,6 +157,9 @@ describe("workspaces flow", () => {
       cache: "no-store",
     });
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/agents/runtime-presets", {
+      cache: "no-store",
+    });
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/workspaces/allowed-roots", {
       cache: "no-store",
     });
     expect(html).toContain("Docs Vault");

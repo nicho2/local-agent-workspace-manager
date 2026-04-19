@@ -2,14 +2,21 @@ import type { ReactElement } from "react";
 
 import { WorkspaceAdminForms } from "@/components/workspace-admin-forms";
 import { WorkspaceTable } from "@/components/workspace-table";
-import { getAgents, getPolicies, getRuntimePresets, getWorkspaces } from "@/lib/api";
+import {
+  getAgents,
+  getPolicies,
+  getRuntimePresets,
+  getWorkspaceAllowedRoots,
+  getWorkspaces,
+} from "@/lib/api";
 
 export default async function WorkspacesPage(): Promise<ReactElement> {
-  const [workspaces, policies, agents, runtimePresets] = await Promise.all([
+  const [workspaces, policies, agents, runtimePresets, workspaceAllowedRoots] = await Promise.all([
     getWorkspaces(),
     getPolicies(),
     getAgents(),
     getRuntimePresets(),
+    getWorkspaceAllowedRoots(),
   ]);
 
   return (
@@ -25,6 +32,7 @@ export default async function WorkspacesPage(): Promise<ReactElement> {
         agents={agents}
         policies={policies}
         runtimePresets={runtimePresets}
+        workspaceAllowedRoots={workspaceAllowedRoots.allowed_roots}
         workspaces={workspaces}
       />
       <WorkspaceTable workspaces={workspaces} />

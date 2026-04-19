@@ -15,6 +15,7 @@ import type {
   SystemSetting,
   SystemSettingUpdate,
   Workspace,
+  WorkspaceAllowedRoots,
   WorkspaceCreate,
   WorkspacePolicyCreate,
   WorkspacePolicyUpdate,
@@ -79,6 +80,10 @@ export function getDashboardSummary(): Promise<DashboardSummary> {
 
 export function getWorkspaces(): Promise<Workspace[]> {
   return fetchJson<Workspace[]>("/workspaces");
+}
+
+export function getWorkspaceAllowedRoots(): Promise<WorkspaceAllowedRoots> {
+  return fetchJson<WorkspaceAllowedRoots>("/workspaces/allowed-roots");
 }
 
 export function createWorkspace(payload: WorkspaceCreate): Promise<Workspace> {

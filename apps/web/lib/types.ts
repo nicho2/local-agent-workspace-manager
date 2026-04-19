@@ -61,6 +61,10 @@ export interface WorkspaceUpdate {
   policy_id?: string;
 }
 
+export interface WorkspaceAllowedRoots {
+  allowed_roots: string[];
+}
+
 export interface AgentProfile {
   id: string;
   name: string;

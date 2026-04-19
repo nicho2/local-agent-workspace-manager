@@ -66,6 +66,13 @@ def test_create_and_list_workspace(client, workspace_root):
     assert detail.json()["name"] == "Docs Vault"
 
 
+def test_workspace_allowed_roots_are_exposed(client, workspace_root):
+    response = client.get("/workspaces/allowed-roots")
+
+    assert response.status_code == 200
+    assert response.json() == {"allowed_roots": [str(workspace_root.resolve())]}
+
+
 def test_update_policy(client):
     policy = _create_policy(client)
 

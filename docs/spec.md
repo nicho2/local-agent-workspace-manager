@@ -129,6 +129,7 @@
 - `GET|POST /policies`
 - `PUT /policies/{policy_id}`
 - `GET|POST /workspaces`
+- `GET /workspaces/allowed-roots`
 - `GET|PUT /workspaces/{workspace_id}`
 - `GET|POST /agents`
 - `GET /agents/runtime-presets`
@@ -161,6 +162,23 @@ The `code` field is stable for UI branching, `message` is human-readable, and
 status codes remain meaningful: validation errors use `400`, missing resources
 use `404`, conflicts such as duplicate names or disabled real execution use
 `409`, and unexpected invariant failures use `500`.
+
+### Workspace updates
+
+### Workspace allowed roots
+
+`GET /workspaces/allowed-roots` returns the resolved workspace roots configured
+through `LAWM_WORKSPACE_ALLOWED_ROOTS`:
+
+```json
+{
+  "allowed_roots": ["E:\\temp"]
+}
+```
+
+The endpoint is read-only and exists so the UI can guide directory selection
+without weakening backend path validation. The backend remains the authority:
+workspace creation and updates still reject paths outside these roots.
 
 ### Workspace updates
 

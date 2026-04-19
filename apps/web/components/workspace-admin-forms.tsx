@@ -27,6 +27,7 @@ interface WorkspaceAdminFormsProps {
   agents: AgentProfile[];
   policies: WorkspacePolicy[];
   runtimePresets: RuntimeCapabilityPreset[];
+  workspaceAllowedRoots: string[];
   workspaces: Workspace[];
 }
 
@@ -65,11 +66,16 @@ export function WorkspaceAdminForms({
   agents,
   policies,
   runtimePresets,
+  workspaceAllowedRoots,
   workspaces,
 }: WorkspaceAdminFormsProps): ReactElement {
   const router = useRouter();
   const [workspaceId, setWorkspaceId] = useState("");
   const [workspaceRootPath, setWorkspaceRootPath] = useState("");
+  const [workspaceAllowedRoot, setWorkspaceAllowedRoot] = useState(
+    workspaceAllowedRoots[0] ?? ""
+  );
+  const [selectedDirectoryName, setSelectedDirectoryName] = useState<string | null>(null);
   const [directoryPickerMessage, setDirectoryPickerMessage] = useState<string | null>(null);
   const [policyId, setPolicyId] = useState("");
   const [agentId, setAgentId] = useState("");
@@ -119,7 +125,21 @@ export function WorkspaceAdminForms({
     setWorkspaceId(nextWorkspaceId);
     const nextWorkspace = workspaces.find((workspace) => workspace.id === nextWorkspaceId);
     setWorkspaceRootPath(nextWorkspace?.root_path ?? "");
+    setSelectedDirectoryName(null);
     setDirectoryPickerMessage(null);
+  }
+
+  function composeWorkspacePath(allowedRoot: string, directoryName: string): string {
+    const separator = allowedRoot.includes("\\") ? "\\" : "/";
+    return `${allowedRoot.replace(/[\\/]+$/, "")}${separator}${directoryName}`;
+  }
+
+  function useSelectedDirectoryWithAllowedRoot(
+    allowedRoot: string,
+    directoryName: string
+  ): void {
+    setWorkspaceAllowedRoot(allowedRoot);
+    setWorkspaceRootPath(composeWorkspacePath(allowedRoot, directoryName));
   }
 
   async function chooseRootPath(): Promise<void> {
@@ -129,6 +149,18 @@ export function WorkspaceAdminForms({
       setDirectoryPickerMessage(selection.message);
       if (selection.path) {
         setWorkspaceRootPath(selection.path);
+        setSelectedDirectoryName(null);
+        return;
+      }
+
+      if (selection.directoryName) {
+        setSelectedDirectoryName(selection.directoryName);
+        if (workspaceAllowedRoots.length === 1) {
+          useSelectedDirectoryWithAllowedRoot(
+            workspaceAllowedRoots[0],
+            selection.directoryName
+          );
+        }
       }
     } catch (selectionError) {
       if (selectionError instanceof DOMException && selectionError.name === "AbortError") {
@@ -291,6 +323,41 @@ export function WorkspaceAdminForms({
             <span className="muted">Manual entry stays available.</span>
           </div>
           {directoryPickerMessage ? <p className="muted">{directoryPickerMessage}</p> : null}
+          {selectedDirectoryName && workspaceAllowedRoots.length > 1 ? (
+            <div className="form-grid compact-form-grid">
+              <label className="field-label" htmlFor="workspace-allowed-root">
+                Allowed root for selected folder
+              </label>
+              <select
+                id="workspace-allowed-root"
+                onChange={(event) =>
+                  useSelectedDirectoryWithAllowedRoot(
+                    event.target.value,
+                    selectedDirectoryName
+                  )
+                }
+                value={workspaceAllowedRoot}
+              >
+                {workspaceAllowedRoots.map((allowedRoot) => (
+                  <option key={allowedRoot} value={allowedRoot}>
+                    {allowedRoot}
+                  </option>
+                ))}
+              </select>
+              <button
+                className="secondary-button"
+                onClick={() =>
+                  useSelectedDirectoryWithAllowedRoot(
+                    workspaceAllowedRoot,
+                    selectedDirectoryName
+                  )
+                }
+                type="button"
+              >
+                Use selected folder under this root
+              </button>
+            </div>
+          ) : null}
           <input
             id="workspace-root-path"
             name="root_path"

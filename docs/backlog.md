@@ -20,6 +20,9 @@ unless it fixes a regression in the delivered safety or audit behavior.
   `root_path`
 - manual path entry remains available for browsers that cannot expose an
   absolute selected path
+- allowed roots are exposed through `GET /workspaces/allowed-roots` so the UI
+  can compose `allowed_root + selected_folder_name` when the browser hides the
+  full path
 - backend structured errors for paths outside allowed roots are surfaced with
   the allowed roots context when available
 

@@ -1,7 +1,12 @@
 from fastapi import APIRouter
 
 from app.core.config import get_settings
-from app.schemas.workspace import WorkspaceCreate, WorkspaceRead, WorkspaceUpdate
+from app.schemas.workspace import (
+    WorkspaceAllowedRootsRead,
+    WorkspaceCreate,
+    WorkspaceRead,
+    WorkspaceUpdate,
+)
 from app.services.workspace_service import (
     create_workspace,
     get_workspace,
@@ -15,6 +20,14 @@ router = APIRouter(prefix="/workspaces", tags=["workspaces"])
 @router.get("", response_model=list[WorkspaceRead])
 def get_workspaces() -> list[WorkspaceRead]:
     return list_workspaces(get_settings().database_path)
+
+
+@router.get("/allowed-roots", response_model=WorkspaceAllowedRootsRead)
+def get_workspace_allowed_roots() -> WorkspaceAllowedRootsRead:
+    allowed_roots = [
+        str(allowed_root) for allowed_root in get_settings().resolved_workspace_allowed_roots
+    ]
+    return WorkspaceAllowedRootsRead(allowed_roots=allowed_roots)
 
 
 @router.get("/{workspace_id}", response_model=WorkspaceRead)

@@ -12,6 +12,7 @@ describe("workspace directory picker", () => {
     });
 
     expect(selection).toEqual({
+      directoryName: "docs-vault",
       message: "Selected directory: E:/workspaces/docs-vault",
       path: "E:/workspaces/docs-vault",
       supported: true,
@@ -22,6 +23,7 @@ describe("workspace directory picker", () => {
     const selection = await chooseWorkspaceDirectory({});
 
     expect(selection).toEqual({
+      directoryName: null,
       message: "Directory picker is unavailable here. Enter the root path manually.",
       path: null,
       supported: false,
@@ -36,6 +38,7 @@ describe("workspace directory picker", () => {
     });
 
     expect(selection).toEqual({
+      directoryName: "docs-vault",
       message:
         "Selected docs-vault, but this browser did not expose its full path. Enter the root path manually.",
       path: null,
