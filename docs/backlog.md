@@ -13,6 +13,22 @@ interval schedule worker, demo seed data, and automated MVP flow coverage.
 No open MVP delivery item remains. Future work should be planned as post-MVP
 unless it fixes a regression in the delivered safety or audit behavior.
 
+## Post-MVP delivered
+
+### P2-012 Runtime capability presets
+- central runtime capability presets are available through
+  `GET /agents/runtime-presets`
+- initial presets cover `copilot_cli`, `codex`, and `local_command`
+- presets expose default command templates, dry-run support, write/network
+  expectations, recommended policy prefixes, and environment defaults
+- real execution remains guarded by the global setting and policy prefix checks
+
+### P2-009 Runtime-based default command templates
+- agent creation/editing reads runtime presets from the API
+- selecting a runtime pre-fills `command_template` while the field is empty or
+  untouched
+- manually edited command templates are preserved when switching runtime
+
 ## Post-MVP backlog
 
 ### P2-001 Full cron scheduling
@@ -60,13 +76,6 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - ensure navigation, dashboard, workspace, run, schedule, settings, and form labels use translation keys instead of hard-coded copy
 - document the i18n approach and add tests for language switching on key pages
 
-### P2-009 Runtime-based default command templates
-- when creating or editing an agent, populate `command_template` with a runtime-specific default after selecting `runtime`
-- keep user edits intact when switching runtime only after explicit confirmation or when the command field is still untouched
-- define safe defaults for supported runtimes such as `copilot_cli`, `codex`, and generic local commands
-- document default command templates and keep policy prefix examples aligned
-- add frontend tests for default population and preservation of manual edits
-
 ### P2-010 Tabbed workspace creation flow
 - split the current workspace creation page into clear tabs for workspace, policy, and agent setup
 - keep each form focused while preserving the ability to create a complete workspace setup from one area
@@ -81,13 +90,6 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - define whether policy and agent deletion is blocked when referenced, archived, or cascaded
 - preserve auditability where possible, or document which records are permanently removed
 - add backend service tests for dependency handling and frontend tests for confirmation/error flows
-
-### P2-012 Runtime capability presets
-- define a central capability model for supported runtimes
-- include default command template, dry-run support, write/network expectations, environment hints, and recommended policy prefixes
-- expose presets to the UI without duplicating runtime knowledge in components
-- use presets as the basis for safer agent creation and future guided setup
-- document the supported runtime capability contract
 
 ### P2-013 Guided workspace setup wizard
 - provide a guided path to create a ready-to-run workspace setup

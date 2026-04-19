@@ -13,11 +13,19 @@ import {
   updatePolicy,
   updateWorkspace,
 } from "@/lib/api";
-import type { AgentProfile, Workspace, WorkspacePolicy } from "@/lib/types";
+import { nextCommandTemplate } from "@/lib/runtime-presets";
+import type {
+  AgentProfile,
+  AgentRuntime,
+  RuntimeCapabilityPreset,
+  Workspace,
+  WorkspacePolicy,
+} from "@/lib/types";
 
 interface WorkspaceAdminFormsProps {
   agents: AgentProfile[];
   policies: WorkspacePolicy[];
+  runtimePresets: RuntimeCapabilityPreset[];
   workspaces: Workspace[];
 }
 
@@ -46,12 +54,20 @@ function formatError(error: unknown): string {
 export function WorkspaceAdminForms({
   agents,
   policies,
+  runtimePresets,
   workspaces,
 }: WorkspaceAdminFormsProps): ReactElement {
   const router = useRouter();
   const [workspaceId, setWorkspaceId] = useState("");
   const [policyId, setPolicyId] = useState("");
   const [agentId, setAgentId] = useState("");
+  const [agentRuntime, setAgentRuntime] = useState<AgentRuntime>(
+    runtimePresets[0]?.runtime ?? "copilot_cli"
+  );
+  const [agentCommand, setAgentCommand] = useState(
+    runtimePresets[0]?.default_command_template ?? ""
+  );
+  const [agentCommandTouched, setAgentCommandTouched] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,6 +83,49 @@ export function WorkspaceAdminForms({
     () => agents.find((agent) => agent.id === agentId),
     [agentId, agents]
   );
+
+  function selectAgent(nextAgentId: string): void {
+    setAgentId(nextAgentId);
+    const nextAgent = agents.find((agent) => agent.id === nextAgentId);
+
+    if (nextAgent) {
+      setAgentRuntime(nextAgent.runtime);
+      setAgentCommand(nextAgent.command_template);
+      setAgentCommandTouched(true);
+      return;
+    }
+
+    const defaultRuntime = runtimePresets[0]?.runtime ?? "copilot_cli";
+    setAgentRuntime(defaultRuntime);
+    setAgentCommand(
+      nextCommandTemplate(runtimePresets, defaultRuntime, "", false)
+    );
+    setAgentCommandTouched(false);
+  }
+
+  function selectAgentRuntime(runtime: AgentRuntime): void {
+    setAgentRuntime(runtime);
+    setAgentCommand((currentCommand) =>
+      nextCommandTemplate(runtimePresets, runtime, currentCommand, agentCommandTouched)
+    );
+  }
+
+  const runtimeOptions = runtimePresets.some((preset) => preset.runtime === agentRuntime)
+    ? runtimePresets
+    : [
+        ...runtimePresets,
+        {
+          runtime: agentRuntime,
+          display_name: agentRuntime,
+          description: "Existing agent runtime without a preset.",
+          default_command_template: agentCommand,
+          supports_dry_run: true,
+          requires_write_access: false,
+          requires_network_access: false,
+          recommended_policy_prefixes: [],
+          environment_defaults: {},
+        },
+      ];
 
   async function runAction(action: () => Promise<unknown>, successMessage: string): Promise<void> {
     setError(null);
@@ -307,7 +366,7 @@ export function WorkspaceAdminForms({
           <label className="field-label" htmlFor="agent-select">
             Edit existing
           </label>
-          <select id="agent-select" onChange={(event) => setAgentId(event.target.value)} value={agentId}>
+          <select id="agent-select" onChange={(event) => selectAgent(event.target.value)} value={agentId}>
             <option value="">New agent</option>
             {agents.map((agent) => (
               <option key={agent.id} value={agent.id}>
@@ -322,11 +381,17 @@ export function WorkspaceAdminForms({
           <label className="field-label" htmlFor="agent-runtime">
             Runtime
           </label>
-          <select defaultValue={selectedAgent?.runtime ?? "copilot_cli"} id="agent-runtime" name="runtime">
-            <option value="copilot_cli">copilot_cli</option>
-            <option value="codex">codex</option>
-            <option value="local_script">local_script</option>
-            <option value="custom">custom</option>
+          <select
+            id="agent-runtime"
+            name="runtime"
+            onChange={(event) => selectAgentRuntime(event.target.value as AgentRuntime)}
+            value={agentRuntime}
+          >
+            {runtimeOptions.map((preset) => (
+              <option key={preset.runtime} value={preset.runtime}>
+                {preset.runtime}
+              </option>
+            ))}
           </select>
           <label className="field-label" htmlFor="agent-workspace">
             Workspace scope
@@ -347,9 +412,13 @@ export function WorkspaceAdminForms({
             Command template
           </label>
           <input
-            defaultValue={selectedAgent?.command_template ?? ""}
             id="agent-command"
             name="command_template"
+            onChange={(event) => {
+              setAgentCommand(event.target.value);
+              setAgentCommandTouched(true);
+            }}
+            value={agentCommand}
           />
           <label className="field-label" htmlFor="agent-system-prompt">
             System prompt

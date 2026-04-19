@@ -6,6 +6,7 @@ import {
   createRun,
   createSchedule,
   createWorkspace,
+  getRuntimePresets,
   updateSchedule,
   updateSetting,
   updateWorkspace,
@@ -211,6 +212,29 @@ describe("api client", () => {
       headers: { "Content-Type": "application/json" },
       method: "PUT",
     });
+  });
+
+  it("fetches runtime capability presets", async () => {
+    const fetchMock = stubJsonResponse([
+      {
+        runtime: "local_command",
+        display_name: "Local command",
+        description: "Generic local command profile for project scripts and checks.",
+        default_command_template: "python -m pytest",
+        supports_dry_run: true,
+        requires_write_access: false,
+        requires_network_access: false,
+        recommended_policy_prefixes: ["python -m"],
+        environment_defaults: {},
+      },
+    ]);
+
+    const presets = await getRuntimePresets();
+
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/agents/runtime-presets", {
+      cache: "no-store",
+    });
+    expect(presets[0].runtime).toBe("local_command");
   });
 
   it("updates settings with the expected PUT contract", async () => {

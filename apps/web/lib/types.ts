@@ -64,7 +64,7 @@ export interface WorkspaceUpdate {
 export interface AgentProfile {
   id: string;
   name: string;
-  runtime: "copilot_cli" | "codex" | "local_script" | "custom";
+  runtime: AgentRuntime;
   workspace_id?: string | null;
   command_template: string;
   system_prompt?: string | null;
@@ -76,7 +76,7 @@ export interface AgentProfile {
 
 export interface AgentProfileCreate {
   name: string;
-  runtime: "copilot_cli" | "codex" | "local_script" | "custom";
+  runtime: AgentRuntime;
   workspace_id?: string | null;
   command_template: string;
   system_prompt?: string | null;
@@ -85,6 +85,25 @@ export interface AgentProfileCreate {
 }
 
 export type AgentProfileUpdate = Partial<AgentProfileCreate>;
+
+export type AgentRuntime =
+  | "copilot_cli"
+  | "codex"
+  | "local_command"
+  | "local_script"
+  | "custom";
+
+export interface RuntimeCapabilityPreset {
+  runtime: AgentRuntime;
+  display_name: string;
+  description: string;
+  default_command_template: string;
+  supports_dry_run: boolean;
+  requires_write_access: boolean;
+  requires_network_access: boolean;
+  recommended_policy_prefixes: string[];
+  environment_defaults: Record<string, string>;
+}
 
 export interface Schedule {
   id: string;

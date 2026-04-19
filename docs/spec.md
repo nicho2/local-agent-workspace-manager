@@ -131,6 +131,7 @@
 - `GET|POST /workspaces`
 - `GET|PUT /workspaces/{workspace_id}`
 - `GET|POST /agents`
+- `GET /agents/runtime-presets`
 - `PUT /agents/{agent_profile_id}`
 - `GET|POST /schedules`
 - `PUT /schedules/{schedule_id}`
@@ -212,6 +213,32 @@ profile is inactive. Runs are also rejected when a workspace-bound agent is
 used with a different workspace; global agents can run against any existing
 workspace. Successful updates refresh `updated_at` with a UTC ISO-8601
 timestamp.
+
+### Runtime capability presets
+
+`GET /agents/runtime-presets` returns the central runtime capability contract
+used by the UI when it needs runtime defaults. Presets are read-only and do not
+enable real execution. The initial supported presets are:
+
+- `copilot_cli`
+- `codex`
+- `local_command`
+
+Each preset exposes:
+
+- `runtime`
+- `display_name`
+- `description`
+- `default_command_template`
+- `supports_dry_run`
+- `requires_write_access`
+- `requires_network_access`
+- `recommended_policy_prefixes`
+- `environment_defaults`
+
+The default command template is only a suggested agent profile value. Real
+execution still requires the global `runner.execution_enabled` setting and a
+workspace policy prefix that explicitly allows the command.
 
 ### Schedule updates
 

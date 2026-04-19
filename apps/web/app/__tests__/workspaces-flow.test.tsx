@@ -61,6 +61,32 @@ const sampleAgent = {
   updated_at: "2026-04-18T09:00:00+00:00",
 };
 
+const sampleRuntimePresets = [
+  {
+    runtime: "copilot_cli",
+    display_name: "GitHub Copilot CLI",
+    description: "Copilot CLI profile for local repository or documentation triage.",
+    default_command_template:
+      'copilot --agent wiki-maintenance --autopilot --yolo --max-autopilot-continues 6 --prompt "Lance la maintenance standard du coffre"',
+    supports_dry_run: true,
+    requires_write_access: false,
+    requires_network_access: true,
+    recommended_policy_prefixes: ["copilot --agent"],
+    environment_defaults: {},
+  },
+  {
+    runtime: "codex",
+    display_name: "Codex",
+    description: "Codex CLI profile for local agent tasks with explicit policy review.",
+    default_command_template: "codex run maintenance",
+    supports_dry_run: true,
+    requires_write_access: true,
+    requires_network_access: false,
+    recommended_policy_prefixes: ["codex run"],
+    environment_defaults: {},
+  },
+];
+
 const inactiveAgent = {
   ...sampleAgent,
   id: "agent_inactive",
@@ -114,7 +140,12 @@ afterEach(() => {
 
 describe("workspaces flow", () => {
   it("renders workspace names as links to detail pages", async () => {
-    const fetchMock = mockFetchSequence([[sampleWorkspace], [samplePolicy], [sampleAgent]]);
+    const fetchMock = mockFetchSequence([
+      [sampleWorkspace],
+      [samplePolicy],
+      [sampleAgent],
+      sampleRuntimePresets,
+    ]);
 
     const html = renderToStaticMarkup(await WorkspacesPage());
 
@@ -124,12 +155,16 @@ describe("workspaces flow", () => {
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/policies", {
       cache: "no-store",
     });
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/agents/runtime-presets", {
+      cache: "no-store",
+    });
     expect(html).toContain("Docs Vault");
     expect(html).toContain('href="/workspaces/ws_docs"');
     expect(html).toContain("Create and edit");
     expect(html).toContain("Create workspace");
     expect(html).toContain("Create policy");
     expect(html).toContain("Create agent");
+    expect(html).toContain("copilot --agent wiki-maintenance");
   });
 
   it("renders workspace detail sections for execution, agent, policy, scheduling, and history", async () => {

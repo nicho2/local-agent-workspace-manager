@@ -63,6 +63,45 @@ def test_create_agent_and_interval_schedule(client, workspace_root):
     assert schedule["next_run_at"] is not None
 
 
+def test_runtime_capability_presets_are_available(client):
+    response = client.get("/agents/runtime-presets")
+
+    assert response.status_code == 200
+    presets = response.json()
+    runtimes = [preset["runtime"] for preset in presets]
+    assert runtimes == ["copilot_cli", "codex", "local_command"]
+
+    copilot = presets[0]
+    assert copilot["default_command_template"] == (
+        'copilot --agent wiki-maintenance --autopilot --yolo '
+        '--max-autopilot-continues 6 --prompt "Lance la maintenance standard du coffre"'
+    )
+    assert copilot["recommended_policy_prefixes"] == ["copilot --agent"]
+    assert copilot["supports_dry_run"] is True
+    assert copilot["requires_network_access"] is True
+    assert copilot["requires_write_access"] is False
+    assert copilot["environment_defaults"] == {}
+
+
+def test_create_agent_accepts_local_command_runtime(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+
+    response = client.post(
+        "/agents",
+        json={
+            "name": "local-checks",
+            "runtime": "local_command",
+            "workspace_id": workspace["id"],
+            "command_template": "python -m pytest",
+            "environment": {},
+            "is_active": True,
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["runtime"] == "local_command"
+
+
 def test_update_agent_profile(client, workspace_root):
     workspace = _create_workspace(client, workspace_root)
     agent = _create_agent(client, workspace["id"])

@@ -8,6 +8,7 @@ import type {
   RunArtifact,
   RunCreate,
   RunLog,
+  RuntimeCapabilityPreset,
   Schedule,
   ScheduleCreate,
   ScheduleUpdate,
@@ -136,6 +137,10 @@ export function updatePolicy(
 
 export function getAgents(): Promise<AgentProfile[]> {
   return fetchJson<AgentProfile[]>("/agents");
+}
+
+export function getRuntimePresets(): Promise<RuntimeCapabilityPreset[]> {
+  return fetchJson<RuntimeCapabilityPreset[]>("/agents/runtime-presets");
 }
 
 export function createAgent(payload: AgentProfileCreate): Promise<AgentProfile> {

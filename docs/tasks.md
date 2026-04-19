@@ -692,7 +692,7 @@ La documentation de fin MVP est coherente avec le produit livre, les limites con
 
 Note de realisation : 2026-04-19 - Documentation de fin MVP stabilisee : README, PRD, spec, architecture, backlog et strategie de test alignes avec le produit livre. Les docs distinguent maintenant explicitement le MVP livre, les limites connues (cron non execute, worker local interval, execution reelle gardee, absence de sandbox/RBAC/secrets) et le backlog post-MVP. Validation : relecture des docs modifiees et verification du diff ; aucun test code lance car la tache ne modifie que la documentation.
 
-## [ ] T019 - Definir les presets de capacites runtime
+## [x] T019 - Definir les presets de capacites runtime
 
 ### Outcome
 Les runtimes supportes ont une definition centrale exploitable par l'UI et les services : commande par defaut, besoins de policy, attentes dry-run, ecriture/reseau et variables d'environnement.
@@ -731,9 +731,9 @@ Les runtimes supportes ont une definition centrale exploitable par l'UI et les s
 - Les tests couvrent les runtimes supportes.
 - La spec documente le contrat de capabilities.
 
-Note de realisation :
+Note de realisation : 2026-04-19 - Ajout d'un contrat central `RuntimeCapabilityPreset` et du endpoint lecture seule `GET /agents/runtime-presets`, avec presets initiaux `copilot_cli`, `codex` et `local_command` couvrant commande par defaut, support dry-run, attentes write/network, prefixes de policy recommandes et variables d'environnement par defaut. Le runtime `local_command` est accepte par les profils agents sans activer l'execution reelle par effet de bord. Types et helper frontend ajoutes via `RuntimeCapabilityPreset` et `getRuntimePresets`; spec et backlog alignes. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 44 tests passent ; `npm test` depuis `apps/web` : 13 tests passent ; `npm run build` depuis `apps/web` passe.
 
-## [ ] T020 - Pre-remplir les commandes agent selon le runtime
+## [x] T020 - Pre-remplir les commandes agent selon le runtime
 
 ### Outcome
 Lors de la creation ou edition d'un agent, le choix du runtime propose automatiquement un `command_template` coherent, sans ecraser une saisie utilisateur deja modifiee.
@@ -769,7 +769,7 @@ Lors de la creation ou edition d'un agent, le choix du runtime propose automatiq
 - Une commande modifiee manuellement n'est pas perdue silencieusement.
 - Les tests couvrent les deux comportements.
 
-Note de realisation :
+Note de realisation : 2026-04-19 - La page Workspaces charge maintenant les presets runtime et les transmet au formulaire Agent. Le choix du runtime pre-remplit `command_template` avec la commande par defaut tant que le champ est vide ou non modifie ; une commande saisie manuellement est conservee lors d'un changement de runtime. Le preset `copilot_cli` propose maintenant la commande `copilot --agent wiki-maintenance --autopilot --yolo --max-autopilot-continues 6 --prompt "Lance la maintenance standard du coffre"` et le prefixe de policy recommande `copilot --agent`. Tests frontend ajoutes pour la population par defaut et la preservation des saisies utilisateur ; wireframes et backlog mis a jour. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp tests/test_agents_and_schedules.py` depuis `apps/api` : 11 tests passent ; `npm test` depuis `apps/web` : 15 tests passent ; `npm run build` depuis `apps/web` passe.
 
 ## [ ] T021 - Ajouter un selecteur de repertoire pour le root path
 

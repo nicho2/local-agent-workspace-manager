@@ -10,8 +10,21 @@ from app.schemas.common import ModelBase
 class AgentRuntime(StrEnum):
     copilot_cli = "copilot_cli"
     codex = "codex"
+    local_command = "local_command"
     local_script = "local_script"
     custom = "custom"
+
+
+class RuntimeCapabilityPreset(ModelBase):
+    runtime: AgentRuntime
+    display_name: str
+    description: str
+    default_command_template: str
+    supports_dry_run: bool
+    requires_write_access: bool
+    requires_network_access: bool
+    recommended_policy_prefixes: list[str]
+    environment_defaults: dict[str, str] = Field(default_factory=dict)
 
 
 class AgentProfileCreate(ModelBase):
