@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import Link from "next/link";
 
+import { T } from "@/components/i18n-provider";
 import type { Workspace } from "@/lib/types";
 
 interface WorkspaceTableProps {
@@ -10,14 +11,22 @@ interface WorkspaceTableProps {
 export function WorkspaceTable({ workspaces }: WorkspaceTableProps): ReactElement {
   return (
     <section className="card">
-      <h3>Workspaces</h3>
+      <h3>
+        <T k="workspaces.title" />
+      </h3>
       <table>
         <thead>
           <tr>
-            <th>Name</th>
+            <th>
+              <T k="table.name" />
+            </th>
             <th>Slug</th>
-            <th>Root path</th>
-            <th>Status</th>
+            <th>
+              <T k="admin.rootPath" />
+            </th>
+            <th>
+              <T k="table.status" />
+            </th>
             <th>Tags</th>
           </tr>
         </thead>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import type { FormEvent, ReactElement } from "react";
 import { useState } from "react";
 
+import { useI18n } from "@/components/i18n-provider";
 import { ApiRequestError, updateSetting } from "@/lib/api";
 import type { SystemSetting } from "@/lib/types";
 
@@ -23,6 +24,7 @@ function formatError(error: unknown): string {
 
 export function SettingsForm({ settings }: SettingsFormProps): ReactElement {
   const router = useRouter();
+  const { t } = useI18n();
   const runnerSetting = settings.find((setting) => setting.key === "runner.execution_enabled");
   const [executionEnabled, setExecutionEnabled] = useState(runnerSetting?.value === "true");
   const [message, setMessage] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export function SettingsForm({ settings }: SettingsFormProps): ReactElement {
       await updateSetting("runner.execution_enabled", {
         value: executionEnabled ? "true" : "false",
       });
-      setMessage("Execution setting updated.");
+      setMessage(t("settings.updatedMessage"));
       router.refresh();
     } catch (requestError) {
       setError(formatError(requestError));
@@ -45,10 +47,9 @@ export function SettingsForm({ settings }: SettingsFormProps): ReactElement {
 
   return (
     <section className="card">
-      <h3>Execution control</h3>
+      <h3>{t("settings.executionControl")}</h3>
       <p className="warning-panel">
-        Real execution can run local commands inside allowed workspaces. Keep it disabled unless
-        policies and command prefixes have been reviewed.
+        {t("settings.warning")}
       </p>
       {message ? <p className="success-text">{message}</p> : null}
       {error ? <p className="error-text">{error}</p> : null}
@@ -60,14 +61,15 @@ export function SettingsForm({ settings }: SettingsFormProps): ReactElement {
             onChange={(event) => setExecutionEnabled(event.target.checked)}
             type="checkbox"
           />
-          Enable real execution globally
+          {t("settings.enableExecution")}
         </label>
         <p className="muted">
-          Current value: {runnerSetting?.value ?? "missing"}; updated{" "}
-          {runnerSetting ? new Date(runnerSetting.updated_at).toLocaleString() : "never"}.
+          {t("settings.currentValue")}: {runnerSetting?.value ?? t("settings.missing")};{" "}
+          {t("settings.updated")}{" "}
+          {runnerSetting ? new Date(runnerSetting.updated_at).toLocaleString() : t("settings.never")}.
         </p>
         <button className="primary-button" type="submit">
-          Save execution setting
+          {t("settings.save")}
         </button>
       </form>
     </section>

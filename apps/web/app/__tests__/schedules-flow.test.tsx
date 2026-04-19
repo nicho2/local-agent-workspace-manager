@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import SchedulesPage from "@/app/schedules/page";
+import { I18nProvider } from "@/components/i18n-provider";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -71,7 +72,9 @@ describe("schedules flow", () => {
   it("renders schedule create/edit form with configured schedules", async () => {
     const fetchMock = mockFetchSequence([[sampleSchedule], [sampleAgent], [sampleWorkspace]]);
 
-    const html = renderToStaticMarkup(await SchedulesPage());
+    const html = renderToStaticMarkup(
+      <I18nProvider>{await SchedulesPage()}</I18nProvider>
+    );
 
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/schedules", {
       cache: "no-store",

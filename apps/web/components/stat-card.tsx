@@ -1,9 +1,9 @@
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 interface StatCardProps {
-  title: string;
-  value: string | number;
-  hint?: string;
+  title: ReactNode;
+  value: ReactNode;
+  hint?: ReactNode;
 }
 
 export function StatCard({ title, value, hint }: StatCardProps): ReactElement {

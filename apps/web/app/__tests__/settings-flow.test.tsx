@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import SettingsPage from "@/app/settings/page";
+import { I18nProvider } from "@/components/i18n-provider";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -38,7 +39,9 @@ describe("settings flow", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const html = renderToStaticMarkup(await SettingsPage());
+    const html = renderToStaticMarkup(
+      <I18nProvider>{await SettingsPage()}</I18nProvider>
+    );
 
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/settings", {
       cache: "no-store",

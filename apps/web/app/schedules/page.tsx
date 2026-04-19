@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import { T } from "@/components/i18n-provider";
 import { ScheduleAdminForm } from "@/components/schedule-admin-form";
 import { getAgents, getSchedules, getWorkspaces } from "@/lib/api";
 
@@ -14,26 +15,42 @@ export default async function SchedulesPage(): Promise<ReactElement> {
   return (
     <main className="stack">
       <div>
-        <h1 className="page-title">Schedules</h1>
+        <h1 className="page-title">
+          <T k="schedules.title" />
+        </h1>
         <p className="page-subtitle">
-          Interval and cron-like automation will expand here.
+          <T k="schedules.subtitle" />
         </p>
       </div>
 
       <ScheduleAdminForm agents={agents} schedules={schedules} workspaces={workspaces} />
       <section className="card">
-        <h3>Configured schedules</h3>
+        <h3>
+          <T k="schedules.configured" />
+        </h3>
         {schedules.length === 0 ? (
-          <p className="muted">No schedules yet.</p>
+          <p className="muted">
+            <T k="schedules.none" />
+          </p>
         ) : (
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Mode</th>
-                <th>Agent</th>
-                <th>Enabled</th>
-                <th>Next run</th>
+                <th>
+                  <T k="table.name" />
+                </th>
+                <th>
+                  <T k="table.mode" />
+                </th>
+                <th>
+                  <T k="table.agent" />
+                </th>
+                <th>
+                  <T k="table.enabled" />
+                </th>
+                <th>
+                  <T k="table.nextRun" />
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -42,7 +59,7 @@ export default async function SchedulesPage(): Promise<ReactElement> {
                   <td>{schedule.name}</td>
                   <td>{schedule.mode}</td>
                   <td>{agentById.get(schedule.agent_profile_id) ?? schedule.agent_profile_id}</td>
-                  <td>{schedule.enabled ? "yes" : "no"}</td>
+                  <td>{schedule.enabled ? <T k="common.yes" /> : <T k="common.no" />}</td>
                   <td>{schedule.next_run_at ? new Date(schedule.next_run_at).toLocaleString() : "—"}</td>
                 </tr>
               ))}

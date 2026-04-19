@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import type { FormEvent, KeyboardEvent, ReactElement } from "react";
 import { useMemo, useState } from "react";
 
+import { useI18n } from "@/components/i18n-provider";
 import {
   ApiRequestError,
   createAgent,
@@ -71,6 +72,7 @@ export function WorkspaceAdminForms({
   workspaces,
 }: WorkspaceAdminFormsProps): ReactElement {
   const router = useRouter();
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<AdminTabId>("workspace");
   const [workspaceId, setWorkspaceId] = useState("");
   const [workspaceRootPath, setWorkspaceRootPath] = useState("");
@@ -299,8 +301,8 @@ export function WorkspaceAdminForms({
 
   return (
     <section className="card">
-      <h3>Create and edit</h3>
-      <p className="muted">Security defaults stay visible: dry-run first, policies explicit.</p>
+      <h3>{t("admin.title")}</h3>
+      <p className="muted">{t("admin.subtitle")}</p>
       {message ? <p className="success-text">{message}</p> : null}
       {error ? <p className="error-text">{error}</p> : null}
 
@@ -318,7 +320,7 @@ export function WorkspaceAdminForms({
             tabIndex={activeTab === tab.id ? 0 : -1}
             type="button"
           >
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         ))}
       </div>
@@ -331,16 +333,16 @@ export function WorkspaceAdminForms({
         role="tabpanel"
       >
         <form className="form-grid" key={`workspace-${workspaceId}`} onSubmit={submitWorkspace}>
-          <h4>Workspace</h4>
+          <h4>{t("admin.workspace")}</h4>
           <label className="field-label" htmlFor="workspace-select">
-            Edit existing
+            {t("admin.editExisting")}
           </label>
           <select
             id="workspace-select"
             onChange={(event) => selectWorkspace(event.target.value)}
             value={workspaceId}
           >
-            <option value="">New workspace</option>
+            <option value="">{t("admin.newWorkspace")}</option>
             {workspaces.map((workspace) => (
               <option key={workspace.id} value={workspace.id}>
                 {workspace.name}
@@ -348,31 +350,31 @@ export function WorkspaceAdminForms({
             ))}
           </select>
           <label className="field-label" htmlFor="workspace-name">
-            Name
+            {t("admin.name")}
           </label>
           <input defaultValue={selectedWorkspace?.name ?? ""} id="workspace-name" name="name" />
           {!selectedWorkspace ? (
             <>
               <label className="field-label" htmlFor="workspace-slug">
-                Slug
+                {t("admin.slug")}
               </label>
               <input id="workspace-slug" name="slug" placeholder="docs-vault" />
             </>
           ) : null}
           <label className="field-label" htmlFor="workspace-root-path">
-            Root path
+            {t("admin.rootPath")}
           </label>
           <div className="inline-control">
             <button className="secondary-button" onClick={chooseRootPath} type="button">
-              Choose directory
+              {t("admin.chooseDirectory")}
             </button>
-            <span className="muted">Manual entry stays available.</span>
+            <span className="muted">{t("admin.manualFallback")}</span>
           </div>
           {directoryPickerMessage ? <p className="muted">{directoryPickerMessage}</p> : null}
           {selectedDirectoryName && workspaceAllowedRoots.length > 1 ? (
             <div className="form-grid compact-form-grid">
               <label className="field-label" htmlFor="workspace-allowed-root">
-                Allowed root for selected folder
+                {t("admin.allowedRoot")}
               </label>
               <select
                 id="workspace-allowed-root"
@@ -400,7 +402,7 @@ export function WorkspaceAdminForms({
                 }
                 type="button"
               >
-                Use selected folder under this root
+                {t("admin.useSelectedFolder")}
               </button>
             </div>
           ) : null}
@@ -412,7 +414,7 @@ export function WorkspaceAdminForms({
             value={workspaceRootPath}
           />
           <label className="field-label" htmlFor="workspace-policy">
-            Policy
+            {t("admin.policy")}
           </label>
           <select
             defaultValue={selectedWorkspace?.policy_id ?? policies[0]?.id ?? ""}
@@ -426,14 +428,14 @@ export function WorkspaceAdminForms({
             ))}
           </select>
           <label className="field-label" htmlFor="workspace-status">
-            Status
+            {t("admin.status")}
           </label>
           <select defaultValue={selectedWorkspace?.status ?? "active"} id="workspace-status" name="status">
             <option value="active">active</option>
             <option value="archived">archived</option>
           </select>
           <label className="field-label" htmlFor="workspace-tags">
-            Tags
+            {t("admin.tags")}
           </label>
           <input
             defaultValue={selectedWorkspace?.tags.join(", ") ?? ""}
@@ -442,7 +444,7 @@ export function WorkspaceAdminForms({
             placeholder="docs, ops"
           />
           <label className="field-label" htmlFor="workspace-description">
-            Description
+            {t("table.description")}
           </label>
           <textarea
             defaultValue={selectedWorkspace?.description ?? ""}
@@ -450,7 +452,7 @@ export function WorkspaceAdminForms({
             name="description"
           />
           <button className="primary-button" type="submit">
-            {selectedWorkspace ? "Update workspace" : "Create workspace"}
+            {selectedWorkspace ? t("admin.updateWorkspace") : t("admin.createWorkspace")}
           </button>
         </form>
       </div>
@@ -463,16 +465,16 @@ export function WorkspaceAdminForms({
         role="tabpanel"
       >
         <form className="form-grid" key={`policy-${policyId}`} onSubmit={submitPolicy}>
-          <h4>Policy</h4>
+          <h4>{t("admin.policy")}</h4>
           <label className="field-label" htmlFor="policy-select">
-            Edit existing
+            {t("admin.editExisting")}
           </label>
           <select
             id="policy-select"
             onChange={(event) => setPolicyId(event.target.value)}
             value={policyId}
           >
-            <option value="">New policy</option>
+            <option value="">{t("admin.newPolicy")}</option>
             {policies.map((policy) => (
               <option key={policy.id} value={policy.id}>
                 {policy.name}
@@ -480,11 +482,11 @@ export function WorkspaceAdminForms({
             ))}
           </select>
           <label className="field-label" htmlFor="policy-name">
-            Name
+            {t("admin.name")}
           </label>
           <input defaultValue={selectedPolicy?.name ?? ""} id="policy-name" name="name" />
           <label className="field-label" htmlFor="policy-runtime">
-            Max runtime seconds
+            {t("admin.maxRuntimeSeconds")}
           </label>
           <input
             defaultValue={selectedPolicy?.max_runtime_seconds ?? 900}
@@ -495,7 +497,7 @@ export function WorkspaceAdminForms({
           />
           <label className="checkbox-row">
             <input defaultChecked={selectedPolicy?.allow_write ?? false} name="allow_write" type="checkbox" />
-            Allow write
+            {t("admin.allowWrite")}
           </label>
           <label className="checkbox-row">
             <input
@@ -503,10 +505,10 @@ export function WorkspaceAdminForms({
               name="allow_network"
               type="checkbox"
             />
-            Allow network
+            {t("admin.allowNetwork")}
           </label>
           <label className="field-label" htmlFor="policy-prefixes">
-            Allowed command prefixes
+            {t("admin.allowedCommandPrefixes")}
           </label>
           <input
             defaultValue={selectedPolicy?.allowed_command_prefixes.join(", ") ?? ""}
@@ -515,7 +517,7 @@ export function WorkspaceAdminForms({
             placeholder="gh copilot, python -m pytest"
           />
           <label className="field-label" htmlFor="policy-description">
-            Description
+            {t("table.description")}
           </label>
           <textarea
             defaultValue={selectedPolicy?.description ?? ""}
@@ -523,7 +525,7 @@ export function WorkspaceAdminForms({
             name="description"
           />
           <button className="primary-button" type="submit">
-            {selectedPolicy ? "Update policy" : "Create policy"}
+            {selectedPolicy ? t("admin.updatePolicy") : t("admin.createPolicy")}
           </button>
         </form>
       </div>
@@ -536,12 +538,12 @@ export function WorkspaceAdminForms({
         role="tabpanel"
       >
         <form className="form-grid" key={`agent-${agentId}`} onSubmit={submitAgent}>
-          <h4>Agent</h4>
+          <h4>{t("admin.agent")}</h4>
           <label className="field-label" htmlFor="agent-select">
-            Edit existing
+            {t("admin.editExisting")}
           </label>
           <select id="agent-select" onChange={(event) => selectAgent(event.target.value)} value={agentId}>
-            <option value="">New agent</option>
+            <option value="">{t("admin.newAgent")}</option>
             {agents.map((agent) => (
               <option key={agent.id} value={agent.id}>
                 {agent.name}
@@ -549,11 +551,11 @@ export function WorkspaceAdminForms({
             ))}
           </select>
           <label className="field-label" htmlFor="agent-name">
-            Name
+            {t("admin.name")}
           </label>
           <input defaultValue={selectedAgent?.name ?? ""} id="agent-name" name="name" />
           <label className="field-label" htmlFor="agent-runtime">
-            Runtime
+            {t("admin.runtime")}
           </label>
           <select
             id="agent-runtime"
@@ -568,14 +570,14 @@ export function WorkspaceAdminForms({
             ))}
           </select>
           <label className="field-label" htmlFor="agent-workspace">
-            Workspace scope
+            {t("admin.workspaceScope")}
           </label>
           <select
             defaultValue={selectedAgent?.workspace_id ?? ""}
             id="agent-workspace"
             name="workspace_id"
           >
-            <option value="">Global agent</option>
+            <option value="">{t("admin.globalAgent")}</option>
             {workspaces.map((workspace) => (
               <option key={workspace.id} value={workspace.id}>
                 {workspace.name}
@@ -583,7 +585,7 @@ export function WorkspaceAdminForms({
             ))}
           </select>
           <label className="field-label" htmlFor="agent-command">
-            Command template
+            {t("admin.commandTemplate")}
           </label>
           <input
             id="agent-command"
@@ -595,7 +597,7 @@ export function WorkspaceAdminForms({
             value={agentCommand}
           />
           <label className="field-label" htmlFor="agent-system-prompt">
-            System prompt
+            {t("admin.systemPrompt")}
           </label>
           <textarea
             defaultValue={selectedAgent?.system_prompt ?? ""}
@@ -604,10 +606,10 @@ export function WorkspaceAdminForms({
           />
           <label className="checkbox-row">
             <input defaultChecked={selectedAgent?.is_active ?? true} name="is_active" type="checkbox" />
-            Active
+            {t("admin.active")}
           </label>
           <button className="primary-button" type="submit">
-            {selectedAgent ? "Update agent" : "Create agent"}
+            {selectedAgent ? t("admin.updateAgent") : t("admin.createAgent")}
           </button>
         </form>
       </div>

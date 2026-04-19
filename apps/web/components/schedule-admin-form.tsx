@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import type { FormEvent, ReactElement } from "react";
 import { useMemo, useState } from "react";
 
+import { useI18n } from "@/components/i18n-provider";
 import { ApiRequestError, createSchedule, updateSchedule } from "@/lib/api";
 import type { AgentProfile, Schedule, Workspace } from "@/lib/types";
 
@@ -39,6 +40,7 @@ export function ScheduleAdminForm({
   workspaces,
 }: ScheduleAdminFormProps): ReactElement {
   const router = useRouter();
+  const { t } = useI18n();
   const [scheduleId, setScheduleId] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -80,21 +82,21 @@ export function ScheduleAdminForm({
 
   return (
     <section className="card">
-      <h3>Create and edit schedule</h3>
-      <p className="muted">Interval schedules compute the next run; cron remains limited in MVP.</p>
+      <h3>{t("schedules.formTitle")}</h3>
+      <p className="muted">{t("schedules.formHint")}</p>
       {message ? <p className="success-text">{message}</p> : null}
       {error ? <p className="error-text">{error}</p> : null}
 
       <form className="form-grid" key={scheduleId || "new-schedule"} onSubmit={submitSchedule}>
         <label className="field-label" htmlFor="schedule-select">
-          Edit existing
+          {t("admin.editExisting")}
         </label>
         <select
           id="schedule-select"
           onChange={(event) => setScheduleId(event.target.value)}
           value={scheduleId}
         >
-          <option value="">New schedule</option>
+          <option value="">{t("schedules.newSchedule")}</option>
           {schedules.map((schedule) => (
             <option key={schedule.id} value={schedule.id}>
               {schedule.name}
@@ -103,12 +105,12 @@ export function ScheduleAdminForm({
         </select>
 
         <label className="field-label" htmlFor="schedule-name">
-          Name
+          {t("admin.name")}
         </label>
         <input defaultValue={selectedSchedule?.name ?? ""} id="schedule-name" name="name" />
 
         <label className="field-label" htmlFor="schedule-workspace">
-          Workspace
+          {t("admin.workspace")}
         </label>
         <select
           defaultValue={selectedSchedule?.workspace_id ?? workspaces[0]?.id ?? ""}
@@ -123,7 +125,7 @@ export function ScheduleAdminForm({
         </select>
 
         <label className="field-label" htmlFor="schedule-agent">
-          Agent
+          {t("admin.agent")}
         </label>
         <select
           defaultValue={selectedSchedule?.agent_profile_id ?? agents[0]?.id ?? ""}
@@ -138,7 +140,7 @@ export function ScheduleAdminForm({
         </select>
 
         <label className="field-label" htmlFor="schedule-mode">
-          Mode
+          {t("table.mode")}
         </label>
         <select defaultValue={selectedSchedule?.mode ?? "interval"} id="schedule-mode" name="mode">
           <option value="interval">interval</option>
@@ -146,7 +148,7 @@ export function ScheduleAdminForm({
         </select>
 
         <label className="field-label" htmlFor="schedule-interval">
-          Interval minutes
+          {t("schedules.intervalMinutes")}
         </label>
         <input
           defaultValue={selectedSchedule?.interval_minutes ?? 60}
@@ -157,7 +159,7 @@ export function ScheduleAdminForm({
         />
 
         <label className="field-label" htmlFor="schedule-cron">
-          Cron expression
+          {t("schedules.cronExpression")}
         </label>
         <input
           defaultValue={selectedSchedule?.cron_expression ?? ""}
@@ -168,11 +170,11 @@ export function ScheduleAdminForm({
 
         <label className="checkbox-row">
           <input defaultChecked={selectedSchedule?.enabled ?? true} name="enabled" type="checkbox" />
-          Enabled
+          {t("table.enabled")}
         </label>
 
         <button className="primary-button" type="submit">
-          {selectedSchedule ? "Update schedule" : "Create schedule"}
+          {selectedSchedule ? t("schedules.update") : t("schedules.create")}
         </button>
       </form>
     </section>

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import DashboardPage from "@/app/page";
 import RunDetailPage from "@/app/runs/[runId]/page";
 import RunsPage from "@/app/runs/page";
+import { I18nProvider } from "@/components/i18n-provider";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -60,7 +61,9 @@ describe("runs flow", () => {
       },
     ]);
 
-    const html = renderToStaticMarkup(await DashboardPage());
+    const html = renderToStaticMarkup(
+      <I18nProvider>{await DashboardPage()}</I18nProvider>
+    );
 
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/dashboard/summary", {
       cache: "no-store",
@@ -74,7 +77,7 @@ describe("runs flow", () => {
   it("renders the runs list with status, trigger, dry-run, and detail links", async () => {
     mockFetchSequence([[sampleRun]]);
 
-    const html = renderToStaticMarkup(await RunsPage());
+    const html = renderToStaticMarkup(<I18nProvider>{await RunsPage()}</I18nProvider>);
 
     expect(html).toContain("Execution history");
     expect(html).toContain('href="/runs/run_abc123"');

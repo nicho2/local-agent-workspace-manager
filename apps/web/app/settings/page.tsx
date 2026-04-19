@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import { T } from "@/components/i18n-provider";
 import { SettingsForm } from "@/components/settings-form";
 import { getSettings } from "@/lib/api";
 
@@ -9,21 +10,31 @@ export default async function SettingsPage(): Promise<ReactElement> {
   return (
     <main className="stack">
       <div>
-        <h1 className="page-title">System settings</h1>
+        <h1 className="page-title">
+          <T k="settings.title" />
+        </h1>
         <p className="page-subtitle">
-          Runtime flags and defaults exposed by the backend.
+          <T k="settings.subtitle" />
         </p>
       </div>
 
       <SettingsForm settings={settings} />
       <section className="card">
-        <h3>Settings</h3>
+        <h3>
+          <T k="settings.listTitle" />
+        </h3>
         <table>
           <thead>
             <tr>
-              <th>Key</th>
-              <th>Value</th>
-              <th>Description</th>
+              <th>
+                <T k="table.key" />
+              </th>
+              <th>
+                <T k="table.value" />
+              </th>
+              <th>
+                <T k="table.description" />
+              </th>
             </tr>
           </thead>
           <tbody>

@@ -1,14 +1,16 @@
+import type { TranslationKey } from "@/lib/i18n";
+
 export type AdminTabId = "workspace" | "policy" | "agent";
 
 export interface AdminTab {
   id: AdminTabId;
-  label: string;
+  labelKey: TranslationKey;
 }
 
 export const adminTabs: AdminTab[] = [
-  { id: "workspace", label: "Workspace" },
-  { id: "policy", label: "Policy" },
-  { id: "agent", label: "Agent" },
+  { id: "workspace", labelKey: "admin.workspace" },
+  { id: "policy", labelKey: "admin.policy" },
+  { id: "agent", labelKey: "admin.agent" },
 ];
 
 export function getAdjacentAdminTab(

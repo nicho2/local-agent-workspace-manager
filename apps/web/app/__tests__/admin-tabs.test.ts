@@ -5,6 +5,11 @@ import { adminTabs, getAdjacentAdminTab } from "@/lib/admin-tabs";
 describe("workspace admin tabs", () => {
   it("defines workspace, policy, and agent tabs in order", () => {
     expect(adminTabs.map((tab) => tab.id)).toEqual(["workspace", "policy", "agent"]);
+    expect(adminTabs.map((tab) => tab.labelKey)).toEqual([
+      "admin.workspace",
+      "admin.policy",
+      "admin.agent",
+    ]);
   });
 
   it("supports keyboard-style forward and backward navigation", () => {

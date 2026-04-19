@@ -47,6 +47,14 @@ unless it fixes a regression in the delivered safety or audit behavior.
   create/edit workflows
 - keyboard navigation supports arrow keys plus Home/End
 
+### P2-008 Internationalization and language switch
+- frontend dictionaries support English and French user-facing labels
+- the dashboard exposes a language selector persisted in browser local storage
+- navigation, dashboard, workspace, run, schedule, settings, table headings, and
+  primary form labels use translation keys
+- raw logs, technical identifiers, API statuses, and backend error messages stay
+  unchanged for auditability
+
 ## Post-MVP backlog
 
 ### P2-001 Full cron scheduling
@@ -79,13 +87,6 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - export/import of audit records
 - richer filtering and pagination for run history
 - CI coverage for full-stack smoke checks
-
-### P2-008 Internationalization and language switch
-- add an i18n structure for user-facing UI copy
-- support French and English as selectable languages from the dashboard
-- persist the selected language locally or through settings, depending on the chosen architecture
-- ensure navigation, dashboard, workspace, run, schedule, settings, and form labels use translation keys instead of hard-coded copy
-- document the i18n approach and add tests for language switching on key pages
 
 ### P2-011 Delete and edit management for workspaces, policies, and agents
 - add explicit delete actions for workspaces, policies, and agents

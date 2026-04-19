@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import { T } from "@/components/i18n-provider";
 import { WorkspaceAdminForms } from "@/components/workspace-admin-forms";
 import { WorkspaceTable } from "@/components/workspace-table";
 import {
@@ -22,9 +23,11 @@ export default async function WorkspacesPage(): Promise<ReactElement> {
   return (
     <main className="stack">
       <div>
-        <h1 className="page-title">Workspaces</h1>
+        <h1 className="page-title">
+          <T k="workspaces.title" />
+        </h1>
         <p className="page-subtitle">
-          Each workspace is an explicit execution boundary with an attached policy.
+          <T k="workspaces.subtitle" />
         </p>
       </div>
 

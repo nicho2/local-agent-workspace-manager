@@ -303,6 +303,18 @@ execution and dashboard status. It is seeded from `LAWM_EXECUTION_ENABLED` on a
 new database, remains `false` by default, and can later be changed explicitly
 through the settings API. Changing the setting does not launch any run.
 
+### UI internationalization
+
+The web UI uses frontend dictionaries for user-facing labels. English (`en`) and
+French (`fr`) are supported. The selected language is changed from the dashboard
+language selector and persisted in browser `localStorage` under `lawm.locale`, so
+it remains stable while navigating between pages on the same browser profile.
+
+Navigation, dashboard, workspace, run, schedule, settings, table headings, and
+primary form labels read from translation keys. Technical values returned by the
+API, run statuses, raw logs, artifact names, setting keys, and backend error
+messages remain displayed as returned so audit/debug information is not altered.
+
 ### Demo seed
 
 `scripts/seed_demo.py` initializes a reproducible local demo dataset. It is

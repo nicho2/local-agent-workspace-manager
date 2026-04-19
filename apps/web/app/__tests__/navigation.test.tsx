@@ -2,6 +2,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
+import { I18nProvider } from "@/components/i18n-provider";
 import { TopNav } from "@/components/top-nav";
 
 vi.mock("next/link", () => ({
@@ -18,7 +19,11 @@ vi.mock("next/link", () => ({
 
 describe("TopNav", () => {
   it("links to the main MVP sections including runs", () => {
-    const html = renderToStaticMarkup(<TopNav />);
+    const html = renderToStaticMarkup(
+      <I18nProvider>
+        <TopNav />
+      </I18nProvider>
+    );
 
     expect(html).toContain('href="/"');
     expect(html).toContain('href="/workspaces"');

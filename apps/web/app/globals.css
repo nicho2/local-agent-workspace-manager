@@ -144,6 +144,18 @@ th {
   padding: 10px 12px;
 }
 
+.language-switcher {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.language-switcher select {
+  min-width: 120px;
+}
+
 .detail-grid {
   display: grid;
   gap: 16px;

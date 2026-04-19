@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import WorkspaceDetailPage from "@/app/workspaces/[workspaceId]/page";
 import WorkspacesPage from "@/app/workspaces/page";
+import { I18nProvider } from "@/components/i18n-provider";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -148,7 +149,9 @@ describe("workspaces flow", () => {
       { allowed_roots: ["E:/workspaces", "E:/temp"] },
     ]);
 
-    const html = renderToStaticMarkup(await WorkspacesPage());
+    const html = renderToStaticMarkup(
+      <I18nProvider>{await WorkspacesPage()}</I18nProvider>
+    );
 
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/workspaces", {
       cache: "no-store",
@@ -199,7 +202,9 @@ describe("workspaces flow", () => {
     ]);
 
     const html = renderToStaticMarkup(
-      await WorkspaceDetailPage({ params: Promise.resolve({ workspaceId: "ws_docs" }) })
+      <I18nProvider>
+        {await WorkspaceDetailPage({ params: Promise.resolve({ workspaceId: "ws_docs" }) })}
+      </I18nProvider>
     );
 
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/workspaces/ws_docs", {

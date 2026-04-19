@@ -846,7 +846,7 @@ La page de creation/edition liee aux workspaces separe clairement Workspace, Pol
 
 Note de realisation : 2026-04-19 - La zone `Create and edit` est maintenant organisee en onglets accessibles `Workspace`, `Policy` et `Agent`. Les formulaires existants sont conserves dans des panneaux dedies, les messages de succes/erreur restent visibles au-dessus des onglets, et la navigation clavier supporte fleches, Home et End. Les appels API restent centralises dans `lib/api.ts`; aucun contrat backend n'a ete modifie pour cette tache. Tests ajoutes pour l'ordre/navigation des onglets et le rendu des panneaux. Validation : `npm test` depuis `apps/web` : 21 tests passent ; `npm run build` depuis `apps/web` passe. Une premiere tentative de build a echoue sur un verrou Windows transitoire de `.next/trace`, puis le relancement a reussi.
 
-## [ ] T023 - Introduire i18n francais anglais
+## [x] T023 - Introduire i18n francais anglais
 
 ### Outcome
 Le site suit une logique i18n et permet de choisir la langue francais/anglais depuis le dashboard.
@@ -883,7 +883,7 @@ Le site suit une logique i18n et permet de choisir la langue francais/anglais de
 - Les pages principales utilisent les dictionnaires.
 - Les tests couvrent le changement de langue.
 
-Note de realisation :
+Note de realisation : 2026-04-19 - Ajout d'une structure i18n frontend avec dictionnaires `en` et `fr`, provider global, helper `T`, hook `useI18n` et selecteur de langue sur le dashboard. Le choix est persiste dans `localStorage` via `lawm.locale` et applique aussi a `document.documentElement.lang`. Navigation, dashboard, workspaces, runs, schedules, settings, principaux tableaux et libelles de formulaires MVP utilisent des cles de traduction. Les logs, statuts techniques, identifiants, descriptions backend et erreurs API restent affiches tels que retournes pour preserver l'audit/debug. Documentation spec, backlog et wireframes mises a jour. Validation : `npm test` depuis `apps/web` : 23 tests passent ; `npm run build` depuis `apps/web` passe.
 
 ## [ ] T024 - Ajouter une previsualisation securite avant lancement
 
