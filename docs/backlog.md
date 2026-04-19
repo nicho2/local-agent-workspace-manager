@@ -46,6 +46,42 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - richer filtering and pagination for run history
 - CI coverage for full-stack smoke checks
 
+### P2-007 Workspace root directory picker
+- replace manual-only `root_path` entry during workspace creation with a directory selection dialog
+- keep a fallback text input for environments where native directory selection is unavailable
+- validate the selected path against `LAWM_WORKSPACE_ALLOWED_ROOTS` before creation
+- surface structured validation errors clearly in the UI
+- add frontend coverage for selection/fallback behavior and backend regression coverage for path bounds if the contract changes
+
+### P2-008 Internationalization and language switch
+- add an i18n structure for user-facing UI copy
+- support French and English as selectable languages from the dashboard
+- persist the selected language locally or through settings, depending on the chosen architecture
+- ensure navigation, dashboard, workspace, run, schedule, settings, and form labels use translation keys instead of hard-coded copy
+- document the i18n approach and add tests for language switching on key pages
+
+### P2-009 Runtime-based default command templates
+- when creating or editing an agent, populate `command_template` with a runtime-specific default after selecting `runtime`
+- keep user edits intact when switching runtime only after explicit confirmation or when the command field is still untouched
+- define safe defaults for supported runtimes such as `copilot_cli`, `codex`, and generic local commands
+- document default command templates and keep policy prefix examples aligned
+- add frontend tests for default population and preservation of manual edits
+
+### P2-010 Tabbed workspace creation flow
+- split the current workspace creation page into clear tabs for workspace, policy, and agent setup
+- keep each form focused while preserving the ability to create a complete workspace setup from one area
+- make dependencies explicit, for example selecting or creating a policy before attaching it to a workspace
+- keep validation and API calls centralized in `lib/api.ts`
+- add responsive UI tests for tab navigation and form submission paths
+
+### P2-011 Delete and edit management for workspaces, policies, and agents
+- add explicit delete actions for workspaces, policies, and agents
+- support deleting a workspace with its dependent agents, schedules, runs, logs, and artifacts only after strong confirmation
+- prevent accidental destructive actions with clear warnings and structured errors
+- define whether policy and agent deletion is blocked when referenced, archived, or cascaded
+- preserve auditability where possible, or document which records are permanently removed
+- add backend service tests for dependency handling and frontend tests for confirmation/error flows
+
 ## Delivered historical backlog
 
 ## P0 — foundation
