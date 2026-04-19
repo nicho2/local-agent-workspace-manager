@@ -11,14 +11,17 @@ Ensure every implemented capability is:
 
 Use `pytest` and FastAPI `TestClient`.
 
-Coverage baseline for this starter:
-- health
-- policy creation/listing
-- workspace creation/listing/get
-- agent creation/listing
-- schedule validation and creation
-- manual dry-run execution
-- settings read/update
+Coverage baseline for the MVP:
+- health and dashboard summary
+- policy creation, listing, editing, validation, and conflicts
+- workspace creation, listing, detail, editing, archive status, and root bounds
+- agent creation, listing, editing, workspace binding, and inactive-run refusal
+- schedule creation, editing, activation/deactivation, interval validation, and
+  due schedule processing
+- manual dry-run execution and guarded real execution outcomes
+- run history, detail, logs, and artifacts
+- settings read/update and `runner.execution_enabled` behavior
+- idempotent demo seed and the lightweight end-to-end MVP flow
 
 ## Frontend
 

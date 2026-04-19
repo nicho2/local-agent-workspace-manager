@@ -1,6 +1,7 @@
 # Local Agent Workspace Manager
 
-Starter project for a local-first application that runs AI agents inside dedicated workspaces, either manually or on a schedule.
+Local-first application for launching, supervising, and auditing AI-agent runs
+inside explicitly bounded workspaces, either manually or on a schedule.
 
 The repository is intentionally opinionated:
 - **Frontend**: Next.js / TypeScript
@@ -21,15 +22,15 @@ The repository is intentionally opinionated:
 
 ```text
 .
-├── AGENTS.md
-├── apps
-│   ├── api
-│   └── web
-├── docs
-├── examples
-├── scripts
-├── storage
-└── docker-compose.yml
+|-- AGENTS.md
+|-- apps
+|   |-- api
+|   `-- web
+|-- docs
+|-- examples
+|-- scripts
+|-- storage
+`-- docker-compose.yml
 ```
 
 ## Quick start
@@ -118,14 +119,29 @@ docker compose up --build
 - `docs/obsidian-vault-maintenance-copilot.md`
 - `docs/adr/*`
 
-## Current implementation status
+## MVP implementation status
 
-This starter already includes:
-- a runnable FastAPI backend
-- SQLite schema bootstrap
-- CRUD endpoints for policies, workspaces, agents, schedules, settings
-- simulated run execution with logs and artifacts
-- pytest coverage for the implemented API surface
-- a typed Next.js UI skeleton aligned with the API
+The MVP is delivered locally with:
+- a runnable FastAPI backend and typed Next.js UI
+- SQLite schema bootstrap and persisted system settings
+- create/edit flows for workspaces, policies, agents, and schedules
+- workspace detail, run list, run detail, logs, and artifacts views
+- manual dry-run launch from the UI
+- interval schedule processing through an optional local worker
+- a controlled real-execution path guarded by both
+  `runner.execution_enabled` and policy command prefixes
+- reproducible demo data through `scripts/seed_demo.py`
+- pytest and Vitest coverage for the MVP contracts and flows
 
-Real command execution is intentionally **disabled by default**. Enable it only after hardening the runner and validating policy enforcement.
+Real command execution remains intentionally **disabled by default**. This
+application is not an OS sandbox: only enable real execution for trusted
+workspace roots, reviewed policies, and explicit command prefixes.
+
+## Known MVP limits
+
+- Schedule execution supports due `interval` schedules only; cron expressions
+  can be stored but are not parsed by the worker.
+- Scheduled runs are dry-runs by default.
+- Real commands use explicit argument splitting and do not support shell syntax.
+- There is no authentication, RBAC, secrets vault, distributed scheduler, or
+  container-per-run isolation in the MVP.

@@ -1,5 +1,53 @@
 # Backlog
 
+## MVP status
+
+The MVP scope tracked in `docs/tasks.md` is delivered. The delivered set
+includes the local FastAPI API, Next.js UI, SQLite persistence, bounded
+workspaces, structured service errors, create/edit flows, manual dry-runs, run
+history with logs and artifacts, settings, guarded real execution, an optional
+interval schedule worker, demo seed data, and automated MVP flow coverage.
+
+## MVP remaining
+
+No open MVP delivery item remains. Future work should be planned as post-MVP
+unless it fixes a regression in the delivered safety or audit behavior.
+
+## Post-MVP backlog
+
+### P2-001 Full cron scheduling
+- parse cron expressions
+- compute `next_run_at`
+- execute due cron schedules with the same audit and safety model
+
+### P2-002 GitHub Copilot CLI runtime
+- runtime adapter
+- command builder
+- policy compatibility layer
+
+### P2-003 Codex runtime
+- runtime adapter
+- prompt file strategy
+- artifact conventions
+
+### P2-004 Obsidian workspace starter
+- vault-oriented defaults
+- maintenance agent template
+
+### P2-005 Security hardening
+- authentication / RBAC
+- secret references or external secrets integration
+- per-run file change tracking
+- OS-level sandboxing or container-per-run isolation
+
+### P2-006 Operations hardening
+- retention policy enforcement
+- export/import of audit records
+- richer filtering and pagination for run history
+- CI coverage for full-stack smoke checks
+
+## Delivered historical backlog
+
 ## P0 — foundation
 
 ### P0-001 Monorepo bootstrap
@@ -72,7 +120,7 @@
 - embedded run launch action
 - schedule list
 
-## P2 — integrations
+## Original integration ideas
 
 ### P2-001 GitHub Copilot CLI runtime
 - runtime adapter

@@ -73,12 +73,15 @@ and creates dry-run runs with `trigger=schedule`. It is intentionally
 single-machine and single-process for the MVP; distributed scheduling and full
 cron parsing remain future work.
 
+Cron schedules can be stored so the API contract is stable, but the MVP worker
+does not parse or execute cron expressions.
+
 ## Design choices
 
 - monorepo for coherence
 - SQLite to minimize friction
 - Pydantic contracts for backend boundaries
-- dry-run execution until policy hardening is complete
+- dry-run defaults even when guarded real execution is available
 - file-based artifacts for easy inspection
 
 ## Security notes
@@ -94,3 +97,21 @@ Therefore:
 - scheduled runs are dry-run by default and the worker is disabled unless
   explicitly enabled in configuration
 - future hardening should consider per-run containerization or OS-level sandboxing
+
+## MVP boundaries
+
+Delivered:
+- local API and web UI
+- SQLite metadata persistence
+- bounded workspace roots
+- manual dry-runs and audited blocked/failed/completed real execution attempts
+- optional interval schedule worker
+- logs and file-based artifacts
+
+Outside the MVP:
+- distributed workers
+- full cron parsing
+- authentication and RBAC
+- remote secrets management
+- runtime-specific adapters for Copilot CLI or Codex
+- OS-level isolation

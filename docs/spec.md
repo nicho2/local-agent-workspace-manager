@@ -228,10 +228,10 @@ timestamp.
 `workspace_id` and `agent_profile_id` must reference existing resources. For
 `mode=interval`, `interval_minutes` is required and must stay between `5` and
 `10080`. For `mode=cron`, `cron_expression` is required, but the MVP does not
-parse cron expressions yet, so `next_run_at` remains `null` until worker support
-is introduced. When an interval schedule is enabled, `next_run_at` is recalculated
-from the current UTC time. When any schedule is disabled, `next_run_at` is set to
-`null`. Successful updates refresh `updated_at` with a UTC ISO-8601 timestamp.
+parse cron expressions yet, so `next_run_at` remains `null`. When an interval
+schedule is enabled, `next_run_at` is recalculated from the current UTC time.
+When any schedule is disabled, `next_run_at` is set to `null`. Successful
+updates refresh `updated_at` with a UTC ISO-8601 timestamp.
 
 ### Schedule worker
 
@@ -322,11 +322,34 @@ Captured stdout/stderr entries are truncated after `4000` characters per stream.
 - every route with business logic must have pytest coverage
 - every schema validator must have a direct or indirect test
 - every bug fix must include a regression test
-- frontend business logic must be test-ready even if the initial UI remains skeleton-level
+- frontend business logic must be covered where it affects MVP behavior
 
-## 8. Planned evolution
+## 8. MVP delivered scope
 
-- real scheduler worker
+- Local FastAPI API and Next.js UI
+- SQLite-backed metadata, logs, and artifact references
+- Bounded workspace roots through configured allowlists
+- Create/edit workflows for workspaces, policies, agents, and schedules
+- Manual dry-run launch from the UI
+- Run history, detail, logs, and artifacts
+- Optional interval schedule worker, disabled by default
+- Controlled real execution guarded by global setting and policy prefix
+- Reproducible demo seed
+
+## 9. Known MVP limits
+
+- Cron schedules are accepted as configuration but not executed by the worker.
+- The schedule worker is in-process and single-machine only.
+- Scheduled runs are dry-runs by default.
+- Real command templates are split into explicit arguments and intentionally do
+  not support shell syntax.
+- The runner is guarded local execution, not an OS sandbox.
+- There is no authentication, multi-user RBAC, secrets vault, distributed
+  orchestration, or per-run file change tracking.
+
+## 10. Planned evolution
+
+- full cron support
 - GitHub Copilot CLI integration
 - richer policy enforcement
 - per-run file change tracking

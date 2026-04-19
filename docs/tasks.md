@@ -653,7 +653,7 @@ Le parcours de succes V1 est executable localement : creer deux workspaces, atta
 
 Note de realisation : 2026-04-18 - Ajout d'un test e2e leger `tests/test_mvp_flow.py` qui seed une base temporaire, verifie les deux workspaces/agents/schedules demo, lance un dry-run manuel, consulte logs et artifacts, confirme le dashboard et verifie qu'un schedule desactive ne declenche pas de run supplementaire. `docs/testing-strategy.md` documente maintenant le parcours MVP automatise et le parcours manuel local avec seed, API, web, lancement dry-run, run detail, schedules et settings. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp` depuis `apps/api` : 38 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests ..\..\scripts\seed_demo.py` passe avec seulement l'avertissement local de cache Ruff ; `npm test` depuis `apps/web` : 12 tests passent ; `npm run build` depuis `apps/web` passe sans warning.
 
-## [ ] T018 - Stabiliser la documentation MVP
+## [x] T018 - Stabiliser la documentation MVP
 
 ### Outcome
 La documentation de fin MVP est coherente avec le produit livre, les limites connues et les commandes de lancement.
@@ -690,4 +690,4 @@ La documentation de fin MVP est coherente avec le produit livre, les limites con
 - Les limites de securite et d'architecture sont explicites.
 - `docs/tasks.md` ne contient plus de tache MVP non terminee.
 
-Note de realisation :
+Note de realisation : 2026-04-19 - Documentation de fin MVP stabilisee : README, PRD, spec, architecture, backlog et strategie de test alignes avec le produit livre. Les docs distinguent maintenant explicitement le MVP livre, les limites connues (cron non execute, worker local interval, execution reelle gardee, absence de sandbox/RBAC/secrets) et le backlog post-MVP. Validation : relecture des docs modifiees et verification du diff ; aucun test code lance car la tache ne modifie que la documentation.
