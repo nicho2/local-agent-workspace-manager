@@ -54,7 +54,6 @@ def _is_path_inside(path: Path, allowed_root: Path) -> bool:
 def _normalize_workspace_root_path(root_path: str) -> Path:
     normalized_path = Path(root_path).expanduser().resolve()
     allowed_roots = get_settings().resolved_workspace_allowed_roots
-    print(f"allowed_roots: {allowed_roots}")
 
     if not any(_is_path_inside(normalized_path, allowed_root) for allowed_root in allowed_roots):
         raise bad_request(

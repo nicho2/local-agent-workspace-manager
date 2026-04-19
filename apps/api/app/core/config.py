@@ -1,5 +1,5 @@
 from functools import lru_cache
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Self
 
 from pydantic import Field, model_validator
@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     @staticmethod
     def _repo_relative_path(path: Path) -> Path:
         expanded_path = path.expanduser()
-        if expanded_path.is_absolute():
+        if expanded_path.is_absolute() or PureWindowsPath(expanded_path).drive:
             return expanded_path
         return REPO_ROOT / expanded_path
 
