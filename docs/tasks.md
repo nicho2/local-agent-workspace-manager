@@ -927,7 +927,7 @@ Avant un run manuel, l'utilisateur voit un recapitulatif clair de ce qui va se p
 
 Note de realisation : 2026-04-20 - Ajout du endpoint `POST /runs/preview`, qui retourne une preview lecture seule sans creer de run : workspace, agent, runtime, commande exacte, mode dry-run/execution reelle, policy, prefixes autorises, flags write/network, et raisons de blocage attendues. Le lancement manuel affiche maintenant cette preview avant soumission, avec une phrase explicite indiquant quel agent se lancera dans quel workspace et le chemin racine associe ; le dry-run reste le chemin par defaut et toute demande d'execution reelle exige une confirmation explicite. Types/API frontend, libelles i18n, wireframes, spec et backlog mis a jour. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-runner-fix tests/test_runs.py` depuis `apps/api` : 14 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement des avertissements de cache Ruff verrouille par Windows ; `npm test` depuis `apps/web` : 25 tests passent ; `npm run build` depuis `apps/web` passe.
 
-## [ ] T025 - Ajouter une timeline d'audit lisible sur le detail run
+## [x] T025 - Ajouter une timeline d'audit lisible sur le detail run
 
 ### Outcome
 Le detail d'un run affiche une timeline humaine des etapes d'audit, en complement des logs bruts.
@@ -967,7 +967,7 @@ Le detail d'un run affiche une timeline humaine des etapes d'audit, en complemen
 - Les logs existants restent consultables.
 - Les tests couvrent les statuts principaux.
 
-Note de realisation :
+Note de realisation : 2026-04-20 - Ajout d'un composant `RunAuditTimeline` sur le detail run, derive des donnees existantes `run`, `logs` et `artifacts` sans nouveau contrat backend. La timeline affiche les etapes verifiables : demande recue, commande capturee, resultat terminal (`completed`, `blocked`, `failed`) et artifacts enregistres. Les runs bloques et echoues remontent le log decisif quand il existe, tout en conservant les logs bruts visibles sous la timeline. Libelles i18n, styles responsive, tests frontend, spec, wireframes et backlog mis a jour. Validation : `npm test -- runs-flow.test.tsx` depuis `apps/web` : 5 tests passent apres relance hors sandbox a cause d'un `spawn EPERM` esbuild initial ; `npm test` depuis `apps/web` : 27 tests passent ; `npm run build` depuis `apps/web` passe.
 
 ## [ ] T026 - Ajouter un Safety Center
 

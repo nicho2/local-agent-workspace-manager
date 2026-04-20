@@ -65,6 +65,14 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - dry-run remains the default path, and real execution requires an explicit
   confirmation checkbox
 
+### P2-016 Human-readable audit timeline
+- run detail pages include an audit timeline derived from existing run metadata,
+  logs, and artifacts
+- timeline entries cover request received, command captured, terminal result,
+  and artifacts recorded when present
+- blocked and failed runs surface the decisive log reason while preserving the
+  raw logs below the timeline
+
 ## Post-MVP backlog
 
 ### P2-001 Full cron scheduling
@@ -119,13 +127,6 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - highlight risky configuration combinations without changing settings automatically
 - link each finding to the relevant settings, policy, agent, schedule, or run detail page
 - document the safety center as an operational review tool
-
-### P2-016 Human-readable audit timeline
-- add a timeline view for run detail pages
-- translate technical logs into key audit steps such as request received, workspace validated, agent validated, policy checked, execution blocked/started/completed, and artifact created
-- preserve raw logs for detailed inspection
-- ensure blocked and failed runs explain the decisive reason
-- add backend or frontend tests depending on where the timeline is derived
 
 ### P2-017 Empty-state onboarding and demo seed shortcut
 - improve empty states for first use

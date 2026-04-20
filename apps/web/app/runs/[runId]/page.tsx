@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactElement } from "react";
 
+import { RunAuditTimeline } from "@/components/run-audit-timeline";
 import { getRun, getRunArtifacts, getRunLogs } from "@/lib/api";
 
 interface RunDetailPageProps {
@@ -70,6 +71,8 @@ export default async function RunDetailPage({
           <h3>Command preview</h3>
           <pre className="code-block">{run.command_preview}</pre>
         </section>
+
+        <RunAuditTimeline artifacts={artifacts} logs={logs} run={run} />
 
         <section className="card">
           <h3>Logs</h3>

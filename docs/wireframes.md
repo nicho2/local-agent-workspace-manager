@@ -119,6 +119,12 @@
 | Status: completed   Trigger: manual   Dry-run: yes                    |
 | Command preview: gh copilot ...                                        |
 +-----------------------------------------------------------------------+
+| Audit timeline                                                        |
+| 1. Request received - manual request from web-ui                       |
+| 2. Command captured - gh copilot ...                                   |
+| 3. Dry-run completed - no real command was executed                    |
+| 4. Artifacts recorded - summary.md                                     |
++-----------------------------------------------------------------------+
 | Logs                                                                  |
 | [timestamp] INFO Starting run                                         |
 | [timestamp] INFO Simulation complete                                  |

@@ -345,6 +345,23 @@ artifacts expose `id`, `run_id`, `name`, `relative_path`, `media_type`, and
 `created_at`. Detail, logs, and artifacts endpoints all return structured `404`
 errors when the run does not exist.
 
+### Run audit timeline
+
+The run detail UI derives a human-readable audit timeline from the existing
+run metadata, logs, and artifacts. No additional persistence contract is needed
+for this slice. The timeline keeps raw logs visible and only summarizes events
+that are backed by existing data:
+
+- request received from the run metadata
+- command captured from `command_preview`
+- dry-run completion, real execution completion, execution blocked, or
+  execution failed from the terminal run status
+- decisive blocked/failed reason from the latest `ERROR` log when present
+- recorded artifacts from the artifact list
+
+Blocked and failed runs must surface the decisive log message in the timeline
+when one exists, while the full raw log list remains available for audit.
+
 ### Run safety preview
 
 `POST /runs/preview` accepts the same creation payload as `POST /runs` and

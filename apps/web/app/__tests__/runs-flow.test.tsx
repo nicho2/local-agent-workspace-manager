@@ -111,7 +111,9 @@ describe("runs flow", () => {
     ]);
 
     const html = renderToStaticMarkup(
-      await RunDetailPage({ params: Promise.resolve({ runId: "run_abc123" }) })
+      <I18nProvider>
+        {await RunDetailPage({ params: Promise.resolve({ runId: "run_abc123" }) })}
+      </I18nProvider>
     );
 
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/runs/run_abc123", {
@@ -124,9 +126,74 @@ describe("runs flow", () => {
       cache: "no-store",
     });
     expect(html).toContain("Run run_abc123");
+    expect(html).toContain("Audit timeline");
+    expect(html).toContain("Request received");
+    expect(html).toContain("Command captured");
+    expect(html).toContain("Dry-run completed");
+    expect(html).toContain("Artifacts recorded");
     expect(html).toContain("gh copilot suggest -t maintenance");
     expect(html).toContain("Simulation complete");
     expect(html).toContain("summary.md");
     expect(html).toContain("run_abc123/summary.md");
+  });
+
+  it("renders blocked run audit timeline with the decisive reason", async () => {
+    mockFetchSequence([
+      {
+        ...sampleRun,
+        dry_run: false,
+        status: "blocked",
+      },
+      [
+        {
+          id: "log_blocked",
+          run_id: "run_abc123",
+          level: "ERROR",
+          message: "Execution blocked: real execution is disabled globally.",
+          timestamp: "2026-04-18T09:00:02+00:00",
+        },
+      ],
+      [],
+    ]);
+
+    const html = renderToStaticMarkup(
+      <I18nProvider>
+        {await RunDetailPage({ params: Promise.resolve({ runId: "run_abc123" }) })}
+      </I18nProvider>
+    );
+
+    expect(html).toContain("Execution blocked");
+    expect(html).toContain("Execution blocked: real execution is disabled globally.");
+    expect(html).toContain("Logs");
+  });
+
+  it("renders failed run audit timeline with the decisive reason", async () => {
+    mockFetchSequence([
+      {
+        ...sampleRun,
+        dry_run: false,
+        status: "failed",
+      },
+      [
+        {
+          id: "log_failed",
+          run_id: "run_abc123",
+          level: "ERROR",
+          message: "Process exited with code 1.",
+          timestamp: "2026-04-18T09:00:02+00:00",
+        },
+      ],
+      [],
+    ]);
+
+    const html = renderToStaticMarkup(
+      <I18nProvider>
+        {await RunDetailPage({ params: Promise.resolve({ runId: "run_abc123" }) })}
+      </I18nProvider>
+    );
+
+    expect(html).toContain("Execution failed");
+    expect(html).toContain("Process exited with code 1.");
+    expect(html).toContain("Logs");
   });
 });

@@ -214,6 +214,44 @@ th {
   padding: 10px;
 }
 
+.audit-timeline {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.audit-timeline-item {
+  align-items: start;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr minmax(180px, max-content);
+  padding: 12px;
+}
+
+.audit-timeline-item p {
+  margin: 6px 0 0;
+}
+
+.audit-timeline-item time {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+}
+
+.audit-timeline-success {
+  border-left-color: var(--success);
+}
+
+.audit-timeline-warning {
+  border-left-color: var(--warning);
+}
+
 .form-grid {
   display: grid;
   gap: 10px;
@@ -365,5 +403,13 @@ code {
 
   .log-row {
     grid-template-columns: 1fr;
+  }
+
+  .audit-timeline-item {
+    grid-template-columns: 1fr;
+  }
+
+  .audit-timeline-item time {
+    text-align: left;
   }
 }
