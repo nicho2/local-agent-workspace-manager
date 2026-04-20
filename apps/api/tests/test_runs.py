@@ -100,6 +100,111 @@ def test_create_dry_run_and_fetch_logs_artifacts(client, workspace_root):
     assert artifacts[0]["media_type"] == "text/markdown"
 
 
+def test_preview_dry_run_identifies_workspace_agent_policy_and_command(client, workspace_root):
+    workspace, agent = _bootstrap_workspace_and_agent(client, workspace_root)
+
+    response = client.post(
+        "/runs/preview",
+        json={
+            "workspace_id": workspace["id"],
+            "agent_profile_id": agent["id"],
+            "dry_run": True,
+            "requested_by": "pytest",
+        },
+    )
+
+    assert response.status_code == 200
+    preview = response.json()
+    assert preview["workspace_id"] == workspace["id"]
+    assert preview["workspace_name"] == workspace["name"]
+    assert preview["workspace_root_path"] == workspace["root_path"]
+    assert preview["agent_profile_id"] == agent["id"]
+    assert preview["agent_name"] == agent["name"]
+    assert preview["policy_name"] == "default-safe"
+    assert preview["dry_run"] is True
+    assert preview["command_preview"] == agent["command_template"]
+    assert preview["blocking_reasons"] == []
+
+
+def test_preview_real_execution_reports_global_block(client, workspace_root):
+    workspace, agent = _bootstrap_workspace_and_agent(client, workspace_root)
+
+    response = client.post(
+        "/runs/preview",
+        json={
+            "workspace_id": workspace["id"],
+            "agent_profile_id": agent["id"],
+            "dry_run": False,
+            "requested_by": "pytest",
+        },
+    )
+
+    assert response.status_code == 200
+    preview = response.json()
+    assert preview["dry_run"] is False
+    assert preview["execution_enabled"] is False
+    assert preview["blocking_reasons"] == ["Real execution is disabled globally."]
+
+
+def test_preview_real_execution_reports_policy_block(client_execution_enabled, workspace_root):
+    policy = _create_policy(client_execution_enabled, ["not-the-command"])
+    workspace = _create_workspace(
+        client_execution_enabled,
+        workspace_root,
+        "preview-policy-block",
+        policy["id"],
+    )
+    agent = _create_agent(client_execution_enabled, workspace["id"])
+
+    response = client_execution_enabled.post(
+        "/runs/preview",
+        json={
+            "workspace_id": workspace["id"],
+            "agent_profile_id": agent["id"],
+            "dry_run": False,
+            "requested_by": "pytest",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["blocking_reasons"] == [
+        "Command is not allowed by the workspace policy."
+    ]
+
+
+def test_preview_real_execution_reports_allowed_launch(client_execution_enabled, workspace_root):
+    policy = _create_policy(
+        client_execution_enabled,
+        ["gh copilot"],
+        max_runtime_seconds=31,
+    )
+    workspace = _create_workspace(
+        client_execution_enabled,
+        workspace_root,
+        "preview-real-allowed",
+        policy["id"],
+    )
+    agent = _create_agent(client_execution_enabled, workspace["id"])
+
+    response = client_execution_enabled.post(
+        "/runs/preview",
+        json={
+            "workspace_id": workspace["id"],
+            "agent_profile_id": agent["id"],
+            "dry_run": False,
+            "requested_by": "pytest",
+        },
+    )
+
+    assert response.status_code == 200
+    preview = response.json()
+    assert preview["dry_run"] is False
+    assert preview["execution_enabled"] is True
+    assert preview["command_preview"] == agent["command_template"]
+    assert preview["allowed_command_prefixes"] == ["gh copilot"]
+    assert preview["blocking_reasons"] == []
+
+
 def test_real_execution_blocked_when_globally_disabled(client, workspace_root):
     workspace, agent = _bootstrap_workspace_and_agent(client, workspace_root)
 

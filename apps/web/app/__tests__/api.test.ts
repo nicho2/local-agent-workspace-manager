@@ -4,6 +4,7 @@ import {
   createAgent,
   createPolicy,
   createRun,
+  createRunPreview,
   createSchedule,
   createWorkspace,
   getRuntimePresets,
@@ -69,6 +70,51 @@ describe("api client", () => {
       method: "POST",
     });
     expect(run.id).toBe("run_created");
+  });
+
+  it("creates a run safety preview with the expected POST contract", async () => {
+    const fetchMock = stubJsonResponse({
+      workspace_id: "ws_docs",
+      workspace_name: "Docs Vault",
+      workspace_slug: "docs-vault",
+      workspace_root_path: "E:/workspaces/docs-vault",
+      agent_profile_id: "agent_docs",
+      agent_name: "maintenance-agent",
+      agent_runtime: "copilot_cli",
+      policy_id: "policy_safe",
+      policy_name: "default-safe",
+      dry_run: true,
+      command_preview: "copilot --agent wiki-maintenance",
+      execution_enabled: false,
+      allow_write: false,
+      allow_network: false,
+      allowed_command_prefixes: ["copilot --agent"],
+      blocking_reasons: [],
+    });
+
+    const preview = await createRunPreview({
+      agent_profile_id: "agent_docs",
+      dry_run: true,
+      requested_by: "web-ui",
+      trigger: "manual",
+      workspace_id: "ws_docs",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/runs/preview", {
+      body: JSON.stringify({
+        agent_profile_id: "agent_docs",
+        dry_run: true,
+        requested_by: "web-ui",
+        trigger: "manual",
+        workspace_id: "ws_docs",
+      }),
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+    expect(preview.workspace_name).toBe("Docs Vault");
   });
 
   it("creates and updates workspace contracts", async () => {

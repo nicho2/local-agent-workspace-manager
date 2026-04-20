@@ -137,6 +137,7 @@
 - `GET|POST /schedules`
 - `PUT /schedules/{schedule_id}`
 - `GET|POST /runs`
+- `POST /runs/preview`
 - `GET /runs/{run_id}`
 - `GET /runs/{run_id}/logs`
 - `GET /runs/{run_id}/artifacts`
@@ -344,6 +345,29 @@ artifacts expose `id`, `run_id`, `name`, `relative_path`, `media_type`, and
 `created_at`. Detail, logs, and artifacts endpoints all return structured `404`
 errors when the run does not exist.
 
+### Run safety preview
+
+`POST /runs/preview` accepts the same creation payload as `POST /runs` and
+returns a read-only safety summary without creating a run, log, or artifact.
+The preview uses the same workspace, agent, and policy validation rules as run
+creation, so inactive agents, unknown resources, and workspace-bound agent
+mismatches are rejected before the UI presents a launch action.
+
+The response identifies the exact launch context:
+
+- workspace id, name, slug, and resolved `root_path`
+- agent id, name, and runtime
+- policy id, name, allowed command prefixes, write flag, and network flag
+- requested dry-run or real-execution mode
+- exact `command_preview`
+- current global `execution_enabled` value
+- expected blocking reasons for a real execution request
+
+The manual-run UI displays this preview before submission so the user can see
+that agent `X` will launch in workspace `Y`, including the root path and command
+that will be used. Real execution still goes through `POST /runs`; the preview
+does not bypass the global execution setting or policy prefix checks.
+
 ### Real execution
 
 `POST /runs` keeps dry-runs as the default. When `dry_run=false`, the run is
@@ -367,6 +391,7 @@ Captured stdout/stderr entries are truncated after `4000` characters per stream.
 - workspace `root_path` must resolve inside one of `workspace_allowed_roots`
 - inactive agents cannot start runs
 - workspace-bound agents can only run in their bound workspace
+- manual runs show a safety preview before launch
 - real execution must be globally enabled and policy-prefix allowed
 - runner must never use `shell=True`
 - runner must receive an explicit working directory

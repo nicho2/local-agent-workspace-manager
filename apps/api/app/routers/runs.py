@@ -1,13 +1,14 @@
 from fastapi import APIRouter
 
 from app.core.config import get_settings
-from app.schemas.run import RunArtifactRead, RunCreate, RunLogRead, RunRead
+from app.schemas.run import RunArtifactRead, RunCreate, RunLogRead, RunPreviewRead, RunRead
 from app.services.run_service import (
     create_run,
     get_run,
     list_run_artifacts,
     list_run_logs,
     list_runs,
+    preview_run,
 )
 
 router = APIRouter(prefix="/runs", tags=["runs"])
@@ -16,6 +17,11 @@ router = APIRouter(prefix="/runs", tags=["runs"])
 @router.get("", response_model=list[RunRead])
 def get_runs() -> list[RunRead]:
     return list_runs(get_settings().database_path)
+
+
+@router.post("/preview", response_model=RunPreviewRead)
+def post_run_preview(payload: RunCreate) -> RunPreviewRead:
+    return preview_run(get_settings().database_path, payload)
 
 
 @router.get("/{run_id}", response_model=RunRead)

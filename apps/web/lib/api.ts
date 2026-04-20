@@ -8,6 +8,7 @@ import type {
   RunArtifact,
   RunCreate,
   RunLog,
+  RunPreview,
   RuntimeCapabilityPreset,
   Schedule,
   ScheduleCreate,
@@ -216,6 +217,16 @@ export function getRunArtifacts(runId: string): Promise<RunArtifact[]> {
 
 export function createRun(payload: RunCreate): Promise<Run> {
   return fetchJson<Run>("/runs", {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+}
+
+export function createRunPreview(payload: RunCreate): Promise<RunPreview> {
+  return fetchJson<RunPreview>("/runs/preview", {
     body: JSON.stringify(payload),
     headers: {
       "Content-Type": "application/json",

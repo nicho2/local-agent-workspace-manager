@@ -41,6 +41,25 @@ class RunRead(ModelBase):
     finished_at: datetime | None = None
 
 
+class RunPreviewRead(ModelBase):
+    workspace_id: str
+    workspace_name: str
+    workspace_slug: str
+    workspace_root_path: str
+    agent_profile_id: str
+    agent_name: str
+    agent_runtime: str
+    policy_id: str
+    policy_name: str
+    dry_run: bool
+    command_preview: str
+    execution_enabled: bool
+    allow_write: bool
+    allow_network: bool
+    allowed_command_prefixes: list[str]
+    blocking_reasons: list[str]
+
+
 class RunLogRead(ModelBase):
     id: str
     run_id: str

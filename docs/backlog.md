@@ -55,6 +55,16 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - raw logs, technical identifiers, API statuses, and backend error messages stay
   unchanged for auditability
 
+### P2-014 Run safety preview before launch
+- `POST /runs/preview` returns a read-only launch summary without creating a run
+- manual launch shows workspace name, slug, root path, agent, runtime, exact
+  command, mode, policy, allowed prefixes, write/network flags, and expected
+  blocking reasons
+- the UI states explicitly which agent will launch in which workspace before
+  submission
+- dry-run remains the default path, and real execution requires an explicit
+  confirmation checkbox
+
 ## Post-MVP backlog
 
 ### P2-001 Full cron scheduling
@@ -102,13 +112,6 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - support common use cases such as documentation maintenance, repository triage, Obsidian vault cleanup, and backlog review
 - keep the existing granular create/edit forms available for advanced use
 - add tests for the happy path and validation failures
-
-### P2-014 Run safety preview before launch
-- show a clear pre-run summary before creating a manual run
-- include workspace, agent, exact command, dry-run/real mode, policy, allowed prefixes, write/network flags, and expected blocking reasons
-- require explicit confirmation before any real execution request
-- reuse backend validation logic where possible so the preview matches actual run behavior
-- test dry-run, blocked real execution, and allowed real execution preview states
 
 ### P2-015 Safety center dashboard
 - add a safety-oriented view summarizing execution posture

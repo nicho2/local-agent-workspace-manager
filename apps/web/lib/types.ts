@@ -148,6 +148,25 @@ export interface Run {
   finished_at?: string | null;
 }
 
+export interface RunPreview {
+  workspace_id: string;
+  workspace_name: string;
+  workspace_slug: string;
+  workspace_root_path: string;
+  agent_profile_id: string;
+  agent_name: string;
+  agent_runtime: string;
+  policy_id: string;
+  policy_name: string;
+  dry_run: boolean;
+  command_preview: string;
+  execution_enabled: boolean;
+  allow_write: boolean;
+  allow_network: boolean;
+  allowed_command_prefixes: string[];
+  blocking_reasons: string[];
+}
+
 export interface RunCreate {
   workspace_id: string;
   agent_profile_id: string;

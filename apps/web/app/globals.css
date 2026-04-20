@@ -162,6 +162,17 @@ th {
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
+.preview-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.preview-wide {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .section-tabs {
   display: flex;
   flex-wrap: wrap;

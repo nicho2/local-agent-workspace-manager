@@ -885,7 +885,7 @@ Le site suit une logique i18n et permet de choisir la langue francais/anglais de
 
 Note de realisation : 2026-04-19 - Ajout d'une structure i18n frontend avec dictionnaires `en` et `fr`, provider global, helper `T`, hook `useI18n` et selecteur de langue sur le dashboard. Le choix est persiste dans `localStorage` via `lawm.locale` et applique aussi a `document.documentElement.lang`. Navigation, dashboard, workspaces, runs, schedules, settings, principaux tableaux et libelles de formulaires MVP utilisent des cles de traduction. Les logs, statuts techniques, identifiants, descriptions backend et erreurs API restent affiches tels que retournes pour preserver l'audit/debug. Documentation spec, backlog et wireframes mises a jour. Validation : `npm test` depuis `apps/web` : 23 tests passent ; `npm run build` depuis `apps/web` passe.
 
-## [ ] T024 - Ajouter une previsualisation securite avant lancement
+## [x] T024 - Ajouter une previsualisation securite avant lancement
 
 ### Outcome
 Avant un run manuel, l'utilisateur voit un recapitulatif clair de ce qui va se passer et des garde-fous qui s'appliquent.
@@ -925,7 +925,7 @@ Avant un run manuel, l'utilisateur voit un recapitulatif clair de ce qui va se p
 - Les cas dry-run, execution reelle bloquee et execution reelle autorisee sont couverts.
 - La documentation de contrat est a jour si un endpoint de preview est ajoute.
 
-Note de realisation :
+Note de realisation : 2026-04-20 - Ajout du endpoint `POST /runs/preview`, qui retourne une preview lecture seule sans creer de run : workspace, agent, runtime, commande exacte, mode dry-run/execution reelle, policy, prefixes autorises, flags write/network, et raisons de blocage attendues. Le lancement manuel affiche maintenant cette preview avant soumission, avec une phrase explicite indiquant quel agent se lancera dans quel workspace et le chemin racine associe ; le dry-run reste le chemin par defaut et toute demande d'execution reelle exige une confirmation explicite. Types/API frontend, libelles i18n, wireframes, spec et backlog mis a jour. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-runner-fix tests/test_runs.py` depuis `apps/api` : 14 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement des avertissements de cache Ruff verrouille par Windows ; `npm test` depuis `apps/web` : 25 tests passent ; `npm run build` depuis `apps/web` passe.
 
 ## [ ] T025 - Ajouter une timeline d'audit lisible sur le detail run
 

@@ -76,7 +76,12 @@
 | Manual run panel                                                      |
 | Agent: maintenance-copilot                                            |
 | Mode: [x] dry-run                                                     |
-| [Launch]                                                              |
+| Safety preview                                                        |
+| - Agent maintenance-copilot will launch in workspace Docs Vault        |
+| - Root: D:/vaults/docs                                                |
+| - Command: copilot --agent wiki-maintenance ...                       |
+| - Policy: default-safe / prefixes / write denied / network denied      |
+| [Launch dry-run]                                                      |
 | Success opens /runs/{runId}                                           |
 +-----------------------------------------------------------------------+
 | Agent                                                                 |

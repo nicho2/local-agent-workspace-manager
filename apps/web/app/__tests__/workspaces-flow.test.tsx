@@ -216,6 +216,7 @@ describe("workspaces flow", () => {
     expect(html).toContain("Docs Vault");
     expect(html).toContain("Execution");
     expect(html).toContain("Launch dry-run");
+    expect(html).toContain("Safety preview");
     expect(html).toContain("Dry-run");
     expect(html).toContain("disabled globally");
     expect(html).toContain("inactive-agent");

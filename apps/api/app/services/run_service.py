@@ -7,7 +7,7 @@ from uuid import uuid4
 from app.core.config import get_settings
 from app.core.errors import bad_request, conflict, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
-from app.schemas.run import RunArtifactRead, RunCreate, RunLogRead, RunRead, RunStatus
+from app.schemas.run import RunArtifactRead, RunCreate, RunLogRead, RunPreviewRead, RunRead, RunStatus
 from app.services.runner_service import run_controlled_command
 from app.services.settings_service import get_bool_setting
 
@@ -98,6 +98,97 @@ def list_run_artifacts(database_path: Path, run_id: str) -> list[RunArtifactRead
             (run_id,),
         ).fetchall()
     return [_row_to_artifact(row) for row in rows]
+
+
+def preview_run(database_path: Path, payload: RunCreate) -> RunPreviewRead:
+    settings = get_settings()
+
+    with get_connection(database_path) as connection:
+        workspace_row = connection.execute(
+            "SELECT * FROM workspaces WHERE id = ?",
+            (payload.workspace_id,),
+        ).fetchone()
+        if workspace_row is None:
+            raise bad_request(
+                "unknown_workspace_id",
+                "Unknown workspace_id",
+                {"workspace_id": payload.workspace_id},
+            )
+
+        agent_row = connection.execute(
+            "SELECT * FROM agent_profiles WHERE id = ?",
+            (payload.agent_profile_id,),
+        ).fetchone()
+        if agent_row is None:
+            raise bad_request(
+                "unknown_agent_profile_id",
+                "Unknown agent_profile_id",
+                {"agent_profile_id": payload.agent_profile_id},
+            )
+        if not bool(agent_row["is_active"]):
+            raise conflict(
+                "agent_profile_inactive",
+                "Agent profile is inactive",
+                {"agent_profile_id": payload.agent_profile_id},
+            )
+        if agent_row["workspace_id"] is not None and agent_row["workspace_id"] != payload.workspace_id:
+            raise conflict(
+                "agent_workspace_mismatch",
+                "Agent profile is bound to a different workspace",
+                {
+                    "agent_profile_id": payload.agent_profile_id,
+                    "agent_workspace_id": str(agent_row["workspace_id"]),
+                    "workspace_id": payload.workspace_id,
+                },
+            )
+
+        policy_row = connection.execute(
+            "SELECT * FROM workspace_policies WHERE id = ?",
+            (workspace_row["policy_id"],),
+        ).fetchone()
+        if policy_row is None:
+            raise internal_error(
+                "workspace_policy_missing",
+                "Workspace policy is missing",
+                {"workspace_id": payload.workspace_id},
+            )
+
+        command_preview = payload.command_override or str(agent_row["command_template"])
+        allowed_command_prefixes = json.loads(policy_row["allowed_command_prefixes"])
+        execution_enabled = get_bool_setting(
+            database_path,
+            "runner.execution_enabled",
+            default=settings.execution_enabled,
+        )
+        blocking_reasons: list[str] = []
+
+        if not payload.dry_run and not execution_enabled:
+            blocking_reasons.append("Real execution is disabled globally.")
+        if (
+            not payload.dry_run
+            and execution_enabled
+            and not any(command_preview.startswith(prefix) for prefix in allowed_command_prefixes)
+        ):
+            blocking_reasons.append("Command is not allowed by the workspace policy.")
+
+        return RunPreviewRead(
+            workspace_id=str(workspace_row["id"]),
+            workspace_name=str(workspace_row["name"]),
+            workspace_slug=str(workspace_row["slug"]),
+            workspace_root_path=str(workspace_row["root_path"]),
+            agent_profile_id=str(agent_row["id"]),
+            agent_name=str(agent_row["name"]),
+            agent_runtime=str(agent_row["runtime"]),
+            policy_id=str(policy_row["id"]),
+            policy_name=str(policy_row["name"]),
+            dry_run=payload.dry_run,
+            command_preview=command_preview,
+            execution_enabled=execution_enabled,
+            allow_write=bool(policy_row["allow_write"]),
+            allow_network=bool(policy_row["allow_network"]),
+            allowed_command_prefixes=allowed_command_prefixes,
+            blocking_reasons=blocking_reasons,
+        )
 
 
 def create_run(database_path: Path, payload: RunCreate) -> RunRead:
