@@ -44,7 +44,7 @@ def _create_agent(
     *,
     is_active=True,
     name="maintenance-agent",
-    command_template="gh copilot suggest -t maintenance",
+    command_template="copilot --agent wiki-maintenance --prompt maintenance",
 ):
     response = client.post(
         "/agents",
@@ -175,7 +175,7 @@ def test_preview_real_execution_reports_policy_block(client_execution_enabled, w
 def test_preview_real_execution_reports_allowed_launch(client_execution_enabled, workspace_root):
     policy = _create_policy(
         client_execution_enabled,
-        ["gh copilot"],
+        ["copilot"],
         max_runtime_seconds=31,
     )
     workspace = _create_workspace(
@@ -201,7 +201,7 @@ def test_preview_real_execution_reports_allowed_launch(client_execution_enabled,
     assert preview["dry_run"] is False
     assert preview["execution_enabled"] is True
     assert preview["command_preview"] == agent["command_template"]
-    assert preview["allowed_command_prefixes"] == ["gh copilot"]
+    assert preview["allowed_command_prefixes"] == ["copilot"]
     assert preview["blocking_reasons"] == []
 
 

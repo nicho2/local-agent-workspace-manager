@@ -66,6 +66,19 @@ def test_create_and_list_workspace(client, workspace_root):
     assert detail.json()["name"] == "Docs Vault"
 
 
+def test_default_policy_allows_current_copilot_cli_prefix(client):
+    response = client.get("/policies")
+
+    assert response.status_code == 200
+    default_policy = response.json()[0]
+    assert default_policy["name"] == "default-safe"
+    assert default_policy["allowed_command_prefixes"] == [
+        "copilot",
+        "python -m pytest",
+        "npm test",
+    ]
+
+
 def test_workspace_allowed_roots_are_exposed(client, workspace_root):
     response = client.get("/workspaces/allowed-roots")
 

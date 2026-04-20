@@ -332,6 +332,12 @@ remain bounded by `workspace_allowed_roots`. Existing demo records are reused
 by natural keys such as workspace slug, agent name/workspace, and schedule
 name/workspace/agent; the script does not overwrite existing user edits.
 
+The seeded `default-safe` policy uses these command prefixes:
+
+```json
+["copilot", "python -m pytest", "npm test"]
+```
+
 ### Run history
 
 `GET /runs` returns the 20 most recent runs ordered by `started_at` descending.

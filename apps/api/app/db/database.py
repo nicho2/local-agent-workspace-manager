@@ -139,7 +139,7 @@ def seed_defaults(
             900,
             0,
             0,
-            json.dumps(["gh copilot", "python -m pytest", "npm test"]),
+            json.dumps(["copilot", "python -m pytest", "npm test"]),
             now,
             now,
         ),

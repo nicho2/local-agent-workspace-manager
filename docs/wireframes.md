@@ -117,11 +117,11 @@
 | Run #run_xxx                                                          |
 +-----------------------------------------------------------------------+
 | Status: completed   Trigger: manual   Dry-run: yes                    |
-| Command preview: gh copilot ...                                        |
+| Command preview: copilot --agent ...                                   |
 +-----------------------------------------------------------------------+
 | Audit timeline                                                        |
 | 1. Request received - manual request from web-ui                       |
-| 2. Command captured - gh copilot ...                                   |
+| 2. Command captured - copilot --agent ...                              |
 | 3. Dry-run completed - no real command was executed                    |
 | 4. Artifacts recorded - summary.md                                     |
 +-----------------------------------------------------------------------+
