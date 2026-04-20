@@ -266,6 +266,10 @@ textarea {
   display: block;
 }
 
+.tab-panel[hidden] {
+  display: none;
+}
+
 .checkbox-row {
   align-items: center;
   display: flex;
