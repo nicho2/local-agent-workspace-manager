@@ -3,9 +3,10 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from app.core.errors import bad_request, internal_error, not_found
+from app.core.errors import bad_request, conflict, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.agent import AgentProfileCreate, AgentProfileRead, AgentProfileUpdate
+from app.schemas.common import DeleteSummary
 
 
 def _row_to_agent(row: object) -> AgentProfileRead:
@@ -161,3 +162,45 @@ def update_agent(
     if row is None:
         raise internal_error("agent_profile_update_failed", "Failed to update agent profile")
     return _row_to_agent(row)
+
+
+def delete_agent(database_path: Path, agent_id: str) -> DeleteSummary:
+    with get_connection(database_path) as connection:
+        existing = connection.execute(
+            "SELECT id FROM agent_profiles WHERE id = ?",
+            (agent_id,),
+        ).fetchone()
+        if existing is None:
+            raise not_found("agent_profile", agent_id)
+
+        schedule_count = int(
+            connection.execute(
+                "SELECT COUNT(*) AS count FROM schedules WHERE agent_profile_id = ?",
+                (agent_id,),
+            ).fetchone()["count"]
+        )
+        run_count = int(
+            connection.execute(
+                "SELECT COUNT(*) AS count FROM runs WHERE agent_profile_id = ?",
+                (agent_id,),
+            ).fetchone()["count"]
+        )
+        if schedule_count > 0 or run_count > 0:
+            raise conflict(
+                "agent_delete_blocked_by_references",
+                "Agent profile is still referenced by schedules or runs",
+                {
+                    "agent_profile_id": agent_id,
+                    "schedules": schedule_count,
+                    "runs": run_count,
+                },
+            )
+
+        connection.execute("DELETE FROM agent_profiles WHERE id = ?", (agent_id,))
+
+    return DeleteSummary(
+        resource="agent_profile",
+        id=agent_id,
+        deleted=True,
+        deleted_counts={"agents": 1},
+    )

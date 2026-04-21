@@ -4,6 +4,7 @@ import type {
   AgentProfileUpdate,
   APIError,
   DashboardSummary,
+  DeleteSummary,
   Run,
   RunArtifact,
   RunCreate,
@@ -119,6 +120,22 @@ export function updateWorkspace(
   });
 }
 
+export function getWorkspaceDeleteSummary(workspaceId: string): Promise<DeleteSummary> {
+  return fetchJson<DeleteSummary>(`/workspaces/${workspaceId}/delete-summary`);
+}
+
+export function deleteWorkspace(
+  workspaceId: string,
+  confirmation: string
+): Promise<DeleteSummary> {
+  return fetchJson<DeleteSummary>(
+    `/workspaces/${workspaceId}?confirmation=${encodeURIComponent(confirmation)}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+
 export function getPolicies(): Promise<WorkspacePolicy[]> {
   return fetchJson<WorkspacePolicy[]>("/policies");
 }
@@ -143,6 +160,12 @@ export function updatePolicy(
       "Content-Type": "application/json",
     },
     method: "PUT",
+  });
+}
+
+export function deletePolicy(policyId: string): Promise<DeleteSummary> {
+  return fetchJson<DeleteSummary>(`/policies/${policyId}`, {
+    method: "DELETE",
   });
 }
 
@@ -174,6 +197,12 @@ export function updateAgent(
       "Content-Type": "application/json",
     },
     method: "PUT",
+  });
+}
+
+export function deleteAgent(agentProfileId: string): Promise<DeleteSummary> {
+  return fetchJson<DeleteSummary>(`/agents/${agentProfileId}`, {
+    method: "DELETE",
   });
 }
 

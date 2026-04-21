@@ -40,11 +40,14 @@ Empty state:
 | Each workspace is an explicit execution boundary with an attached      |
 | policy.                                                               |
 +-----------------------------------------------------------------------+
-| Create and edit                                                       |
+| Create and edit                                             [Open +]   |
 | [Workspace] [Policy] [Agent]                                          |
 | Active tab shows one focused form                                     |
 | Workspace root path: [Choose directory] + manual path fallback        |
 | Agent runtime selection pre-fills command template until user edits it |
+| Delete area appears only while editing an existing resource. Workspace |
+| delete requires typing the exact slug; policy/agent delete is blocked |
+| by backend dependency rules when still referenced.                    |
 +-----------------------------------------------------------------------+
 | Search [.........................]                                    |
 +-----------------------------------------------------------------------+

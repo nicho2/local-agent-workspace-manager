@@ -13,6 +13,13 @@ class APIMessage(BaseModel):
     message: str
 
 
+class DeleteSummary(BaseModel):
+    resource: str
+    id: str
+    deleted: bool
+    deleted_counts: dict[str, int] = Field(default_factory=dict)
+
+
 class APIError(BaseModel):
     code: str
     message: str

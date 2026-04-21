@@ -7,9 +7,13 @@ import {
   createRunPreview,
   createSchedule,
   createWorkspace,
+  deleteAgent,
+  deletePolicy,
+  deleteWorkspace,
   getRuntimePresets,
   getSafetySummary,
   getWorkspaceAllowedRoots,
+  getWorkspaceDeleteSummary,
   updateSchedule,
   updateSetting,
   updateWorkspace,
@@ -279,6 +283,55 @@ describe("api client", () => {
       headers: { "Content-Type": "application/json" },
       method: "PUT",
     });
+  });
+
+  it("deletes workspace, policy, and agent contracts", async () => {
+    const fetchMock = stubJsonResponse({
+      resource: "workspace",
+      id: "ws_docs",
+      deleted: true,
+      deleted_counts: { agents: 1, schedules: 1, runs: 1 },
+    });
+
+    await deleteWorkspace("ws_docs", "docs-vault");
+    await deletePolicy("policy_safe");
+    await deleteAgent("agent_docs");
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost:8000/workspaces/ws_docs?confirmation=docs-vault",
+      {
+        cache: "no-store",
+        method: "DELETE",
+      }
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(2, "http://localhost:8000/policies/policy_safe", {
+      cache: "no-store",
+      method: "DELETE",
+    });
+    expect(fetchMock).toHaveBeenNthCalledWith(3, "http://localhost:8000/agents/agent_docs", {
+      cache: "no-store",
+      method: "DELETE",
+    });
+  });
+
+  it("loads the workspace delete summary contract", async () => {
+    const fetchMock = stubJsonResponse({
+      resource: "workspace",
+      id: "ws_docs",
+      deleted: false,
+      deleted_counts: { agents: 1, schedules: 1, runs: 2, artifacts: 2 },
+    });
+
+    const summary = await getWorkspaceDeleteSummary("ws_docs");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:8000/workspaces/ws_docs/delete-summary",
+      {
+        cache: "no-store",
+      }
+    );
+    expect(summary.deleted_counts.runs).toBe(2);
   });
 
   it("fetches runtime capability presets", async () => {

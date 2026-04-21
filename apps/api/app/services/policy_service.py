@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from app.core.errors import conflict, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
+from app.schemas.common import DeleteSummary
 from app.schemas.policy import WorkspacePolicyCreate, WorkspacePolicyRead, WorkspacePolicyUpdate
 
 
@@ -163,3 +164,35 @@ def update_policy(
     if row is None:
         raise internal_error("policy_update_failed", "Failed to update policy")
     return _row_to_policy(row)
+
+
+def delete_policy(database_path: Path, policy_id: str) -> DeleteSummary:
+    with get_connection(database_path) as connection:
+        existing = connection.execute(
+            "SELECT id FROM workspace_policies WHERE id = ?",
+            (policy_id,),
+        ).fetchone()
+        if existing is None:
+            raise not_found("policy", policy_id)
+
+        workspace_count = int(
+            connection.execute(
+                "SELECT COUNT(*) AS count FROM workspaces WHERE policy_id = ?",
+                (policy_id,),
+            ).fetchone()["count"]
+        )
+        if workspace_count > 0:
+            raise conflict(
+                "policy_delete_blocked_by_workspaces",
+                "Policy is still attached to workspaces",
+                {"policy_id": policy_id, "workspaces": workspace_count},
+            )
+
+        connection.execute("DELETE FROM workspace_policies WHERE id = ?", (policy_id,))
+
+    return DeleteSummary(
+        resource="policy",
+        id=policy_id,
+        deleted=True,
+        deleted_counts={"policies": 1},
+    )

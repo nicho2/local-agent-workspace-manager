@@ -129,12 +129,16 @@
 - `GET /safety/summary`
 - `GET|POST /policies`
 - `PUT /policies/{policy_id}`
+- `DELETE /policies/{policy_id}`
 - `GET|POST /workspaces`
 - `GET /workspaces/allowed-roots`
 - `GET|PUT /workspaces/{workspace_id}`
+- `GET /workspaces/{workspace_id}/delete-summary`
+- `DELETE /workspaces/{workspace_id}?confirmation={workspace_slug}`
 - `GET|POST /agents`
 - `GET /agents/runtime-presets`
 - `PUT /agents/{agent_profile_id}`
+- `DELETE /agents/{agent_profile_id}`
 - `GET|POST /schedules`
 - `PUT /schedules/{schedule_id}`
 - `GET|POST /runs`
@@ -198,6 +202,40 @@ the same rule as creation. `policy_id` must reference an existing policy.
 Setting `status` to `archived` archives the workspace metadata without deleting
 runs, logs, artifacts, schedules, or agents associated with it. Successful
 updates refresh `updated_at` with a UTC ISO-8601 timestamp.
+
+### Controlled deletion
+
+Destructive deletion is intentionally explicit:
+
+- `DELETE /workspaces/{workspace_id}?confirmation={workspace_slug}` requires
+  the exact workspace slug. When confirmed, it deletes the workspace,
+  workspace-scoped agents, schedules, runs, run logs, run artifact rows, and
+  artifact files stored under `LAWM_ARTIFACTS_ROOT`.
+- `GET /workspaces/{workspace_id}/delete-summary` returns the exact counts the
+  UI shows before confirmation.
+- `DELETE /policies/{policy_id}` deletes only unreferenced policies. If any
+  workspace still uses the policy, the API returns `409` with dependency counts.
+- `DELETE /agents/{agent_profile_id}` deletes only unreferenced agents. If any
+  schedule or run still references the agent, the API returns `409` with
+  dependency counts.
+- Workspace archive remains the non-destructive alternative.
+
+Successful delete calls return:
+
+```json
+{
+  "resource": "workspace",
+  "id": "ws_docs",
+  "deleted": true,
+  "deleted_counts": {
+    "agents": 1,
+    "schedules": 1,
+    "runs": 2,
+    "artifacts": 2,
+    "artifact_files": 2
+  }
+}
+```
 
 ### Policy updates
 

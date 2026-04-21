@@ -6,6 +6,13 @@ export interface APIError {
   details: Record<string, unknown>;
 }
 
+export interface DeleteSummary {
+  resource: string;
+  id: string;
+  deleted: boolean;
+  deleted_counts: Record<string, number>;
+}
+
 export interface WorkspacePolicy {
   id: string;
   name: string;

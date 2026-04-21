@@ -332,3 +332,116 @@ def test_archive_workspace_preserves_existing_run_history(client, workspace_root
     preserved_run_response = client.get(f"/runs/{run['id']}")
     assert preserved_run_response.status_code == 200
     assert preserved_run_response.json()["workspace_id"] == workspace["id"]
+
+
+def test_delete_policy_is_blocked_when_referenced_by_workspace(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+
+    response = client.delete(f"/policies/{workspace['policy_id']}")
+
+    assert response.status_code == 409
+    assert response.json() == {
+        "code": "policy_delete_blocked_by_workspaces",
+        "message": "Policy is still attached to workspaces",
+        "details": {"policy_id": workspace["policy_id"], "workspaces": 1},
+    }
+
+
+def test_delete_unreferenced_policy(client):
+    policy = _create_policy(client, "temporary-policy")
+
+    response = client.delete(f"/policies/{policy['id']}")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "resource": "policy",
+        "id": policy["id"],
+        "deleted": True,
+        "deleted_counts": {"policies": 1},
+    }
+    assert all(item["id"] != policy["id"] for item in client.get("/policies").json())
+
+
+def test_delete_workspace_requires_exact_slug_confirmation(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+
+    response = client.delete(f"/workspaces/{workspace['id']}", params={"confirmation": "wrong"})
+
+    assert response.status_code == 409
+    assert response.json()["code"] == "workspace_delete_confirmation_required"
+    assert response.json()["details"]["required_confirmation"] == workspace["slug"]
+
+
+def test_delete_workspace_cascades_dependents_and_artifacts(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent_response = client.post(
+        "/agents",
+        json={
+            "name": "delete-check-agent",
+            "runtime": "copilot_cli",
+            "workspace_id": workspace["id"],
+            "command_template": "gh copilot suggest -t delete",
+            "environment": {},
+            "is_active": True,
+        },
+    )
+    assert agent_response.status_code == 201
+    agent = agent_response.json()
+    schedule_response = client.post(
+        "/schedules",
+        json={
+            "name": "delete-check-schedule",
+            "workspace_id": workspace["id"],
+            "agent_profile_id": agent["id"],
+            "mode": "interval",
+            "interval_minutes": 60,
+            "enabled": True,
+        },
+    )
+    assert schedule_response.status_code == 201
+    run_response = client.post(
+        "/runs",
+        json={
+            "workspace_id": workspace["id"],
+            "agent_profile_id": agent["id"],
+            "dry_run": True,
+            "requested_by": "pytest",
+        },
+    )
+    assert run_response.status_code == 201
+    run = run_response.json()
+    artifact = client.get(f"/runs/{run['id']}/artifacts").json()[0]
+    summary_response = client.get(f"/workspaces/{workspace['id']}/delete-summary")
+
+    response = client.delete(
+        f"/workspaces/{workspace['id']}",
+        params={"confirmation": workspace["slug"]},
+    )
+
+    assert summary_response.status_code == 200
+    assert summary_response.json() == {
+        "resource": "workspace",
+        "id": workspace["id"],
+        "deleted": False,
+        "deleted_counts": {
+            "agents": 1,
+            "schedules": 1,
+            "runs": 1,
+            "artifacts": 1,
+            "artifact_files": 1,
+        },
+    }
+    assert response.status_code == 200
+    assert response.json()["deleted_counts"] == {
+        "agents": 1,
+        "schedules": 1,
+        "runs": 1,
+        "artifacts": 1,
+        "artifact_files": 1,
+    }
+    assert client.get(f"/workspaces/{workspace['id']}").status_code == 404
+    assert client.get(f"/runs/{run['id']}").status_code == 404
+    assert all(item["id"] != agent["id"] for item in client.get("/agents").json())
+    assert all(item["id"] != schedule_response.json()["id"] for item in client.get("/schedules").json())
+    artifacts_root = workspace_root.parent / "artifacts"
+    assert not (artifacts_root / artifact["relative_path"]).exists()

@@ -1,11 +1,13 @@
 import json
 from datetime import datetime
 from pathlib import Path
+from sqlite3 import Connection
 from uuid import uuid4
 
 from app.core.config import get_settings
 from app.core.errors import bad_request, conflict, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
+from app.schemas.common import DeleteSummary
 from app.schemas.workspace import WorkspaceCreate, WorkspaceRead, WorkspaceUpdate
 from app.services.policy_service import get_default_policy_id
 
@@ -197,3 +199,182 @@ def update_workspace(
     if row is None:
         raise internal_error("workspace_update_failed", "Failed to update workspace")
     return _row_to_workspace(row)
+
+
+def _safe_delete_artifact_file(relative_path: str) -> bool:
+    artifacts_root = get_settings().artifacts_root.expanduser().resolve()
+    artifact_path = (artifacts_root / relative_path).expanduser().resolve()
+    try:
+        artifact_path.relative_to(artifacts_root)
+    except ValueError:
+        return False
+    if artifact_path.is_file():
+        artifact_path.unlink()
+        return True
+    return False
+
+
+def get_workspace_delete_summary(database_path: Path, workspace_id: str) -> DeleteSummary:
+    with get_connection(database_path) as connection:
+        _, _, _, _, artifact_paths, dependency_counts = _workspace_delete_plan(
+            connection,
+            workspace_id,
+        )
+
+    existing_artifact_files = sum(
+        1 for relative_path in artifact_paths if _artifact_file_exists(relative_path)
+    )
+    return DeleteSummary(
+        resource="workspace",
+        id=workspace_id,
+        deleted=False,
+        deleted_counts={
+            **dependency_counts,
+            "artifacts": len(artifact_paths),
+            "artifact_files": existing_artifact_files,
+        },
+    )
+
+
+def delete_workspace(
+    database_path: Path,
+    workspace_id: str,
+    confirmation: str | None,
+) -> DeleteSummary:
+    with get_connection(database_path) as connection:
+        workspace, _, schedule_ids, run_ids, artifact_paths, dependency_counts = (
+            _workspace_delete_plan(connection, workspace_id)
+        )
+        if confirmation != workspace["slug"]:
+            raise conflict(
+                "workspace_delete_confirmation_required",
+                "Workspace deletion requires exact slug confirmation",
+                {
+                    "workspace_id": workspace_id,
+                    "required_confirmation": str(workspace["slug"]),
+                    "agents": dependency_counts["agents"],
+                    "schedules": dependency_counts["schedules"],
+                    "runs": dependency_counts["runs"],
+                },
+            )
+
+        if run_ids:
+            placeholders = ", ".join("?" for _ in run_ids)
+            connection.execute(
+                f"DELETE FROM run_artifacts WHERE run_id IN ({placeholders})",
+                run_ids,
+            )
+            connection.execute(
+                f"DELETE FROM run_logs WHERE run_id IN ({placeholders})",
+                run_ids,
+            )
+            connection.execute(
+                f"DELETE FROM runs WHERE id IN ({placeholders})",
+                run_ids,
+            )
+
+        if schedule_ids:
+            placeholders = ", ".join("?" for _ in schedule_ids)
+            connection.execute(
+                f"DELETE FROM schedules WHERE id IN ({placeholders})",
+                schedule_ids,
+            )
+        connection.execute("DELETE FROM agent_profiles WHERE workspace_id = ?", (workspace_id,))
+        connection.execute("DELETE FROM workspaces WHERE id = ?", (workspace_id,))
+
+    deleted_files = sum(1 for relative_path in artifact_paths if _safe_delete_artifact_file(relative_path))
+    return DeleteSummary(
+        resource="workspace",
+        id=workspace_id,
+        deleted=True,
+        deleted_counts={
+            **dependency_counts,
+            "artifacts": len(artifact_paths),
+            "artifact_files": deleted_files,
+        },
+    )
+
+
+def _artifact_file_exists(relative_path: str) -> bool:
+    artifacts_root = get_settings().artifacts_root.expanduser().resolve()
+    artifact_path = (artifacts_root / relative_path).expanduser().resolve()
+    try:
+        artifact_path.relative_to(artifacts_root)
+    except ValueError:
+        return False
+    return artifact_path.is_file()
+
+
+def _workspace_delete_plan(
+    connection: Connection,
+    workspace_id: str,
+) -> tuple[object, list[str], list[str], list[str], list[str], dict[str, int]]:
+    workspace = connection.execute(
+        "SELECT id, slug FROM workspaces WHERE id = ?",
+        (workspace_id,),
+    ).fetchone()
+    if workspace is None:
+        raise not_found("workspace", workspace_id)
+
+    scoped_agent_rows = connection.execute(
+        "SELECT id FROM agent_profiles WHERE workspace_id = ?",
+        (workspace_id,),
+    ).fetchall()
+    scoped_agent_ids = [str(row["id"]) for row in scoped_agent_rows]
+    schedule_ids = _ids_for_workspace_dependents(
+        connection,
+        table="schedules",
+        workspace_id=workspace_id,
+        scoped_agent_ids=scoped_agent_ids,
+        agent_column="agent_profile_id",
+    )
+    run_ids = _ids_for_workspace_dependents(
+        connection,
+        table="runs",
+        workspace_id=workspace_id,
+        scoped_agent_ids=scoped_agent_ids,
+        agent_column="agent_profile_id",
+    )
+    artifact_paths: list[str] = []
+    if run_ids:
+        placeholders = ", ".join("?" for _ in run_ids)
+        artifact_rows = connection.execute(
+            f"SELECT relative_path FROM run_artifacts WHERE run_id IN ({placeholders})",
+            run_ids,
+        ).fetchall()
+        artifact_paths = [str(row["relative_path"]) for row in artifact_rows]
+
+    dependency_counts = {
+        "agents": len(scoped_agent_ids),
+        "schedules": len(schedule_ids),
+        "runs": len(run_ids),
+    }
+    return workspace, scoped_agent_ids, schedule_ids, run_ids, artifact_paths, dependency_counts
+
+
+def _ids_for_workspace_dependents(
+    connection: Connection,
+    *,
+    table: str,
+    workspace_id: str,
+    scoped_agent_ids: list[str],
+    agent_column: str,
+) -> list[str]:
+    assert table in {"runs", "schedules"}
+    assert agent_column == "agent_profile_id"
+    if not scoped_agent_ids:
+        rows = connection.execute(
+            f"SELECT id FROM {table} WHERE workspace_id = ?",
+            (workspace_id,),
+        ).fetchall()
+        return [str(row["id"]) for row in rows]
+
+    placeholders = ", ".join("?" for _ in scoped_agent_ids)
+    rows = connection.execute(
+        f"""
+        SELECT id FROM {table}
+        WHERE workspace_id = ? OR {agent_column} IN ({placeholders})
+        """,
+        [workspace_id, *scoped_agent_ids],
+    ).fetchall()
+    return [str(row["id"]) for row in rows]

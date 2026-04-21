@@ -149,6 +149,37 @@ def test_update_agent_with_unknown_workspace_returns_structured_error(client, wo
     }
 
 
+def test_delete_agent_is_blocked_when_referenced_by_schedule(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent = _create_agent(client, workspace["id"])
+    _create_interval_schedule(client, workspace["id"], agent["id"])
+
+    response = client.delete(f"/agents/{agent['id']}")
+
+    assert response.status_code == 409
+    assert response.json() == {
+        "code": "agent_delete_blocked_by_references",
+        "message": "Agent profile is still referenced by schedules or runs",
+        "details": {"agent_profile_id": agent["id"], "schedules": 1, "runs": 0},
+    }
+
+
+def test_delete_unreferenced_agent(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent = _create_agent(client, workspace["id"])
+
+    response = client.delete(f"/agents/{agent['id']}")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "resource": "agent_profile",
+        "id": agent["id"],
+        "deleted": True,
+        "deleted_counts": {"agents": 1},
+    }
+    assert all(item["id"] != agent["id"] for item in client.get("/agents").json())
+
+
 def test_update_schedule_activation_recalculates_next_run(client, workspace_root):
     workspace = _create_workspace(client, workspace_root)
     agent = _create_agent(client, workspace["id"])

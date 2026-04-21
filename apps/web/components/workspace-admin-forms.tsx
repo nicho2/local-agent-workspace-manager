@@ -10,6 +10,10 @@ import {
   createAgent,
   createPolicy,
   createWorkspace,
+  deleteAgent,
+  deletePolicy,
+  deleteWorkspace,
+  getWorkspaceDeleteSummary,
   updateAgent,
   updatePolicy,
   updateWorkspace,
@@ -20,6 +24,7 @@ import { nextCommandTemplate } from "@/lib/runtime-presets";
 import type {
   AgentProfile,
   AgentRuntime,
+  DeleteSummary,
   RuntimeCapabilityPreset,
   Workspace,
   WorkspacePolicy,
@@ -83,6 +88,8 @@ export function WorkspaceAdminForms({
   const [directoryPickerMessage, setDirectoryPickerMessage] = useState<string | null>(null);
   const [policyId, setPolicyId] = useState("");
   const [agentId, setAgentId] = useState("");
+  const [workspaceDeleteConfirmation, setWorkspaceDeleteConfirmation] = useState("");
+  const [workspaceDeleteSummary, setWorkspaceDeleteSummary] = useState<DeleteSummary | null>(null);
   const [agentRuntime, setAgentRuntime] = useState<AgentRuntime>(
     runtimePresets[0]?.runtime ?? "copilot_cli"
   );
@@ -150,6 +157,19 @@ export function WorkspaceAdminForms({
     setWorkspaceRootPath(nextWorkspace?.root_path ?? "");
     setSelectedDirectoryName(null);
     setDirectoryPickerMessage(null);
+    setWorkspaceDeleteConfirmation("");
+    setWorkspaceDeleteSummary(null);
+    if (nextWorkspace) {
+      void loadWorkspaceDeleteSummary(nextWorkspace.id);
+    }
+  }
+
+  async function loadWorkspaceDeleteSummary(nextWorkspaceId: string): Promise<void> {
+    try {
+      setWorkspaceDeleteSummary(await getWorkspaceDeleteSummary(nextWorkspaceId));
+    } catch {
+      setWorkspaceDeleteSummary(null);
+    }
   }
 
   function composeWorkspacePath(allowedRoot: string, directoryName: string): string {
@@ -218,15 +238,17 @@ export function WorkspaceAdminForms({
         },
       ];
 
-  async function runAction(action: () => Promise<unknown>, successMessage: string): Promise<void> {
+  async function runAction(action: () => Promise<unknown>, successMessage: string): Promise<boolean> {
     setError(null);
     setMessage(null);
     try {
       await action();
       setMessage(successMessage);
       router.refresh();
+      return true;
     } catch (requestError) {
       setError(formatError(requestError));
+      return false;
     }
   }
 
@@ -261,6 +283,28 @@ export function WorkspaceAdminForms({
     );
   }
 
+  async function deleteSelectedWorkspace(): Promise<void> {
+    if (!selectedWorkspace) {
+      return;
+    }
+    if (workspaceDeleteConfirmation !== selectedWorkspace.slug) {
+      setError(t("admin.deleteWorkspaceMismatch"));
+      return;
+    }
+    if (!window.confirm(t("admin.deleteWorkspaceConfirm"))) {
+      return;
+    }
+    const deleted = await runAction(
+      () => deleteWorkspace(selectedWorkspace.id, workspaceDeleteConfirmation),
+      t("admin.workspaceDeleted")
+    );
+    if (deleted) {
+      setWorkspaceId("");
+      setWorkspaceRootPath("");
+      setWorkspaceDeleteConfirmation("");
+    }
+  }
+
   async function submitPolicy(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -277,6 +321,22 @@ export function WorkspaceAdminForms({
       () => (selectedPolicy ? updatePolicy(selectedPolicy.id, payload) : createPolicy(payload)),
       selectedPolicy ? "Policy updated." : "Policy created."
     );
+  }
+
+  async function deleteSelectedPolicy(): Promise<void> {
+    if (!selectedPolicy) {
+      return;
+    }
+    if (!window.confirm(t("admin.deletePolicyConfirm"))) {
+      return;
+    }
+    const deleted = await runAction(
+      () => deletePolicy(selectedPolicy.id),
+      t("admin.policyDeleted")
+    );
+    if (deleted) {
+      setPolicyId("");
+    }
   }
 
   async function submitAgent(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -297,6 +357,22 @@ export function WorkspaceAdminForms({
       () => (selectedAgent ? updateAgent(selectedAgent.id, payload) : createAgent(payload)),
       selectedAgent ? "Agent updated." : "Agent created."
     );
+  }
+
+  async function deleteSelectedAgent(): Promise<void> {
+    if (!selectedAgent) {
+      return;
+    }
+    if (!window.confirm(t("admin.deleteAgentConfirm"))) {
+      return;
+    }
+    const deleted = await runAction(
+      () => deleteAgent(selectedAgent.id),
+      t("admin.agentDeleted")
+    );
+    if (deleted) {
+      setAgentId("");
+    }
   }
 
   return (
@@ -460,6 +536,38 @@ export function WorkspaceAdminForms({
           <button className="primary-button" type="submit">
             {selectedWorkspace ? t("admin.updateWorkspace") : t("admin.createWorkspace")}
           </button>
+          {selectedWorkspace ? (
+            <div className="danger-zone">
+              <strong>{t("admin.deleteWorkspaceTitle")}</strong>
+              <p className="muted">{t("admin.deleteWorkspaceHelp")}</p>
+              {workspaceDeleteSummary ? (
+                <ul className="compact-list">
+                  {Object.entries(workspaceDeleteSummary.deleted_counts).map(([name, count]) => (
+                    <li key={name}>
+                      {name}: {count}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted">{t("admin.deleteSummaryLoading")}</p>
+              )}
+              <label className="field-label" htmlFor="workspace-delete-confirmation">
+                {t("admin.deleteWorkspaceLabel")} {selectedWorkspace.slug}
+              </label>
+              <input
+                id="workspace-delete-confirmation"
+                onChange={(event) => setWorkspaceDeleteConfirmation(event.target.value)}
+                value={workspaceDeleteConfirmation}
+              />
+              <button
+                className="danger-button"
+                onClick={deleteSelectedWorkspace}
+                type="button"
+              >
+                {t("admin.deleteWorkspace")}
+              </button>
+            </div>
+          ) : null}
         </form>
       </div>
 
@@ -533,6 +641,15 @@ export function WorkspaceAdminForms({
           <button className="primary-button" type="submit">
             {selectedPolicy ? t("admin.updatePolicy") : t("admin.createPolicy")}
           </button>
+          {selectedPolicy ? (
+            <div className="danger-zone">
+              <strong>{t("admin.deletePolicyTitle")}</strong>
+              <p className="muted">{t("admin.deletePolicyHelp")}</p>
+              <button className="danger-button" onClick={deleteSelectedPolicy} type="button">
+                {t("admin.deletePolicy")}
+              </button>
+            </div>
+          ) : null}
         </form>
       </div>
 
@@ -617,6 +734,15 @@ export function WorkspaceAdminForms({
           <button className="primary-button" type="submit">
             {selectedAgent ? t("admin.updateAgent") : t("admin.createAgent")}
           </button>
+          {selectedAgent ? (
+            <div className="danger-zone">
+              <strong>{t("admin.deleteAgentTitle")}</strong>
+              <p className="muted">{t("admin.deleteAgentHelp")}</p>
+              <button className="danger-button" onClick={deleteSelectedAgent} type="button">
+                {t("admin.deleteAgent")}
+              </button>
+            </div>
+          ) : null}
         </form>
         </div>
       </div>

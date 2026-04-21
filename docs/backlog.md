@@ -100,6 +100,16 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - preset values remain visible and editable, and the final safety review keeps
   dry-run first without changing the real-execution setting
 
+### P2-011 Delete and edit management for workspaces, policies, and agents
+- controlled delete rules are captured in ADR 0004
+- workspace deletion requires exact slug confirmation and cascades scoped
+  agents, schedules, runs, logs, artifact rows, and artifact files within the
+  workspace boundary
+- policy deletion is blocked while workspaces reference the policy
+- agent deletion is blocked while schedules or runs reference the agent
+- the advanced Workspaces UI exposes protected delete areas and surfaces
+  structured backend dependency errors
+
 ## Post-MVP backlog
 
 ### P2-001 Full cron scheduling
@@ -132,14 +142,6 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - export/import of audit records
 - richer filtering and pagination for run history
 - CI coverage for full-stack smoke checks
-
-### P2-011 Delete and edit management for workspaces, policies, and agents
-- add explicit delete actions for workspaces, policies, and agents
-- support deleting a workspace with its dependent agents, schedules, runs, logs, and artifacts only after strong confirmation
-- prevent accidental destructive actions with clear warnings and structured errors
-- define whether policy and agent deletion is blocked when referenced, archived, or cascaded
-- preserve auditability where possible, or document which records are permanently removed
-- add backend service tests for dependency handling and frontend tests for confirmation/error flows
 
 ## Delivered historical backlog
 
