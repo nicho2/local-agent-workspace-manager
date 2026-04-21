@@ -59,6 +59,7 @@ describe("runs flow", () => {
         execution_enabled: false,
         recent_runs: [sampleRun],
       },
+      { allowed_roots: ["E:/workspaces", "E:/temp"] },
     ]);
 
     const html = renderToStaticMarkup(
@@ -68,10 +69,39 @@ describe("runs flow", () => {
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/dashboard/summary", {
       cache: "no-store",
     });
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/workspaces/allowed-roots", {
+      cache: "no-store",
+    });
     expect(html).toContain("Recent runs");
     expect(html).toContain('href="/runs/run_abc123"');
     expect(html).toContain("completed");
     expect(html).toContain("dry-run");
+  });
+
+  it("renders first-use guidance on an empty dashboard", async () => {
+    mockFetchSequence([
+      {
+        workspaces: 0,
+        agents: 0,
+        enabled_schedules: 0,
+        execution_enabled: false,
+        recent_runs: [],
+      },
+      { allowed_roots: ["E:/temp"] },
+    ]);
+
+    const html = renderToStaticMarkup(
+      <I18nProvider>{await DashboardPage()}</I18nProvider>
+    );
+
+    expect(html).toContain("Start safely");
+    expect(html).toContain("Create a workspace");
+    expect(html).toContain("py -3.12 scripts/seed_demo.py");
+    expect(html).toContain("E:/temp");
+    expect(html).toContain("Dry-run remains the default");
+    expect(html).toContain('href="/workspaces"');
+    expect(html).toContain('href="/settings"');
+    expect(html).toContain('href="/safety"');
   });
 
   it("renders the runs list with status, trigger, dry-run, and detail links", async () => {
@@ -84,6 +114,17 @@ describe("runs flow", () => {
     expect(html).toContain("completed");
     expect(html).toContain("manual");
     expect(html).toContain("yes");
+  });
+
+  it("renders run list onboarding when there are no runs", async () => {
+    mockFetchSequence([[]]);
+
+    const html = renderToStaticMarkup(<I18nProvider>{await RunsPage()}</I18nProvider>);
+
+    expect(html).toContain("No runs yet.");
+    expect(html).toContain("Launch a manual dry-run");
+    expect(html).toContain('href="/workspaces"');
+    expect(html).toContain('href="/safety"');
   });
 
   it("renders run detail with metadata, logs, and artifacts", async () => {

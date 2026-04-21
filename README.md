@@ -86,6 +86,12 @@ workspaces under `examples/workspaces`, one active agent per workspace, and two
 disabled interval schedules. Existing demo records are reused rather than
 overwritten.
 
+On a fresh database, the web UI also surfaces this command in the dashboard and
+workspace empty states. The UI does not execute the seed script itself; run it
+from a terminal so the local filesystem action stays explicit. Empty states also
+show the configured allowed workspace roots and remind that dry-run remains the
+default.
+
 ### Frontend
 
 ```bash

@@ -19,6 +19,19 @@
 +--------------------------------------------------------------+
 ```
 
+Empty state:
+
+```text
++--------------------------------------------------------------+
+| Start safely                                                 |
+| Create a workspace, keep first launch in dry-run, or seed    |
+| demo data from the terminal.                                 |
+| Allowed roots: E:/temp                                       |
+| Demo seed: py -3.12 scripts/seed_demo.py                     |
+| [Create workspace] [Review execution setting] [Safety Center]|
++--------------------------------------------------------------+
+```
+
 ## Workspaces list
 
 ```text
@@ -37,6 +50,18 @@
 +-----------------------------------------------------------------------+
 ```
 
+Empty state:
+
+```text
++-----------------------------------------------------------------------+
+| Start safely                                                          |
+| No workspace exists yet. Create one under an allowed root first.       |
+| Allowed roots: E:/temp                                                |
+| Demo seed: py -3.12 scripts/seed_demo.py                              |
+| [Review execution setting] [Safety Center]                            |
++-----------------------------------------------------------------------+
+```
+
 ## Schedules
 
 ```text
@@ -47,6 +72,17 @@
 | Configured schedules                                                  |
 | Name            | Mode       | Agent              | Enabled | Next run |
 | nightly-docs    | interval   | maintenance-agent  | yes     | ...      |
++-----------------------------------------------------------------------+
+```
+
+Empty state:
+
+```text
++-----------------------------------------------------------------------+
+| No schedules yet.                                                     |
+| Create a workspace and agent, then add an interval schedule after the  |
+| dry-run path is clear.                                                |
+| [Create workspace] [Safety Center]                                    |
 +-----------------------------------------------------------------------+
 ```
 
@@ -140,6 +176,16 @@
 | Run              | Status       | Trigger      | Dry-run | Started     |
 | run_xxx          | completed    | manual       | yes     | ...         |
 | run_yyy          | blocked      | schedule     | yes     | ...         |
++-----------------------------------------------------------------------+
+```
+
+Empty state:
+
+```text
++-----------------------------------------------------------------------+
+| No runs yet.                                                          |
+| Launch a manual dry-run from a workspace detail page first.            |
+| [Create workspace] [Safety Center]                                    |
 +-----------------------------------------------------------------------+
 ```
 

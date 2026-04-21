@@ -334,6 +334,20 @@ primary form labels read from translation keys. Technical values returned by the
 API, run statuses, raw logs, artifact names, setting keys, and backend error
 messages remain displayed as returned so audit/debug information is not altered.
 
+### Empty-state onboarding
+
+Dashboard, workspace, run, and schedule empty states guide first use instead of
+looking like errors. They point to workspace creation, Settings, and the Safety
+Center, remind the user that dry-run remains the default, and show the
+terminal-only demo seed command:
+
+```text
+py -3.12 scripts/seed_demo.py
+```
+
+The dashboard and workspace empty states display configured allowed workspace
+roots when available. The UI does not execute the seed script directly.
+
 ### Demo seed
 
 `scripts/seed_demo.py` initializes a reproducible local demo dataset. It is

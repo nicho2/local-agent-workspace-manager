@@ -40,6 +40,8 @@ Coverage baseline:
 - MVP create/edit forms render for workspaces, policies, agents, and schedules
 - API client POST/PUT contracts are covered for workspace, policy, agent, schedule, and run creation
 - settings page shows the real-execution warning and settings table
+- empty dashboard and workspace states explain allowed roots, demo seed, dry-run
+  defaults, and next navigation actions
 - runner execution setting updates are reflected by the dashboard
 
 As UI logic grows:
@@ -79,6 +81,9 @@ Manual local path:
 8. Confirm the app opens the run detail page with metadata, logs and `summary.md`.
 9. Open Schedules and confirm demo schedules are disabled by default.
 10. Open Settings and confirm real execution remains disabled unless explicitly changed.
+11. On an empty database, open Dashboard and Workspaces and confirm the empty
+    states point to workspace creation, Settings, Safety Center, and
+    `py -3.12 scripts/seed_demo.py`.
 
 ## Regression policy
 

@@ -88,4 +88,18 @@ describe("schedules flow", () => {
     expect(html).toContain("maintenance-agent");
     expect(html).toContain("Docs Vault");
   });
+
+  it("renders schedule onboarding when no schedule exists", async () => {
+    mockFetchSequence([[], [sampleAgent], [sampleWorkspace]]);
+
+    const html = renderToStaticMarkup(
+      <I18nProvider>{await SchedulesPage()}</I18nProvider>
+    );
+
+    expect(html).toContain("No schedules yet.");
+    expect(html).toContain("Create a workspace and agent");
+    expect(html).toContain("Dry-run remains the default");
+    expect(html).toContain('href="/workspaces"');
+    expect(html).toContain('href="/safety"');
+  });
 });

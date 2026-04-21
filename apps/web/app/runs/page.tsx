@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import { EmptyState } from "@/components/empty-state";
 import { T } from "@/components/i18n-provider";
 import { RunTable } from "@/components/run-table";
 import { getRuns } from "@/lib/api";
@@ -28,9 +29,20 @@ export default async function RunsPage(): Promise<ReactElement> {
             <T k="dashboard.recentRuns" />
           </h3>
           {runs.length === 0 ? (
-            <p className="muted">
-              <T k="dashboard.noRuns" />
-            </p>
+            <EmptyState
+              actions={[
+                { href: "/workspaces", label: <T k="onboarding.createWorkspace" /> },
+                { href: "/safety", label: <T k="onboarding.reviewSafety" /> },
+              ]}
+              title={<T k="dashboard.noRuns" />}
+            >
+              <p>
+                <T k="onboarding.runsEmpty" />
+              </p>
+              <p>
+                <T k="onboarding.dryRunReminder" />
+              </p>
+            </EmptyState>
           ) : (
             <RunTable runs={runs} />
           )}

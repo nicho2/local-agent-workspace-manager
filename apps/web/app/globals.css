@@ -162,6 +162,44 @@ th {
   padding: 10px;
 }
 
+.empty-state {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.empty-state h4 {
+  margin: 0;
+}
+
+.empty-state-body {
+  color: var(--muted);
+  display: grid;
+  gap: 10px;
+}
+
+.empty-state-body p {
+  margin: 0;
+}
+
+.empty-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.inline-code-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
 .button-link {
   background: var(--panel-soft);
   border: 1px solid var(--border);

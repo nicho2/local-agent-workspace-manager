@@ -82,6 +82,15 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - the page explicitly states that the application is a guarded local runner, not
   an OS sandbox
 
+### P2-017 Empty-state onboarding and demo seed shortcut
+- dashboard, workspace, run, and schedule empty states now explain the next
+  safe action instead of rendering as blank/error-like pages
+- first-use guidance points to workspace creation, Settings, Safety Center, and
+  the terminal-only `py -3.12 scripts/seed_demo.py` command
+- dashboard and workspace empty states display allowed workspace roots when
+  available
+- empty-state copy reminds users that dry-run remains the default
+
 ## Post-MVP backlog
 
 ### P2-001 Full cron scheduling
@@ -129,13 +138,6 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - support common use cases such as documentation maintenance, repository triage, Obsidian vault cleanup, and backlog review
 - keep the existing granular create/edit forms available for advanced use
 - add tests for the happy path and validation failures
-
-### P2-017 Empty-state onboarding and demo seed shortcut
-- improve empty states for first use
-- explain dry-run defaults, allowed roots, demo data, and the next recommended action
-- provide a safe shortcut or documented path to initialize demo data
-- guide users from an empty dashboard to workspace creation or demo exploration
-- add frontend tests for empty dashboard/workspace states
 
 ## Delivered historical backlog
 

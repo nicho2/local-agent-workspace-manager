@@ -184,6 +184,27 @@ describe("workspaces flow", () => {
     expect(html).toContain("copilot --agent wiki-maintenance");
   });
 
+  it("renders onboarding guidance when the workspace list is empty", async () => {
+    mockFetchSequence([
+      [],
+      [samplePolicy],
+      [],
+      sampleRuntimePresets,
+      { allowed_roots: ["E:/temp"] },
+    ]);
+
+    const html = renderToStaticMarkup(
+      <I18nProvider>{await WorkspacesPage()}</I18nProvider>
+    );
+
+    expect(html).toContain("No workspace exists yet");
+    expect(html).toContain("py -3.12 scripts/seed_demo.py");
+    expect(html).toContain("Dry-run remains the default");
+    expect(html).toContain("E:/temp");
+    expect(html).toContain('href="/settings"');
+    expect(html).toContain('href="/safety"');
+  });
+
   it("renders workspace detail sections for execution, agent, policy, scheduling, and history", async () => {
     const fetchMock = mockFetchSequence([
       sampleWorkspace,

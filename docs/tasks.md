@@ -1012,7 +1012,7 @@ Une page de controle securite resume la posture locale : execution reelle, racin
 
 Note de realisation : 2026-04-21 - Ajout du Safety Center en lecture seule avec le endpoint `GET /safety/summary`, agregant `runner.execution_enabled`, les racines autorisees, policies permissives, agents actifs, schedules actifs et derniers runs `blocked`/`failed`. La page `/safety` est accessible depuis la navigation, affiche les signaux principaux, rappelle que l'application est un runner local garde et non une sandbox OS, et lie vers settings, workspaces, schedules et details de run. Types/API frontend, i18n, tests, spec, wireframes et backlog mis a jour. Validation : `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement les avertissements de cache Ruff verrouille par Windows ; `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-safety tests/test_safety.py` passe hors sandbox apres un PermissionError Windows sur le basetemp sandbox ; `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-api-full` : 52 tests passent ; `npm test -- safety-flow.test.tsx navigation.test.tsx api.test.ts` passe hors sandbox apres un `spawn EPERM` esbuild initial ; `npm test` : 30 tests passent ; `npm run build` passe.
 
-## [ ] T027 - Ameliorer les etats vides et l'onboarding
+## [x] T027 - Ameliorer les etats vides et l'onboarding
 
 ### Outcome
 Lors d'une premiere ouverture ou d'une base vide, l'utilisateur comprend les prochaines actions possibles : creer un workspace, charger la demo, verifier les racines autorisees et rester en dry-run.
@@ -1051,7 +1051,7 @@ Lors d'une premiere ouverture ou d'une base vide, l'utilisateur comprend les pro
 - Un nouvel utilisateur sait comment demarrer.
 - Les tests couvrent au moins dashboard et workspaces vides.
 
-Note de realisation :
+Note de realisation : 2026-04-21 - Ajout d'un composant `EmptyState` et d'etats vides utiles sur dashboard, workspaces, runs et schedules. Les premiers ecrans guident vers creation de workspace, Settings et Safety Center, affichent les racines autorisees quand disponibles, rappellent que le dry-run reste le defaut, et exposent la commande terminal `py -3.12 scripts/seed_demo.py` sans l'executer depuis l'UI. Tests frontend ajoutes pour dashboard vide, workspaces vide, runs vide et schedules vide ; README, spec, strategie de test, wireframes et backlog mis a jour. Validation : `npm test -- runs-flow.test.tsx workspaces-flow.test.tsx schedules-flow.test.tsx` passe hors sandbox apres un `spawn EPERM` esbuild initial ; `npm test` depuis `apps/web` : 34 tests passent ; `npm run build` depuis `apps/web` passe.
 
 ## [ ] T028 - Ajouter un assistant de creation workspace guidee
 

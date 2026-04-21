@@ -1,13 +1,18 @@
 import type { ReactElement } from "react";
 
+import { EmptyState } from "@/components/empty-state";
 import { T } from "@/components/i18n-provider";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { RunTable } from "@/components/run-table";
 import { StatCard } from "@/components/stat-card";
-import { getDashboardSummary } from "@/lib/api";
+import { getDashboardSummary, getWorkspaceAllowedRoots } from "@/lib/api";
 
 export default async function DashboardPage(): Promise<ReactElement> {
-  const summary = await getDashboardSummary();
+  const [summary, workspaceAllowedRoots] = await Promise.all([
+    getDashboardSummary(),
+    getWorkspaceAllowedRoots(),
+  ]);
+  const isEmptyWorkspace = summary.workspaces === 0;
 
   return (
     <main className="stack">
@@ -36,14 +41,58 @@ export default async function DashboardPage(): Promise<ReactElement> {
         />
       </section>
 
+      {isEmptyWorkspace ? (
+        <EmptyState
+          actions={[
+            { href: "/workspaces", label: <T k="onboarding.createWorkspace" /> },
+            { href: "/settings", label: <T k="onboarding.reviewSettings" /> },
+            { href: "/safety", label: <T k="onboarding.reviewSafety" /> },
+          ]}
+          title={<T k="onboarding.title" />}
+        >
+          <p>
+            <T k="onboarding.dashboardEmpty" />
+          </p>
+          <p>
+            <T k="onboarding.dryRunReminder" />
+          </p>
+          <div>
+            <strong>
+              <T k="onboarding.allowedRoots" />
+            </strong>
+            <ul className="inline-code-list">
+              {workspaceAllowedRoots.allowed_roots.map((root) => (
+                <li key={root}>
+                  <code>{root}</code>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p>
+            <strong>
+              <T k="onboarding.seedDemo" />
+            </strong>
+            : <code>py -3.12 scripts/seed_demo.py</code>
+          </p>
+        </EmptyState>
+      ) : null}
+
       <section className="card">
         <h3>
           <T k="dashboard.recentRuns" />
         </h3>
         {summary.recent_runs.length === 0 ? (
-          <p className="muted">
-            <T k="dashboard.noRuns" />
-          </p>
+          <EmptyState
+            actions={[
+              { href: "/workspaces", label: <T k="onboarding.createWorkspace" /> },
+              { href: "/safety", label: <T k="onboarding.reviewSafety" /> },
+            ]}
+            title={<T k="dashboard.noRuns" />}
+          >
+            <p>
+              <T k="onboarding.runsEmpty" />
+            </p>
+          </EmptyState>
         ) : (
           <RunTable runs={summary.recent_runs} />
         )}

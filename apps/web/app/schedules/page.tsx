@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import { EmptyState } from "@/components/empty-state";
 import { T } from "@/components/i18n-provider";
 import { ScheduleAdminForm } from "@/components/schedule-admin-form";
 import { getAgents, getSchedules, getWorkspaces } from "@/lib/api";
@@ -29,9 +30,20 @@ export default async function SchedulesPage(): Promise<ReactElement> {
           <T k="schedules.configured" />
         </h3>
         {schedules.length === 0 ? (
-          <p className="muted">
-            <T k="schedules.none" />
-          </p>
+          <EmptyState
+            actions={[
+              { href: "/workspaces", label: <T k="onboarding.createWorkspace" /> },
+              { href: "/safety", label: <T k="onboarding.reviewSafety" /> },
+            ]}
+            title={<T k="schedules.none" />}
+          >
+            <p>
+              <T k="onboarding.schedulesEmpty" />
+            </p>
+            <p>
+              <T k="onboarding.dryRunReminder" />
+            </p>
+          </EmptyState>
         ) : (
           <table>
             <thead>

@@ -38,7 +38,10 @@ export default async function WorkspacesPage(): Promise<ReactElement> {
         workspaceAllowedRoots={workspaceAllowedRoots.allowed_roots}
         workspaces={workspaces}
       />
-      <WorkspaceTable workspaces={workspaces} />
+      <WorkspaceTable
+        allowedRoots={workspaceAllowedRoots.allowed_roots}
+        workspaces={workspaces}
+      />
     </main>
   );
 }
