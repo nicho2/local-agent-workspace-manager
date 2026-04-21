@@ -81,6 +81,53 @@ a {
   margin-top: 0;
 }
 
+.collapsible-card {
+  padding: 0;
+}
+
+.collapsible-summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  list-style: none;
+  padding: 18px;
+}
+
+.collapsible-summary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsible-summary-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.collapsible-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.collapsible-action {
+  color: var(--accent);
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.collapsible-action::after {
+  content: " +";
+}
+
+.collapsible-card[open] .collapsible-action::after {
+  content: " -";
+}
+
+.collapsible-body {
+  border-top: 1px solid var(--border);
+  padding: 18px;
+}
+
 .stat-value {
   font-size: 32px;
   font-weight: 700;
@@ -476,6 +523,15 @@ code {
   .section-heading-row {
     align-items: flex-start;
     display: grid;
+  }
+
+  .collapsible-summary {
+    align-items: flex-start;
+    display: grid;
+  }
+
+  .collapsible-action {
+    justify-self: start;
   }
 
   .log-row {

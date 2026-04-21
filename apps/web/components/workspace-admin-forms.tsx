@@ -300,38 +300,44 @@ export function WorkspaceAdminForms({
   }
 
   return (
-    <section className="card">
-      <h3>{t("admin.title")}</h3>
-      <p className="muted">{t("admin.subtitle")}</p>
-      {message ? <p className="success-text">{message}</p> : null}
-      {error ? <p className="error-text">{error}</p> : null}
+    <details className="card collapsible-card">
+      <summary className="collapsible-summary">
+        <span className="collapsible-summary-copy">
+          <span className="collapsible-title">{t("admin.title")}</span>
+          <span className="muted">{t("admin.subtitle")}</span>
+        </span>
+        <span className="collapsible-action">{t("admin.openForms")}</span>
+      </summary>
+      <div className="collapsible-body">
+        {message ? <p className="success-text">{message}</p> : null}
+        {error ? <p className="error-text">{error}</p> : null}
 
-      <div aria-label="Create and edit workspace resources" className="admin-tabs" role="tablist">
-        {adminTabs.map((tab) => (
-          <button
-            aria-controls={`${tab.id}-admin-panel`}
-            aria-selected={activeTab === tab.id}
-            className={activeTab === tab.id ? "tab-button tab-button-active" : "tab-button"}
-            id={`${tab.id}-admin-tab`}
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            onKeyDown={handleTabKeyDown}
-            role="tab"
-            tabIndex={activeTab === tab.id ? 0 : -1}
-            type="button"
-          >
-            {t(tab.labelKey)}
-          </button>
-        ))}
-      </div>
+        <div aria-label="Create and edit workspace resources" className="admin-tabs" role="tablist">
+          {adminTabs.map((tab) => (
+            <button
+              aria-controls={`${tab.id}-admin-panel`}
+              aria-selected={activeTab === tab.id}
+              className={activeTab === tab.id ? "tab-button tab-button-active" : "tab-button"}
+              id={`${tab.id}-admin-tab`}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              onKeyDown={handleTabKeyDown}
+              role="tab"
+              tabIndex={activeTab === tab.id ? 0 : -1}
+              type="button"
+            >
+              {t(tab.labelKey)}
+            </button>
+          ))}
+        </div>
 
-      <div
-        aria-labelledby="workspace-admin-tab"
-        className="tab-panel"
-        hidden={activeTab !== "workspace"}
-        id="workspace-admin-panel"
-        role="tabpanel"
-      >
+        <div
+          aria-labelledby="workspace-admin-tab"
+          className="tab-panel"
+          hidden={activeTab !== "workspace"}
+          id="workspace-admin-panel"
+          role="tabpanel"
+        >
         <form className="form-grid" key={`workspace-${workspaceId}`} onSubmit={submitWorkspace}>
           <h4>{t("admin.workspace")}</h4>
           <label className="field-label" htmlFor="workspace-select">
@@ -457,13 +463,13 @@ export function WorkspaceAdminForms({
         </form>
       </div>
 
-      <div
-        aria-labelledby="policy-admin-tab"
-        className="tab-panel"
-        hidden={activeTab !== "policy"}
-        id="policy-admin-panel"
-        role="tabpanel"
-      >
+        <div
+          aria-labelledby="policy-admin-tab"
+          className="tab-panel"
+          hidden={activeTab !== "policy"}
+          id="policy-admin-panel"
+          role="tabpanel"
+        >
         <form className="form-grid" key={`policy-${policyId}`} onSubmit={submitPolicy}>
           <h4>{t("admin.policy")}</h4>
           <label className="field-label" htmlFor="policy-select">
@@ -530,13 +536,13 @@ export function WorkspaceAdminForms({
         </form>
       </div>
 
-      <div
-        aria-labelledby="agent-admin-tab"
-        className="tab-panel"
-        hidden={activeTab !== "agent"}
-        id="agent-admin-panel"
-        role="tabpanel"
-      >
+        <div
+          aria-labelledby="agent-admin-tab"
+          className="tab-panel"
+          hidden={activeTab !== "agent"}
+          id="agent-admin-panel"
+          role="tabpanel"
+        >
         <form className="form-grid" key={`agent-${agentId}`} onSubmit={submitAgent}>
           <h4>{t("admin.agent")}</h4>
           <label className="field-label" htmlFor="agent-select">
@@ -612,7 +618,8 @@ export function WorkspaceAdminForms({
             {selectedAgent ? t("admin.updateAgent") : t("admin.createAgent")}
           </button>
         </form>
+        </div>
       </div>
-    </section>
+    </details>
   );
 }

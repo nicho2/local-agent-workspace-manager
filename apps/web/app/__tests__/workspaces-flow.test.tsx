@@ -173,6 +173,10 @@ describe("workspaces flow", () => {
     expect(html).toContain("Guided setup");
     expect(html).not.toContain("Safety review");
     expect(html).toContain("Create and edit");
+    expect(html).toContain("<details");
+    expect(html).toContain('class="collapsible-summary"');
+    expect(html).toContain("Open forms");
+    expect(html).not.toContain("<details open");
     expect(html).toContain("Create workspace");
     expect(html).toContain("Create policy");
     expect(html).toContain("Create agent");
