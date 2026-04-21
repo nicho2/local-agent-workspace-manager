@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import WorkspaceDetailPage from "@/app/workspaces/[workspaceId]/page";
+import GuidedWorkspacePage from "@/app/workspaces/guided/page";
 import WorkspacesPage from "@/app/workspaces/page";
 import { I18nProvider } from "@/components/i18n-provider";
 
@@ -21,6 +22,7 @@ vi.mock("next/link", () => ({
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
+    refresh: vi.fn(),
   }),
 }));
 
@@ -167,6 +169,9 @@ describe("workspaces flow", () => {
     });
     expect(html).toContain("Docs Vault");
     expect(html).toContain('href="/workspaces/ws_docs"');
+    expect(html).toContain('href="/workspaces/guided"');
+    expect(html).toContain("Guided setup");
+    expect(html).not.toContain("Safety review");
     expect(html).toContain("Create and edit");
     expect(html).toContain("Create workspace");
     expect(html).toContain("Create policy");
@@ -182,6 +187,28 @@ describe("workspaces flow", () => {
     expect(html).toContain("Choose directory");
     expect(html).toContain("Manual entry stays available.");
     expect(html).toContain("copilot --agent wiki-maintenance");
+  });
+
+  it("renders guided workspace setup on a dedicated page", async () => {
+    const fetchMock = mockFetchSequence([
+      sampleRuntimePresets,
+      { allowed_roots: ["E:/workspaces", "E:/temp"] },
+    ]);
+
+    const html = renderToStaticMarkup(
+      <I18nProvider>{await GuidedWorkspacePage()}</I18nProvider>
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/agents/runtime-presets", {
+      cache: "no-store",
+    });
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/workspaces/allowed-roots", {
+      cache: "no-store",
+    });
+    expect(html).toContain("Guided workspace setup");
+    expect(html).toContain("Documentation Maintenance");
+    expect(html).toContain("Safety review");
+    expect(html).toContain('href="/workspaces"');
   });
 
   it("renders onboarding guidance when the workspace list is empty", async () => {

@@ -348,6 +348,27 @@ py -3.12 scripts/seed_demo.py
 The dashboard and workspace empty states display configured allowed workspace
 roots when available. The UI does not execute the seed script directly.
 
+### Guided workspace setup
+
+The Workspaces page links to a dedicated `/workspaces/guided` setup page from
+the heading area. The guided page uses existing API contracts only:
+`POST /policies`, then `POST /workspaces` with the created policy id, then
+`POST /agents` scoped to the created workspace. No backend batch endpoint is
+required for this slice.
+
+Initial guided use cases are:
+
+- documentation maintenance
+- repository triage
+- Obsidian cleanup
+- backlog review
+
+Each preset fills workspace metadata, tags, policy name and permissions, agent
+name, runtime, command template, system prompt, and command prefixes. All values
+remain visible and editable before creation. The final safety review reiterates
+the root path, exact command, allowed prefixes, and that real execution is not
+enabled by this setup.
+
 ### Demo seed
 
 `scripts/seed_demo.py` initializes a reproducible local demo dataset. It is

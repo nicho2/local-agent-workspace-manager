@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import Link from "next/link";
 
 import { T } from "@/components/i18n-provider";
 import { WorkspaceAdminForms } from "@/components/workspace-admin-forms";
@@ -17,18 +18,23 @@ export default async function WorkspacesPage(): Promise<ReactElement> {
     getPolicies(),
     getAgents(),
     getRuntimePresets(),
-    getWorkspaceAllowedRoots(),
+      getWorkspaceAllowedRoots(),
   ]);
 
   return (
     <main className="stack">
-      <div>
-        <h1 className="page-title">
-          <T k="workspaces.title" />
-        </h1>
-        <p className="page-subtitle">
-          <T k="workspaces.subtitle" />
-        </p>
+      <div className="page-heading-row">
+        <div>
+          <h1 className="page-title">
+            <T k="workspaces.title" />
+          </h1>
+          <p className="page-subtitle">
+            <T k="workspaces.subtitle" />
+          </p>
+        </div>
+        <Link className="button-link" href="/workspaces/guided">
+          <T k="guided.open" />
+        </Link>
       </div>
 
       <WorkspaceAdminForms

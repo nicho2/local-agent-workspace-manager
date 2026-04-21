@@ -36,6 +36,10 @@ Empty state:
 
 ```text
 +-----------------------------------------------------------------------+
+| Workspaces                                      [Guided setup]         |
+| Each workspace is an explicit execution boundary with an attached      |
+| policy.                                                               |
++-----------------------------------------------------------------------+
 | Create and edit                                                       |
 | [Workspace] [Policy] [Agent]                                          |
 | Active tab shows one focused form                                     |
@@ -47,6 +51,23 @@ Empty state:
 | Name            | Policy        | Root path                | Status    |
 | Docs Vault      | default-safe  | D:/vaults/docs          | active    |
 | Repo Triage     | repo-review   | D:/repos/project-x      | active    |
++-----------------------------------------------------------------------+
+```
+
+## Guided workspace setup
+
+```text
++-----------------------------------------------------------------------+
+| Guided workspace setup                         [Back to workspaces]    |
++-----------------------------------------------------------------------+
+| Usage: [Documentation Maintenance v]                                  |
+| Allowed root: [E:/temp v]  Root path: E:/temp/documentation-maintenance|
+| Workspace: Documentation Maintenance / documentation-maintenance       |
+| Policy: write yes, network yes, prefixes copilot                      |
+| Agent: documentation-maintenance / copilot_cli                         |
+| Command: copilot --agent wiki-maintenance ...                         |
+| Safety review: dry-run first, real execution unchanged                 |
+| [Create guided setup]                                                 |
 +-----------------------------------------------------------------------+
 ```
 

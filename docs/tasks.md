@@ -1053,7 +1053,7 @@ Lors d'une premiere ouverture ou d'une base vide, l'utilisateur comprend les pro
 
 Note de realisation : 2026-04-21 - Ajout d'un composant `EmptyState` et d'etats vides utiles sur dashboard, workspaces, runs et schedules. Les premiers ecrans guident vers creation de workspace, Settings et Safety Center, affichent les racines autorisees quand disponibles, rappellent que le dry-run reste le defaut, et exposent la commande terminal `py -3.12 scripts/seed_demo.py` sans l'executer depuis l'UI. Tests frontend ajoutes pour dashboard vide, workspaces vide, runs vide et schedules vide ; README, spec, strategie de test, wireframes et backlog mis a jour. Validation : `npm test -- runs-flow.test.tsx workspaces-flow.test.tsx schedules-flow.test.tsx` passe hors sandbox apres un `spawn EPERM` esbuild initial ; `npm test` depuis `apps/web` : 34 tests passent ; `npm run build` depuis `apps/web` passe.
 
-## [ ] T028 - Ajouter un assistant de creation workspace guidee
+## [x] T028 - Ajouter un assistant de creation workspace guidee
 
 ### Outcome
 Un utilisateur peut creer un setup pret a l'emploi via un parcours guide : dossier, usage, policy, agent, commande et recapitulatif securite.
@@ -1091,7 +1091,7 @@ Un utilisateur peut creer un setup pret a l'emploi via un parcours guide : dossi
 - Les objets crees restent editables dans les formulaires existants.
 - Les tests couvrent le happy path et une erreur de validation.
 
-Note de realisation :
+Note de realisation : 2026-04-21 - Ajout d'un assistant guide accessible depuis un bouton sur la page Workspaces et rendu sur la page dediee `/workspaces/guided`, afin de garder la liste Workspaces lisible. Les presets couvrent documentation maintenance, repo triage, Obsidian cleanup et backlog review ; ils pre-remplissent usage, racine, workspace, policy, agent, runtime, commande, prompt systeme et prefixes, tout en laissant chaque valeur editable avant creation. Le wizard cree un setup complet via les endpoints existants `POST /policies`, `POST /workspaces`, puis `POST /agents`, sans activer l'execution reelle et avec recapitulatif securite dry-run-first. Tests frontend ajoutes pour le happy path de construction du setup, l'erreur de validation, le bouton Workspaces et la page dediee. Validation : `npm test -- guided-workspace.test.ts workspaces-flow.test.tsx` passe hors sandbox apres un `spawn EPERM` esbuild initial ; `npm test` depuis `apps/web` : 36 tests passent ; `npm run build` passe apres relance longue hors sandbox, une premiere tentative ayant ete bloquee par `.next/trace`/EPIPE Windows.
 
 ## [ ] T029 - Ajouter suppression controlee des workspaces, policies et agents
 

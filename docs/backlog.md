@@ -91,6 +91,15 @@ unless it fixes a regression in the delivered safety or audit behavior.
   available
 - empty-state copy reminds users that dry-run remains the default
 
+### P2-013 Guided workspace setup wizard
+- Workspaces now links to a dedicated guided setup page from the heading
+- initial use cases cover documentation maintenance, repository triage,
+  Obsidian cleanup, and backlog review
+- the wizard creates a policy, workspace, and scoped active agent through the
+  existing API contracts
+- preset values remain visible and editable, and the final safety review keeps
+  dry-run first without changing the real-execution setting
+
 ## Post-MVP backlog
 
 ### P2-001 Full cron scheduling
@@ -131,13 +140,6 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - define whether policy and agent deletion is blocked when referenced, archived, or cascaded
 - preserve auditability where possible, or document which records are permanently removed
 - add backend service tests for dependency handling and frontend tests for confirmation/error flows
-
-### P2-013 Guided workspace setup wizard
-- provide a guided path to create a ready-to-run workspace setup
-- combine directory selection, workspace metadata, policy choice, agent preset, and safety recap
-- support common use cases such as documentation maintenance, repository triage, Obsidian vault cleanup, and backlog review
-- keep the existing granular create/edit forms available for advanced use
-- add tests for the happy path and validation failures
 
 ## Delivered historical backlog
 
