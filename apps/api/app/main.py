@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.errors import AppError, app_error_handler
 from app.db.database import ensure_database
-from app.routers import agents, dashboard, health, policies, runs, schedules, settings, workspaces
+from app.routers import agents, dashboard, health, policies, runs, safety, schedules, settings, workspaces
 from app.services.schedule_worker_service import run_schedule_worker_loop
 
 
@@ -60,6 +60,7 @@ def create_app() -> FastAPI:
     application.include_router(agents.router)
     application.include_router(schedules.router)
     application.include_router(runs.router)
+    application.include_router(safety.router)
     application.include_router(settings.router)
     application.add_exception_handler(AppError, app_error_handler)
     return application

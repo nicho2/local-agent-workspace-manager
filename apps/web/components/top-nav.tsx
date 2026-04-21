@@ -11,6 +11,7 @@ const items = [
   { href: "/workspaces", labelKey: "nav.workspaces" },
   { href: "/schedules", labelKey: "nav.schedules" },
   { href: "/runs", labelKey: "nav.runs" },
+  { href: "/safety", labelKey: "nav.safety" },
   { href: "/settings", labelKey: "nav.settings" },
 ] satisfies Array<{
   href: string;

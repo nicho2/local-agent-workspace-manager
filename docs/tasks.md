@@ -969,7 +969,7 @@ Le detail d'un run affiche une timeline humaine des etapes d'audit, en complemen
 
 Note de realisation : 2026-04-20 - Ajout d'un composant `RunAuditTimeline` sur le detail run, derive des donnees existantes `run`, `logs` et `artifacts` sans nouveau contrat backend. La timeline affiche les etapes verifiables : demande recue, commande capturee, resultat terminal (`completed`, `blocked`, `failed`) et artifacts enregistres. Les runs bloques et echoues remontent le log decisif quand il existe, tout en conservant les logs bruts visibles sous la timeline. Libelles i18n, styles responsive, tests frontend, spec, wireframes et backlog mis a jour. Validation : `npm test -- runs-flow.test.tsx` depuis `apps/web` : 5 tests passent apres relance hors sandbox a cause d'un `spawn EPERM` esbuild initial ; `npm test` depuis `apps/web` : 27 tests passent ; `npm run build` depuis `apps/web` passe.
 
-## [ ] T026 - Ajouter un Safety Center
+## [x] T026 - Ajouter un Safety Center
 
 ### Outcome
 Une page de controle securite resume la posture locale : execution reelle, racines autorisees, policies permissives, agents actifs, schedules actifs et runs bloques/echoues.
@@ -1010,7 +1010,7 @@ Une page de controle securite resume la posture locale : execution reelle, racin
 - Les principaux signaux de securite sont visibles et lies.
 - Les tests couvrent l'etat nominal et les alertes principales.
 
-Note de realisation :
+Note de realisation : 2026-04-21 - Ajout du Safety Center en lecture seule avec le endpoint `GET /safety/summary`, agregant `runner.execution_enabled`, les racines autorisees, policies permissives, agents actifs, schedules actifs et derniers runs `blocked`/`failed`. La page `/safety` est accessible depuis la navigation, affiche les signaux principaux, rappelle que l'application est un runner local garde et non une sandbox OS, et lie vers settings, workspaces, schedules et details de run. Types/API frontend, i18n, tests, spec, wireframes et backlog mis a jour. Validation : `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement les avertissements de cache Ruff verrouille par Windows ; `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-safety tests/test_safety.py` passe hors sandbox apres un PermissionError Windows sur le basetemp sandbox ; `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-api-full` : 52 tests passent ; `npm test -- safety-flow.test.tsx navigation.test.tsx api.test.ts` passe hors sandbox apres un `spawn EPERM` esbuild initial ; `npm test` : 30 tests passent ; `npm run build` passe.
 
 ## [ ] T027 - Ameliorer les etats vides et l'onboarding
 

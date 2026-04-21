@@ -73,6 +73,15 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - blocked and failed runs surface the decisive log reason while preserving the
   raw logs below the timeline
 
+### P2-015 Safety center dashboard
+- `GET /safety/summary` exposes a read-only posture summary for the UI
+- the Safety Center is reachable from navigation and highlights real execution,
+  allowed roots, permissive policies, active agents, active schedules, and recent
+  blocked/failed runs
+- findings link back to settings, workspaces, schedules, and run detail pages
+- the page explicitly states that the application is a guarded local runner, not
+  an OS sandbox
+
 ## Post-MVP backlog
 
 ### P2-001 Full cron scheduling
@@ -120,13 +129,6 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - support common use cases such as documentation maintenance, repository triage, Obsidian vault cleanup, and backlog review
 - keep the existing granular create/edit forms available for advanced use
 - add tests for the happy path and validation failures
-
-### P2-015 Safety center dashboard
-- add a safety-oriented view summarizing execution posture
-- show real-execution status, allowed workspace roots, permissive policies, active agents, active schedules, and recent blocked/failed runs
-- highlight risky configuration combinations without changing settings automatically
-- link each finding to the relevant settings, policy, agent, schedule, or run detail page
-- document the safety center as an operational review tool
 
 ### P2-017 Empty-state onboarding and demo seed shortcut
 - improve empty states for first use

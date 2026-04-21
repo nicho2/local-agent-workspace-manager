@@ -8,6 +8,7 @@ import {
   createSchedule,
   createWorkspace,
   getRuntimePresets,
+  getSafetySummary,
   getWorkspaceAllowedRoots,
   updateSchedule,
   updateSetting,
@@ -115,6 +116,25 @@ describe("api client", () => {
       method: "POST",
     });
     expect(preview.workspace_name).toBe("Docs Vault");
+  });
+
+  it("loads the safety summary contract", async () => {
+    const fetchMock = stubJsonResponse({
+      execution_enabled: true,
+      allowed_roots: ["E:/temp"],
+      permissive_policies: [],
+      active_agents: [],
+      active_schedules: [],
+      recent_attention_runs: [],
+    });
+
+    const summary = await getSafetySummary();
+
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/safety/summary", {
+      cache: "no-store",
+    });
+    expect(summary.execution_enabled).toBe(true);
+    expect(summary.allowed_roots).toEqual(["E:/temp"]);
   });
 
   it("creates and updates workspace contracts", async () => {

@@ -29,6 +29,7 @@ describe("TopNav", () => {
     expect(html).toContain('href="/workspaces"');
     expect(html).toContain('href="/schedules"');
     expect(html).toContain('href="/runs"');
+    expect(html).toContain('href="/safety"');
     expect(html).toContain('href="/settings"');
   });
 });

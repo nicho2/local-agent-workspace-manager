@@ -10,6 +10,7 @@ import type {
   RunLog,
   RunPreview,
   RuntimeCapabilityPreset,
+  SafetySummary,
   Schedule,
   ScheduleCreate,
   ScheduleUpdate,
@@ -77,6 +78,10 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function getDashboardSummary(): Promise<DashboardSummary> {
   return fetchJson<DashboardSummary>("/dashboard/summary");
+}
+
+export function getSafetySummary(): Promise<SafetySummary> {
+  return fetchJson<SafetySummary>("/safety/summary");
 }
 
 export function getWorkspaces(): Promise<Workspace[]> {

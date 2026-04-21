@@ -135,6 +135,33 @@ th {
   justify-content: space-between;
 }
 
+.section-heading-row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-heading-row h3 {
+  margin: 0;
+}
+
+.signal-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.signal-list li {
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+}
+
 .button-link {
   background: var(--panel-soft);
   border: 1px solid var(--border);
@@ -398,6 +425,11 @@ code {
   }
 
   .page-heading-row {
+    display: grid;
+  }
+
+  .section-heading-row {
+    align-items: flex-start;
     display: grid;
   }
 

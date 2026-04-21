@@ -6,7 +6,7 @@
 +--------------------------------------------------------------+
 | Header: Local Agent Workspace Manager                        |
 +--------------------------------------------------------------+
-| [Workspaces] [Schedules] [Runs] [Settings]                  |
+| [Workspaces] [Schedules] [Runs] [Safety] [Settings]         |
 +--------------------------------------------------------------+
 | Language: [English v]                                        |
 +--------------------------------------------------------------+
@@ -62,6 +62,37 @@
 | Settings                                                              |
 | Key                       | Value | Description                        |
 | runner.execution_enabled  | false | Global switch ...                  |
++-----------------------------------------------------------------------+
+```
+
+## Safety Center
+
+```text
++-----------------------------------------------------------------------+
+| Safety Center                                      [Review settings]   |
+| Read-only posture. Guarded runner, not an OS sandbox.                 |
++-----------------------------------------------------------------------+
+| Real execution | Allowed roots | Permissive policies | Attention runs |
+| dry-run        |      2        |          1          |       2        |
++-----------------------------------------------------------------------+
+| Allowed roots                                                         |
+| - E:/temp                                                             |
++-----------------------------------------------------------------------+
+| Permissive policies                         [Review workspaces]        |
+| Name          | write/network | prefixes                              |
+| default-safe  | write+network | copilot, python -m pytest, npm test   |
++-----------------------------------------------------------------------+
+| Active agents                                                         |
+| Agent         | Runtime      | Workspace scope                        |
+| docs-agent    | copilot_cli  | Docs Vault                             |
++-----------------------------------------------------------------------+
+| Active schedules                         [Review schedules]           |
+| Name          | Mode     | Workspace | Agent      | Next run          |
+| nightly-docs  | interval | Docs Vault| docs-agent | ...               |
++-----------------------------------------------------------------------+
+| Blocked and failed runs                                               |
+| Run          | Status  | Workspace | Agent      | Started            |
+| [Open run]   | blocked | Docs Vault| docs-agent | ...                |
 +-----------------------------------------------------------------------+
 ```
 

@@ -126,6 +126,7 @@
 
 - `GET /health`
 - `GET /dashboard/summary`
+- `GET /safety/summary`
 - `GET|POST /policies`
 - `PUT /policies/{policy_id}`
 - `GET|POST /workspaces`
@@ -303,6 +304,23 @@ The `runner.execution_enabled` setting is the operational source for real
 execution and dashboard status. It is seeded from `LAWM_EXECUTION_ENABLED` on a
 new database, remains `false` by default, and can later be changed explicitly
 through the settings API. Changing the setting does not launch any run.
+
+### Safety summary
+
+`GET /safety/summary` returns a read-only operational posture summary for the
+Safety Center. It does not change settings, policies, schedules, agents, or
+runs. The response includes:
+
+- persisted `runner.execution_enabled`
+- configured workspace allowed roots
+- policies where `allow_write=true` or `allow_network=true`
+- active agents, including their runtime and workspace scope
+- enabled schedules, including workspace, agent, mode, and `next_run_at`
+- the five most recent `blocked` or `failed` runs with workspace and agent names
+
+The Safety Center links these findings back to the existing settings,
+workspace, schedule, and run detail pages. It must continue to state that the
+application is a guarded local runner, not an OS sandbox.
 
 ### UI internationalization
 

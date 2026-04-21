@@ -211,3 +211,51 @@ export interface SystemSetting {
 export interface SystemSettingUpdate {
   value: string;
 }
+
+export interface SafetyPolicySignal {
+  id: string;
+  name: string;
+  allow_write: boolean;
+  allow_network: boolean;
+  allowed_command_prefixes: string[];
+}
+
+export interface SafetyAgentSignal {
+  id: string;
+  name: string;
+  runtime: string;
+  workspace_id?: string | null;
+  workspace_name?: string | null;
+}
+
+export interface SafetyScheduleSignal {
+  id: string;
+  name: string;
+  mode: string;
+  workspace_id: string;
+  workspace_name: string;
+  agent_profile_id: string;
+  agent_name: string;
+  next_run_at?: string | null;
+}
+
+export interface SafetyRunSignal {
+  id: string;
+  status: "blocked" | "failed";
+  trigger: "manual" | "schedule";
+  dry_run: boolean;
+  workspace_id: string;
+  workspace_name: string;
+  agent_profile_id: string;
+  agent_name: string;
+  started_at: string;
+}
+
+export interface SafetySummary {
+  execution_enabled: boolean;
+  allowed_roots: string[];
+  permissive_policies: SafetyPolicySignal[];
+  active_agents: SafetyAgentSignal[];
+  active_schedules: SafetyScheduleSignal[];
+  recent_attention_runs: SafetyRunSignal[];
+}
