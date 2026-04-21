@@ -173,7 +173,7 @@ Empty state:
 | - Command: copilot --agent wiki-maintenance ...                       |
 | - Policy: default-safe / prefixes / write denied / network denied      |
 | [Launch dry-run]                                                      |
-| Success opens /runs/{runId}                                           |
+| Opens /runs/{runId} immediately; real runs continue in background      |
 +-----------------------------------------------------------------------+
 | Agent                                                                 |
 | - active and global profiles available to the workspace                |
@@ -226,7 +226,8 @@ Empty state:
 | 3. Dry-run completed - no real command was executed                    |
 | 4. Artifacts recorded - summary.md                                     |
 +-----------------------------------------------------------------------+
-| Logs                                                                  |
+| Live logs                                                             |
+| Stream: connected while status is running; logs endpoint is fallback   |
 | [timestamp] INFO Starting run                                         |
 | [timestamp] INFO Simulation complete                                  |
 +-----------------------------------------------------------------------+

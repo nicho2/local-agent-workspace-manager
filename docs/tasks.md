@@ -1136,3 +1136,63 @@ L'utilisateur peut supprimer explicitement un workspace et ses dependances, ains
 - Les tests couvrent suppression workspace avec dependances, policy referencee et agent reference.
 
 Note de realisation : 2026-04-21 - Ajout de l'ADR 0004 pour definir les regles de suppression controlee : workspace avec confirmation exacte par slug et cascade limitee a sa frontiere, policies bloquees si referencees par des workspaces, agents bloques si referencees par des schedules ou runs, archive comme option non destructive. Ajout des endpoints `GET /workspaces/{workspace_id}/delete-summary`, `DELETE /workspaces/{workspace_id}?confirmation=...`, `DELETE /policies/{policy_id}` et `DELETE /agents/{agent_profile_id}` avec summaries structures et erreurs de dependances. Le delete workspace supprime les agents scopes, schedules, runs, logs, lignes artifacts et fichiers artifacts sous `LAWM_ARTIFACTS_ROOT`. L'UI avancee Workspaces expose des zones de suppression protegees : recapitulatif exact charge depuis l'API, slug exact pour workspace, confirmation navigateur pour policy/agent, et affichage des erreurs backend quand une dependance bloque. Documentation spec/wireframes mise a jour. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-delete4 tests/test_policies_and_workspaces.py tests/test_agents_and_schedules.py` hors sandbox : 32 tests passent ; `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-delete-full4` hors sandbox : 58 tests passent ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement des avertissements de cache Ruff verrouille par Windows ; `npm test -- api.test.ts workspaces-flow.test.tsx` hors sandbox : 14 tests passent ; `npm test` depuis `apps/web` : 39 tests passent ; `npm run build` passe. Des premieres tentatives pytest ont ete bloquees par un PermissionError Windows sur les dossiers `pytest-tmp-delete*`, et une premiere tentative Vitest par `spawn EPERM` esbuild.
+
+## [x] T030 - Executer les runs en arriere-plan avec logs streaming
+
+### Outcome
+Quand l'utilisateur lance un agent, le run apparait immediatement avec le statut `running`, puis l'UI affiche les logs de progression au fil de l'eau jusqu'au statut final `completed`, `failed` ou `blocked`.
+
+### Scope
+- In scope : creation immediate du `Run`, runner asynchrone/background local, lecture streaming `stdout`/`stderr`, append progressif dans `RunLog`, endpoint ou transport temps reel pour l'UI, mise a jour finale du statut et du code retour, tests backend/frontend.
+- Out of scope : orchestration distribuee, reprise apres crash, annulation de run, multiplexing multi-machine, parsing metier avance de toutes les sorties Copilot/Codex.
+
+### Files likely affected
+- `apps/api/app/schemas/run.py`
+- `apps/api/app/services/runner_service.py`
+- `apps/api/app/services/run_service.py`
+- `apps/api/app/routers/runs.py`
+- `apps/api/app/db/database.py`
+- `apps/api/tests/test_runs.py`
+- `apps/web/app/workspaces/[workspaceId]/page.tsx`
+- `apps/web/app/runs/[runId]/page.tsx`
+- `apps/web/components/*run*.tsx`
+- `apps/web/lib/api.ts`
+- `apps/web/lib/types.ts`
+- `docs/spec.md`
+- `docs/architecture.md`
+- `docs/wireframes.md`
+- eventuellement `docs/adr/0005-run-streaming.md`
+
+### Constraints
+- Garder les guardrails actuels : dry-run par defaut, execution reelle gatee par setting global et policy, commandes parsees sans `shell=True`, `cwd` explicite, timeout obligatoire.
+- Le run doit etre persiste avant le demarrage effectif du subprocess pour etre visible immediatement.
+- Les logs doivent etre persistés incrementiellement dans `RunLog` pour conserver l'audit meme si l'UI est fermee.
+- `stdout` et `stderr` doivent etre lus en streaming, idealement fusionnes avec indication de source si le contrat le permet.
+- Le backend ne doit pas attendre la fin du processus avant de repondre a la requete de lancement.
+- Gerer les sorties ligne par ligne, les sorties bufferisees, les retours chariot `\r` et les sequences ANSI de facon robuste pour l'UI.
+- Les statuts doivent rester coherents : `queued` ou `running` pendant l'execution, puis statut final avec `finished_at`.
+
+### Implementation notes
+- Remplacer l'approche bloquante type `subprocess.run(..., capture_output=True)` par une execution longue en tache de fond autour de `subprocess.Popen`.
+- Lire les flux au fil de l'eau, ajouter chaque ligne a `run_logs`, et exposer ces logs a l'UI via SSE ou WebSocket. SSE est probablement suffisant pour un flux serveur -> navigateur local.
+- Conserver le polling `GET /runs/{run_id}/logs` comme fallback simple si le transport streaming n'est pas disponible.
+- Ajouter au modele `Run` les champs necessaires si utiles : `exit_code`, eventuellement `error_message` ou `last_log_at`.
+- En dry-run, conserver une reponse rapide mais passer par le meme cycle visible si cela simplifie le contrat.
+- Sur timeout, tuer le processus, ajouter un log explicite et marquer le run `failed`.
+- Sur lancement impossible, persister le run et le log d'erreur, puis marquer `failed` ou `blocked` selon la cause.
+- La page workspace doit rediriger ou afficher un lien vers le run cree immediatement, et la page detail run doit afficher les logs qui arrivent sans attendre le refresh complet.
+
+### Validation
+- `cd apps/api && pytest`
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+- Test manuel avec un agent local qui imprime plusieurs lignes avec delai, pour verifier que chaque ligne apparait avant la fin du processus.
+
+### Done when
+- `POST /runs` retourne rapidement un run persiste en `running` ou `queued` pour une execution longue.
+- Les logs `stdout`/`stderr` sont stockes dans `RunLog` pendant l'execution et visibles avant la fin.
+- L'UI affiche la progression temps reel ou quasi temps reel sur le detail run.
+- Le statut final, `finished_at` et le code retour sont mis a jour a la fin.
+- Les cas completed, failed, blocked et timeout sont couverts par tests.
+
+Note de realisation : 2026-04-21 - Les executions reelles autorisees sont maintenant persistees immediatement avec `status=running`, `finished_at=null` et `exit_code=null`, puis executees en arriere-plan local. Le runner utilise `subprocess.Popen` sans `shell=True`, lit stdout/stderr fusionnes au fil de l'eau, nettoie les sequences ANSI simples et persiste chaque ligne dans `RunLog` pendant que le processus tourne. Les blocages de policy/setting et les dry-runs restent synchrones. La fin de processus met a jour `status`, `finished_at`, `exit_code` et cree l'artifact summary. Ajout de `GET /runs/{run_id}/events` en SSE pour diffuser les evenements `run` et `log`; le detail run web utilise ce flux avec les logs existants en etat initial. Le contrat ajoute `Run.exit_code`; spec, architecture, wireframes et backlog sont alignes. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-stream tests/test_runs.py` hors sandbox : 15 tests passent ; `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-stream-full` hors sandbox : 59 tests passent ; `npm test -- runs-flow.test.tsx api.test.ts workspaces-flow.test.tsx` hors sandbox : 21 tests passent ; `npm test` depuis `apps/web` hors sandbox : 39 tests passent ; `npm run build` passe ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement des avertissements de cache Ruff verrouille par Windows.

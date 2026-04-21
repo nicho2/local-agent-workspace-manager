@@ -249,6 +249,10 @@ export function getRunArtifacts(runId: string): Promise<RunArtifact[]> {
   return fetchJson<RunArtifact[]>(`/runs/${runId}/artifacts`);
 }
 
+export function getRunEventsUrl(runId: string): string {
+  return `${API_BASE_URL}/runs/${runId}/events`;
+}
+
 export function createRun(payload: RunCreate): Promise<Run> {
   return fetchJson<Run>("/runs", {
     body: JSON.stringify(payload),

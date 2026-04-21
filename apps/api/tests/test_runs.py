@@ -1,9 +1,22 @@
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
 from app.schemas.run import RunStatus
 from app.services.runner_service import run_controlled_command
+
+
+def _wait_for_run_status(client, run_id, expected_status, *, timeout_seconds=5):
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        response = client.get(f"/runs/{run_id}")
+        assert response.status_code == 200
+        run = response.json()
+        if run["status"] == expected_status:
+            return run
+        time.sleep(0.1)
+    raise AssertionError(f"Run {run_id} did not reach {expected_status}")
 
 
 def _create_policy(client, allowed_command_prefixes, *, max_runtime_seconds=30):
@@ -342,7 +355,9 @@ def test_allowed_real_execution_completes(client_execution_enabled, workspace_ro
 
     assert response.status_code == 201
     run = response.json()
-    assert run["status"] == "completed"
+    assert run["status"] == "running"
+    run = _wait_for_run_status(client_execution_enabled, run["id"], "completed")
+    assert run["exit_code"] == 0
     logs = client_execution_enabled.get(f"/runs/{run['id']}/logs").json()
     assert any("runner-ok" in log["message"] for log in logs)
 
@@ -380,6 +395,7 @@ def test_real_execution_with_disallowed_command_is_blocked(
     assert response.status_code == 201
     run = response.json()
     assert run["status"] == "blocked"
+    assert run["finished_at"] is not None
     logs = client_execution_enabled.get(f"/runs/{run['id']}/logs").json()
     assert any("not allowed" in log["message"] for log in logs)
 
@@ -413,9 +429,61 @@ def test_allowed_real_execution_non_zero_exit_fails(client_execution_enabled, wo
 
     assert response.status_code == 201
     run = response.json()
-    assert run["status"] == "failed"
+    assert run["status"] == "running"
+    run = _wait_for_run_status(client_execution_enabled, run["id"], "failed")
+    assert run["exit_code"] == 2
     logs = client_execution_enabled.get(f"/runs/{run['id']}/logs").json()
     assert any("code 2" in log["message"] for log in logs)
+
+
+def test_real_execution_logs_are_persisted_while_running(client_execution_enabled, workspace_root):
+    command = (
+        f"{sys.executable} -c "
+        "\"import time; print('step-one', flush=True); time.sleep(1); print('step-two', flush=True)\""
+    )
+    policy = _create_policy(client_execution_enabled, [f"{sys.executable} -c"])
+    workspace = _create_workspace(
+        client_execution_enabled,
+        workspace_root,
+        "real-streaming",
+        policy["id"],
+    )
+    Path(workspace["root_path"]).mkdir(parents=True, exist_ok=True)
+    agent = _create_agent(
+        client_execution_enabled,
+        workspace["id"],
+        name="real-streaming-agent",
+        command_template=command,
+    )
+
+    response = client_execution_enabled.post(
+        "/runs",
+        json={
+            "workspace_id": workspace["id"],
+            "agent_profile_id": agent["id"],
+            "dry_run": False,
+            "requested_by": "pytest",
+        },
+    )
+
+    assert response.status_code == 201
+    run = response.json()
+    assert run["status"] == "running"
+
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline:
+        detail = client_execution_enabled.get(f"/runs/{run['id']}").json()
+        logs = client_execution_enabled.get(f"/runs/{run['id']}/logs").json()
+        if detail["status"] == "running" and any("step-one" in log["message"] for log in logs):
+            break
+        time.sleep(0.1)
+    else:
+        raise AssertionError("Streaming log was not persisted while run was still running")
+
+    completed = _wait_for_run_status(client_execution_enabled, run["id"], "completed")
+    assert completed["finished_at"] is not None
+    final_logs = client_execution_enabled.get(f"/runs/{run['id']}/logs").json()
+    assert any("step-two" in log["message"] for log in final_logs)
 
 
 def test_runner_timeout_returns_failed(tmp_path):

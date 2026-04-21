@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS runs (
     command_preview TEXT NOT NULL,
     started_at TEXT NOT NULL,
     finished_at TEXT,
+    exit_code INTEGER,
     FOREIGN KEY(workspace_id) REFERENCES workspaces(id),
     FOREIGN KEY(agent_profile_id) REFERENCES agent_profiles(id)
 );
@@ -114,8 +115,15 @@ def ensure_database(database_path: Path, *, execution_enabled_default: bool = Fa
     database_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(database_path) as connection:
         connection.executescript(SCHEMA)
+        migrate_schema(connection)
         seed_defaults(connection, execution_enabled_default=execution_enabled_default)
         connection.commit()
+
+
+def migrate_schema(connection: sqlite3.Connection) -> None:
+    run_columns = {str(row[1]) for row in connection.execute("PRAGMA table_info(runs)").fetchall()}
+    if "exit_code" not in run_columns:
+        connection.execute("ALTER TABLE runs ADD COLUMN exit_code INTEGER")
 
 
 def seed_defaults(

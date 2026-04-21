@@ -39,6 +39,7 @@ class RunRead(ModelBase):
     command_preview: str
     started_at: datetime
     finished_at: datetime | None = None
+    exit_code: int | None = None
 
 
 class RunPreviewRead(ModelBase):

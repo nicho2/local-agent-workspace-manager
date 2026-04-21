@@ -153,6 +153,7 @@ export interface Run {
   command_preview: string;
   started_at: string;
   finished_at?: string | null;
+  exit_code?: number | null;
 }
 
 export interface RunPreview {

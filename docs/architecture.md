@@ -43,11 +43,14 @@ sequenceDiagram
   UI->>API: POST /runs
   API->>SVC: validate request
   SVC->>DB: read workspace/policy/agent
-  SVC->>RUN: simulate or execute
-  RUN-->>SVC: logs + artifact metadata
-  SVC->>DB: persist run, logs, artifacts
+  SVC->>DB: persist run as running
   SVC-->>API: RunRead
   API-->>UI: 201 Created
+  SVC->>RUN: execute in background
+  RUN-->>SVC: stdout/stderr lines
+  SVC->>DB: append RunLog rows
+  RUN-->>SVC: exit code
+  SVC->>DB: set final status + artifact
 ```
 
 ## Deployment shape
@@ -93,7 +96,7 @@ Therefore:
 - real execution is gated by the global `execution_enabled` setting and
   workspace policy command-prefix allowlists
 - controlled subprocess runs use explicit argument lists, workspace `cwd`,
-  timeout, stdout/stderr capture, and no shell
+  timeout, incremental stdout/stderr capture, and no shell
 - scheduled runs are dry-run by default and the worker is disabled unless
   explicitly enabled in configuration
 - future hardening should consider per-run containerization or OS-level sandboxing

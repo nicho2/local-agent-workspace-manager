@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactElement } from "react";
 
 import { RunAuditTimeline } from "@/components/run-audit-timeline";
+import { RunLivePanel } from "@/components/run-live-panel";
 import { getRun, getRunArtifacts, getRunLogs } from "@/lib/api";
 
 interface RunDetailPageProps {
@@ -44,52 +45,13 @@ export default async function RunDetailPage({
           </Link>
         </div>
 
-        <section className="card detail-grid">
-          <div>
-            <div className="muted">Status</div>
-            <span className={`badge badge-${run.status}`}>{run.status}</span>
-          </div>
-          <div>
-            <div className="muted">Trigger</div>
-            <strong>{run.trigger}</strong>
-          </div>
-          <div>
-            <div className="muted">Dry-run</div>
-            <strong>{run.dry_run ? "yes" : "no"}</strong>
-          </div>
-          <div>
-            <div className="muted">Started</div>
-            <strong>{formatDateTime(run.started_at)}</strong>
-          </div>
-          <div>
-            <div className="muted">Finished</div>
-            <strong>{formatDateTime(run.finished_at)}</strong>
-          </div>
-        </section>
-
         <section className="card">
           <h3>Command preview</h3>
           <pre className="code-block">{run.command_preview}</pre>
         </section>
 
         <RunAuditTimeline artifacts={artifacts} logs={logs} run={run} />
-
-        <section className="card">
-          <h3>Logs</h3>
-          {logs.length === 0 ? (
-            <p className="muted">No logs recorded.</p>
-          ) : (
-            <div className="log-list">
-              {logs.map((log) => (
-                <div className="log-row" key={log.id}>
-                  <span>{formatDateTime(log.timestamp)}</span>
-                  <span className="badge">{log.level}</span>
-                  <span>{log.message}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        <RunLivePanel initialLogs={logs} initialRun={run} />
 
         <section className="card">
           <h3>Artifacts</h3>

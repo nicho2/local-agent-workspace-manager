@@ -100,6 +100,7 @@
 - `command_preview`
 - `started_at`
 - `finished_at`
+- `exit_code` nullable
 
 ### RunLog
 - `id`
@@ -146,6 +147,7 @@
 - `GET /runs/{run_id}`
 - `GET /runs/{run_id}/logs`
 - `GET /runs/{run_id}/artifacts`
+- `GET /runs/{run_id}/events`
 - `GET|PUT /settings`
 - `PUT /settings/{key}`
 
@@ -437,6 +439,12 @@ entries ordered chronologically by `timestamp`, with insertion order preserved
 for entries that share the same timestamp. `GET /runs/{run_id}/artifacts`
 returns artifacts ordered by `created_at`.
 
+`GET /runs/{run_id}/events` exposes a local Server-Sent Events stream for run
+detail pages. It emits `run` events with the latest run metadata and `log`
+events as new `RunLog` rows appear. The stream closes after `completed`,
+`failed`, or `blocked`. The regular logs endpoint remains the fallback and
+the durable audit source.
+
 Run logs expose `id`, `run_id`, `level`, `message`, and `timestamp`. Run
 artifacts expose `id`, `run_id`, `name`, `relative_path`, `media_type`, and
 `created_at`. Detail, logs, and artifacts endpoints all return structured `404`
@@ -484,8 +492,11 @@ does not bypass the global execution setting or policy prefix checks.
 
 ### Real execution
 
-`POST /runs` keeps dry-runs as the default. When `dry_run=false`, the run is
-created for auditability and receives a terminal status:
+`POST /runs` keeps dry-runs as the default. Dry-runs and policy/global blocks
+complete synchronously. When `dry_run=false` and execution is allowed, the API
+persists the run first with `status=running`, `finished_at=null`, and
+`exit_code=null`, then executes the subprocess in a local background thread.
+This makes the run visible immediately while logs are appended.
 
 - `blocked` when `execution_enabled=false`
 - `blocked` when the command does not start with an allowed policy prefix
@@ -496,8 +507,10 @@ created for auditability and receives a terminal status:
 Real execution uses an explicit argument list derived from the command template
 with `shlex.split`; it never uses `shell=True`. The runner always sets `cwd` to
 the workspace `root_path`, uses the workspace policy `max_runtime_seconds` as
-the subprocess timeout, and captures stdout/stderr into bounded run logs.
-Captured stdout/stderr entries are truncated after `4000` characters per stream.
+the subprocess timeout, and reads merged stdout/stderr incrementally. Each
+output line is sanitized for ANSI control sequences and persisted as `RunLog`
+while the process is still running. At the end, the service sets terminal
+status, `finished_at`, and `exit_code`, then writes the summary artifact.
 
 ## 6. Safety rules
 
@@ -509,7 +522,7 @@ Captured stdout/stderr entries are truncated after `4000` characters per stream.
 - real execution must be globally enabled and policy-prefix allowed
 - runner must never use `shell=True`
 - runner must receive an explicit working directory
-- runner must set a timeout and capture stdout/stderr explicitly
+- runner must set a timeout and persist stdout/stderr incrementally
 - policies expose allowlist-style command prefixes
 - dry-run remains allowed
 

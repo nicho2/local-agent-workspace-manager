@@ -110,6 +110,14 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - the advanced Workspaces UI exposes protected delete areas and surfaces
   structured backend dependency errors
 
+### P2-018 Background run execution and streaming logs
+- real executions are persisted immediately with `status=running`
+- subprocess stdout/stderr is read incrementally and appended to `RunLog`
+- run detail pages subscribe to a local SSE stream and show logs while the
+  process is still running
+- final status, `finished_at`, and `exit_code` are persisted when the process
+  exits
+
 ## Post-MVP backlog
 
 ### P2-001 Full cron scheduling
