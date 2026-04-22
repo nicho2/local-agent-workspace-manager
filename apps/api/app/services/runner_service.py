@@ -1,4 +1,5 @@
 import os
+from collections.abc import Callable
 import queue
 import re
 import shlex
@@ -6,12 +7,12 @@ import subprocess
 import threading
 import time
 from dataclasses import dataclass
-from collections.abc import Callable
 from pathlib import Path
 
 from app.schemas.run import RunStatus
 
 MAX_CAPTURED_OUTPUT_CHARS = 4000
+RUNNER_OUTPUT_ENCODING = "utf-8"
 
 
 @dataclass(frozen=True)
@@ -117,6 +118,8 @@ def run_controlled_command(
             timeout=timeout_seconds,
             capture_output=True,
             text=True,
+            encoding=RUNNER_OUTPUT_ENCODING,
+            errors="replace",
             shell=False,
             check=False,
         )
@@ -175,6 +178,8 @@ def run_controlled_command_streaming(
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
+            encoding=RUNNER_OUTPUT_ENCODING,
+            errors="replace",
             bufsize=1,
             shell=False,
         )
@@ -183,13 +188,22 @@ def run_controlled_command_streaming(
         on_log(log)
         return RunnerResult(status=RunStatus.failed, logs=[log])
 
-    output_queue: queue.Queue[str | None] = queue.Queue()
+    output_queue: queue.Queue[str | RunnerLogEntry | None] = queue.Queue()
 
     def read_output() -> None:
         assert process.stdout is not None
-        for raw_line in process.stdout:
-            output_queue.put(raw_line)
-        output_queue.put(None)
+        try:
+            for raw_line in process.stdout:
+                output_queue.put(raw_line)
+        except UnicodeDecodeError as exc:
+            output_queue.put(
+                RunnerLogEntry(
+                    "ERROR",
+                    f"Output decode error with {RUNNER_OUTPUT_ENCODING}: {exc}",
+                )
+            )
+        finally:
+            output_queue.put(None)
 
     reader = threading.Thread(target=read_output, daemon=True)
     reader.start()
@@ -217,6 +231,11 @@ def run_controlled_command_streaming(
             saw_reader_done = True
             if process.poll() is not None:
                 break
+            continue
+
+        if isinstance(item, RunnerLogEntry):
+            logs.append(item)
+            on_log(item)
             continue
 
         for fragment in item.replace("\r", "\n").splitlines():
