@@ -154,13 +154,13 @@ The MVP success path is implemented for local use:
 - the UI covers dashboard, workspaces, workspace detail, schedules, runs, run
   detail, and settings
 - manual runs are launched as dry-runs by default from the workspace detail
-- interval schedules can be processed by the optional local worker
+- interval and cron schedules can be processed by the optional local worker
 - real execution is possible only after explicit global enablement and policy
   prefix review
 - demo data and an automated MVP flow test verify the main scenario
 
-The MVP intentionally keeps cron execution, authentication, secrets management,
-distributed scheduling, and OS-level sandboxing outside the shipped scope.
+The MVP intentionally keeps authentication, secrets management, distributed
+scheduling, and OS-level sandboxing outside the shipped scope.
 
 ## 11. Risks
 

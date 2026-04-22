@@ -314,9 +314,9 @@ workspace policy prefix that explicitly allows the command.
 
 `workspace_id` and `agent_profile_id` must reference existing resources. For
 `mode=interval`, `interval_minutes` is required and must stay between `5` and
-`10080`. For `mode=cron`, `cron_expression` is required, but the MVP does not
-parse cron expressions yet, so `next_run_at` remains `null`. When an interval
-schedule is enabled, `next_run_at` is recalculated from the current UTC time.
+`10080`. For `mode=cron`, `cron_expression` is required and must be a valid
+five-field cron expression. When a schedule is enabled, `next_run_at` is
+recalculated from the current UTC time.
 When any schedule is disabled, `next_run_at` is set to `null`. Successful
 updates refresh `updated_at` with a UTC ISO-8601 timestamp.
 
@@ -327,13 +327,14 @@ The local schedule worker is disabled by default through
 single-process polling loop that calls `process_due_schedules` every
 `schedule_worker_poll_seconds` seconds.
 
-For the MVP, the worker processes enabled `interval` schedules whose
-`next_run_at` is due. Each due schedule is claimed with a conditional database
-update before run creation, which prevents repeated processing by the local
-worker for the same due timestamp. The worker triggers runs with
-`trigger=schedule`, `requested_by=schedule-worker`, and `dry_run=true`, then
-advances `next_run_at` by the schedule interval from the processing time.
-Disabled schedules, non-due schedules, and `cron` schedules do not create runs.
+The worker processes enabled `interval` and `cron` schedules whose `next_run_at`
+is due. Each due schedule is claimed with a conditional database update before
+run creation, which prevents repeated processing by the local worker for the
+same due timestamp. The worker triggers runs with `trigger=schedule`,
+`requested_by=schedule-worker`, and `dry_run=true`, then advances `next_run_at`
+from the processing time (by interval duration for `interval`, or by the next
+matching occurrence for `cron`). Disabled and non-due schedules do not create
+runs.
 
 ### Settings
 

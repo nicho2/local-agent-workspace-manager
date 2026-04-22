@@ -118,12 +118,13 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - final status, `finished_at`, and `exit_code` are persisted when the process
   exits
 
-## Post-MVP backlog
-
 ### P2-001 Full cron scheduling
-- parse cron expressions
-- compute `next_run_at`
-- execute due cron schedules with the same audit and safety model
+- cron expressions are validated with a local five-field parser
+- enabled cron schedules compute and persist `next_run_at`
+- the local worker processes due cron schedules with the same claim/audit model
+  as interval schedules
+
+## Post-MVP backlog
 
 ### P2-002 GitHub Copilot CLI runtime
 - runtime adapter

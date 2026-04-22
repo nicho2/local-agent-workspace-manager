@@ -52,6 +52,22 @@ def _create_interval_schedule(client, workspace_id, agent_id, *, enabled=True):
     return response.json()
 
 
+def _create_cron_schedule(client, workspace_id, agent_id, *, enabled=True, cron_expression="0 9 * * *"):
+    response = client.post(
+        "/schedules",
+        json={
+            "name": "daily-cron-triage",
+            "workspace_id": workspace_id,
+            "agent_profile_id": agent_id,
+            "mode": "cron",
+            "cron_expression": cron_expression,
+            "enabled": enabled,
+        },
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
 def test_create_agent_and_interval_schedule(client, workspace_root):
     workspace = _create_workspace(client, workspace_root)
 
@@ -61,6 +77,40 @@ def test_create_agent_and_interval_schedule(client, workspace_root):
     schedule = _create_interval_schedule(client, workspace["id"], agent["id"])
     assert schedule["mode"] == "interval"
     assert schedule["next_run_at"] is not None
+
+
+def test_create_cron_schedule_sets_next_run(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent = _create_agent(client, workspace["id"])
+
+    schedule = _create_cron_schedule(client, workspace["id"], agent["id"])
+
+    assert schedule["mode"] == "cron"
+    assert schedule["next_run_at"] is not None
+
+
+def test_create_schedule_rejects_invalid_cron_expression(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent = _create_agent(client, workspace["id"])
+
+    response = client.post(
+        "/schedules",
+        json={
+            "name": "invalid-cron",
+            "workspace_id": workspace["id"],
+            "agent_profile_id": agent["id"],
+            "mode": "cron",
+            "cron_expression": "60 25 * * *",
+            "enabled": True,
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "code": "schedule_cron_expression_invalid",
+        "message": "Invalid cron_expression",
+        "details": {"cron_expression": "60 25 * * *"},
+    }
 
 
 def test_runtime_capability_presets_are_available(client):
@@ -320,3 +370,30 @@ def test_schedule_worker_ignores_disabled_and_not_due_schedules(client, workspac
     assert result.processed_count == 0
     assert result.created_run_ids == []
     assert client.get("/runs").json() == []
+
+
+def test_schedule_worker_processes_due_cron_once(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent = _create_agent(client, workspace["id"])
+    schedule = _create_cron_schedule(client, workspace["id"], agent["id"], cron_expression="0 9 * * *")
+    database_path = get_settings().database_path
+    due_at = datetime(2026, 4, 18, 9, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 4, 18, 9, 0, tzinfo=timezone.utc)
+
+    with get_connection(database_path) as connection:
+        connection.execute(
+            "UPDATE schedules SET next_run_at = ? WHERE id = ?",
+            (due_at.isoformat(), schedule["id"]),
+        )
+
+    result = process_due_schedules(database_path, now=now)
+    assert result.processed_count == 1
+
+    schedules = client.get("/schedules").json()
+    updated_schedule = next(item for item in schedules if item["id"] == schedule["id"])
+    assert datetime.fromisoformat(updated_schedule["next_run_at"]) == datetime(
+        2026, 4, 19, 9, 0, tzinfo=timezone.utc
+    )
+
+    second_result = process_due_schedules(database_path, now=now)
+    assert second_result.processed_count == 0

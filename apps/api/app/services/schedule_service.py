@@ -5,6 +5,7 @@ from uuid import uuid4
 from app.core.errors import bad_request, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.schedule import ScheduleCreate, ScheduleMode, ScheduleRead, ScheduleUpdate
+from app.services.cron_service import calculate_next_cron_run, validate_cron_expression
 
 
 def _row_to_schedule(row: object) -> ScheduleRead:
@@ -30,6 +31,7 @@ def _calculate_next_run(
     enabled: bool,
     mode: ScheduleMode,
     interval_minutes: int | None,
+    cron_expression: str | None,
 ) -> str | None:
     if not enabled:
         return None
@@ -38,6 +40,8 @@ def _calculate_next_run(
             minutes=interval_minutes
         )
         return target.isoformat()
+    if mode == ScheduleMode.cron and cron_expression:
+        return calculate_next_cron_run(cron_expression)
     return None
 
 
@@ -59,6 +63,8 @@ def _validate_schedule_shape(
             "cron_expression is required when mode=cron",
             {"mode": mode.value},
         )
+    if mode == ScheduleMode.cron:
+        validate_cron_expression(cron_expression)
 
 
 def list_schedules(database_path: Path) -> list[ScheduleRead]:
@@ -70,10 +76,16 @@ def list_schedules(database_path: Path) -> list[ScheduleRead]:
 def create_schedule(database_path: Path, payload: ScheduleCreate) -> ScheduleRead:
     schedule_id = f"sched_{uuid4().hex[:12]}"
     now = utc_now_iso()
+    _validate_schedule_shape(
+        mode=payload.mode,
+        interval_minutes=payload.interval_minutes,
+        cron_expression=payload.cron_expression,
+    )
     next_run_at = _calculate_next_run(
         enabled=payload.enabled,
         mode=payload.mode,
         interval_minutes=payload.interval_minutes,
+        cron_expression=payload.cron_expression,
     )
 
     with get_connection(database_path) as connection:
@@ -198,6 +210,7 @@ def update_schedule(
             enabled=enabled,
             mode=mode,
             interval_minutes=interval_minutes,
+            cron_expression=cron_expression,
         )
 
         if "name" in fields_set:

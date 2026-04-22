@@ -8,6 +8,7 @@ from app.core.errors import AppError
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.run import RunCreate, RunTrigger
 from app.schemas.schedule import ScheduleMode
+from app.services.cron_service import calculate_next_cron_run
 from app.services.run_service import create_run
 
 
@@ -38,7 +39,7 @@ def _next_interval_run_at(now: datetime, interval_minutes: int) -> str:
 
 
 def process_due_schedules(database_path: Path, now: datetime | None = None) -> ScheduleWorkerResult:
-    """Claim due interval schedules and trigger dry-run runs for them."""
+    """Claim due schedules and trigger dry-run runs for them."""
     current_time = _normalize_now(now)
     claimed_schedules: list[_ClaimedSchedule] = []
     skipped_count = 0
@@ -49,17 +50,33 @@ def process_due_schedules(database_path: Path, now: datetime | None = None) -> S
             SELECT *
             FROM schedules
             WHERE enabled = 1
-              AND mode = ?
+              AND mode IN (?, ?)
               AND next_run_at IS NOT NULL
               AND next_run_at <= ?
             ORDER BY next_run_at ASC, rowid ASC
             ''',
-            (ScheduleMode.interval.value, current_time.isoformat()),
+            (
+                ScheduleMode.interval.value,
+                ScheduleMode.cron.value,
+                current_time.isoformat(),
+            ),
         ).fetchall()
 
         for row in rows:
-            interval_minutes = row["interval_minutes"]
-            if interval_minutes is None:
+            mode = ScheduleMode(str(row["mode"]))
+            if mode == ScheduleMode.interval:
+                interval_minutes = row["interval_minutes"]
+                if interval_minutes is None:
+                    skipped_count += 1
+                    continue
+                next_run_at = _next_interval_run_at(current_time, int(interval_minutes))
+            elif mode == ScheduleMode.cron:
+                cron_expression = row["cron_expression"]
+                if not cron_expression:
+                    skipped_count += 1
+                    continue
+                next_run_at = calculate_next_cron_run(cron_expression, now=current_time)
+            else:
                 skipped_count += 1
                 continue
 
@@ -72,7 +89,7 @@ def process_due_schedules(database_path: Path, now: datetime | None = None) -> S
                   AND next_run_at = ?
                 ''',
                 (
-                    _next_interval_run_at(current_time, int(interval_minutes)),
+                    next_run_at,
                     utc_now_iso(),
                     row["id"],
                     row["next_run_at"],

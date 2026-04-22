@@ -145,8 +145,8 @@ workspace roots, reviewed policies, and explicit command prefixes.
 
 ## Known MVP limits
 
-- Schedule execution supports due `interval` schedules only; cron expressions
-  can be stored but are not parsed by the worker.
+- Schedule execution supports due `interval` and `cron` schedules, but remains
+  single-process and local-worker only.
 - Scheduled runs are dry-runs by default.
 - Real commands use explicit argument splitting and do not support shell syntax.
 - There is no authentication, RBAC, secrets vault, distributed scheduler, or
