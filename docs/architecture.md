@@ -71,13 +71,10 @@ sequenceDiagram
 
 The API can start an optional in-process schedule worker when
 `LAWM_SCHEDULE_WORKER_ENABLED=true`. The worker polls SQLite at the configured
-interval, claims due interval schedules with a conditional `next_run_at` update,
-and creates dry-run runs with `trigger=schedule`. It is intentionally
-single-machine and single-process for the MVP; distributed scheduling and full
-cron parsing remain future work.
-
-Cron schedules can be stored so the API contract is stable, but the MVP worker
-does not parse or execute cron expressions.
+interval, claims due schedules with a conditional `next_run_at` update, and
+creates dry-run runs with `trigger=schedule`. It is intentionally
+single-machine and single-process for the MVP; distributed scheduling remains
+future work.
 
 ## Design choices
 
@@ -113,7 +110,6 @@ Delivered:
 
 Outside the MVP:
 - distributed workers
-- full cron parsing
 - authentication and RBAC
 - remote secrets management
 - runtime-specific adapters for Copilot CLI or Codex
