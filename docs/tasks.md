@@ -1196,3 +1196,56 @@ Quand l'utilisateur lance un agent, le run apparait immediatement avec le statut
 - Les cas completed, failed, blocked et timeout sont couverts par tests.
 
 Note de realisation : 2026-04-21 - Les executions reelles autorisees sont maintenant persistees immediatement avec `status=running`, `finished_at=null` et `exit_code=null`, puis executees en arriere-plan local. Le runner utilise `subprocess.Popen` sans `shell=True`, lit stdout/stderr fusionnes au fil de l'eau, nettoie les sequences ANSI simples et persiste chaque ligne dans `RunLog` pendant que le processus tourne. Les blocages de policy/setting et les dry-runs restent synchrones. La fin de processus met a jour `status`, `finished_at`, `exit_code` et cree l'artifact summary. Ajout de `GET /runs/{run_id}/events` en SSE pour diffuser les evenements `run` et `log`; le detail run web utilise ce flux avec les logs existants en etat initial. Le contrat ajoute `Run.exit_code`; spec, architecture, wireframes et backlog sont alignes. Validation : `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-stream tests/test_runs.py` hors sandbox : 15 tests passent ; `.venv\Scripts\python.exe -m pytest --basetemp .\pytest-tmp-stream-full` hors sandbox : 59 tests passent ; `npm test -- runs-flow.test.tsx api.test.ts workspaces-flow.test.tsx` hors sandbox : 21 tests passent ; `npm test` depuis `apps/web` hors sandbox : 39 tests passent ; `npm run build` passe ; `.venv\Scripts\python.exe -m ruff check app tests` passe avec seulement des avertissements de cache Ruff verrouille par Windows.
+
+## [ ] T031 - Permettre l'execution planifiee reelle avec garde-fous explicites
+
+### Outcome
+Une planification peut, de facon explicite et securisee, declencher soit un dry-run soit une execution reelle, tout en preservant les garde-fous existants (setting global, policy prefixes, audit complet).
+
+### Scope
+- In scope : ajout d'un mode d'execution planifiee explicite (API + persistance + worker + UI), conservation du dry-run par defaut, validations et erreurs structurees, tests backend/frontend, documentation.
+- Out of scope : orchestration distribuee, annulation de run planifie, secrets manager, sandbox OS.
+
+### Files likely affected
+- `apps/api/app/schemas/schedule.py`
+- `apps/api/app/services/schedule_service.py`
+- `apps/api/app/services/schedule_worker_service.py`
+- `apps/api/app/routers/schedules.py`
+- `apps/api/app/services/run_service.py`
+- `apps/api/tests/test_agents_and_schedules.py`
+- `apps/api/tests/test_runs.py`
+- `apps/web/components/schedule-admin-form.tsx`
+- `apps/web/lib/types.ts`
+- `apps/web/lib/api.ts`
+- `apps/web/app/schedules/page.tsx`
+- `docs/spec.md`
+- `README.md`
+- `docs/architecture.md`
+- eventuellement `docs/adr/0005-scheduled-real-execution.md`
+
+### Constraints
+- Le mode par defaut doit rester dry-run.
+- L'execution reelle planifiee doit rester bloquee si `runner.execution_enabled=false`.
+- Les checks de policy (allowed command prefixes) restent obligatoires.
+- Les runs planifies doivent conserver `trigger=schedule` et une trace d'audit explicite du mode choisi.
+- Aucun affaiblissement des limites de workspace.
+
+### Implementation notes
+- Introduire un champ explicite au niveau schedule (ex : `execution_mode` ou `force_dry_run`) avec valeur par defaut sure.
+- Adapter le worker pour propager ce mode dans `RunCreate` au lieu de forcer `dry_run=True`.
+- Afficher clairement dans l'UI le risque et la posture de securite lorsqu'un schedule est en execution reelle.
+- Ajouter une prevention UX (confirmation explicite) avant d'activer l'execution reelle planifiee.
+- Documenter les preconditions operationnelles (setting global + policy).
+
+### Validation
+- `cd apps/api && pytest`
+- `cd apps/web && npm test`
+- `cd apps/web && npm run build`
+- Test manuel : schedule en mode dry-run puis mode execution reelle avec `runner.execution_enabled=true` et policy compatible.
+
+### Done when
+- Un schedule peut etre configure explicitement en dry-run ou en execution reelle.
+- Le worker respecte ce mode lors de la creation des runs.
+- Les runs planifies reels restent bloques proprement si setting global/policy ne permettent pas.
+- Les tests couvrent dry-run planifie, execution reelle planifiee autorisee, et blocages attendus.
+- Les docs expliquent la configuration et les risques.
