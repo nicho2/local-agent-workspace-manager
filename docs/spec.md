@@ -311,6 +311,7 @@ workspace policy prefix that explicitly allows the command.
 - `interval_minutes`
 - `cron_expression`
 - `enabled`
+- `execution_mode` (`dry_run` by default, or explicit `real_execution`)
 
 `workspace_id` and `agent_profile_id` must reference existing resources. For
 `mode=interval`, `interval_minutes` is required and must stay between `5` and
@@ -331,10 +332,21 @@ The worker processes enabled `interval` and `cron` schedules whose `next_run_at`
 is due. Each due schedule is claimed with a conditional database update before
 run creation, which prevents repeated processing by the local worker for the
 same due timestamp. The worker triggers runs with `trigger=schedule`,
-`requested_by=schedule-worker`, and `dry_run=true`, then advances `next_run_at`
-from the processing time (by interval duration for `interval`, or by the next
-matching occurrence for `cron`). Disabled and non-due schedules do not create
-runs.
+`requested_by=schedule-worker`, and a `dry_run` value derived from the explicit
+schedule `execution_mode`:
+
+- `execution_mode=dry_run` => `dry_run=true`
+- `execution_mode=real_execution` => `dry_run=false`
+
+The default remains `execution_mode=dry_run`. Scheduled real execution still
+requires the same guardrails as manual runs: the persisted
+`runner.execution_enabled=true` setting and a workspace policy prefix that
+allows the exact command. Blocked schedule runs remain audited as
+`trigger=schedule` runs with `dry_run=false`.
+
+After each successful claim, the worker advances `next_run_at` from the
+processing time (by interval duration for `interval`, or by the next matching
+occurrence for `cron`). Disabled and non-due schedules do not create runs.
 
 ### Settings
 

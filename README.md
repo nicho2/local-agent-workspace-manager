@@ -147,7 +147,10 @@ workspace roots, reviewed policies, and explicit command prefixes.
 
 - Schedule execution supports due `interval` and `cron` schedules, but remains
   single-process and local-worker only.
-- Scheduled runs are dry-runs by default.
+- Schedules now expose an explicit `execution_mode` (`dry_run` by default, or
+  `real_execution` with an explicit UI confirmation).
+- Scheduled real execution still requires `runner.execution_enabled=true` and
+  matching policy command prefixes; otherwise the run is persisted as blocked.
 - Real commands use explicit argument splitting and do not support shell syntax.
 - There is no authentication, RBAC, secrets vault, distributed scheduler, or
   container-per-run isolation in the MVP.

@@ -4,7 +4,13 @@ from uuid import uuid4
 
 from app.core.errors import bad_request, internal_error, not_found
 from app.db.database import get_connection, utc_now_iso
-from app.schemas.schedule import ScheduleCreate, ScheduleMode, ScheduleRead, ScheduleUpdate
+from app.schemas.schedule import (
+    ScheduleCreate,
+    ScheduleExecutionMode,
+    ScheduleMode,
+    ScheduleRead,
+    ScheduleUpdate,
+)
 from app.services.cron_service import calculate_next_cron_run, validate_cron_expression
 
 
@@ -20,6 +26,7 @@ def _row_to_schedule(row: object) -> ScheduleRead:
         interval_minutes=row["interval_minutes"],
         cron_expression=row["cron_expression"],
         enabled=bool(row["enabled"]),
+        execution_mode=ScheduleExecutionMode(str(row["execution_mode"])),
         next_run_at=datetime.fromisoformat(next_run_at) if next_run_at else None,
         created_at=datetime.fromisoformat(row["created_at"]),
         updated_at=datetime.fromisoformat(row["updated_at"]),
@@ -116,7 +123,8 @@ def create_schedule(database_path: Path, payload: ScheduleCreate) -> ScheduleRea
             INSERT INTO schedules (
                 id, name, workspace_id, agent_profile_id, mode, interval_minutes,
                 cron_expression, enabled, next_run_at, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                , execution_mode
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''',
             (
                 schedule_id,
@@ -130,6 +138,7 @@ def create_schedule(database_path: Path, payload: ScheduleCreate) -> ScheduleRea
                 next_run_at,
                 now,
                 now,
+                payload.execution_mode.value,
             ),
         )
         row = connection.execute(
@@ -178,6 +187,11 @@ def update_schedule(
             else existing["cron_expression"]
         )
         enabled = payload.enabled if "enabled" in fields_set else bool(existing["enabled"])
+        execution_mode = (
+            payload.execution_mode
+            if "execution_mode" in fields_set
+            else ScheduleExecutionMode(str(existing["execution_mode"]))
+        )
 
         workspace_row = connection.execute(
             "SELECT id FROM workspaces WHERE id = ?",
@@ -234,6 +248,9 @@ def update_schedule(
         if "enabled" in fields_set:
             updates.append("enabled = ?")
             values.append(int(enabled))
+        if "execution_mode" in fields_set:
+            updates.append("execution_mode = ?")
+            values.append(execution_mode.value)
 
         updates.append("next_run_at = ?")
         values.append(next_run_at)

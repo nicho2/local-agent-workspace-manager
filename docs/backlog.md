@@ -118,6 +118,16 @@ unless it fixes a regression in the delivered safety or audit behavior.
 - final status, `finished_at`, and `exit_code` are persisted when the process
   exits
 
+### P2-019 Explicit scheduled execution mode
+- schedules now persist an explicit `execution_mode` with `dry_run` as the
+  default
+- schedule worker forwards this mode into run creation while keeping
+  `trigger=schedule` and `requested_by=schedule-worker`
+- scheduled real execution remains gated by
+  `runner.execution_enabled=true` and policy command-prefix allowlists
+- schedules UI requires an explicit confirmation before saving
+  `real_execution`
+
 ### P2-001 Full cron scheduling
 - cron expressions are validated with a local five-field parser
 - enabled cron schedules compute and persist `next_run_at`

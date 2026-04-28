@@ -13,6 +13,11 @@ class ScheduleMode(StrEnum):
     cron = "cron"
 
 
+class ScheduleExecutionMode(StrEnum):
+    dry_run = "dry_run"
+    real_execution = "real_execution"
+
+
 class ScheduleCreate(ModelBase):
     name: str = Field(min_length=3, max_length=120)
     workspace_id: str
@@ -21,6 +26,7 @@ class ScheduleCreate(ModelBase):
     interval_minutes: int | None = Field(default=None, ge=5, le=10080)
     cron_expression: str | None = None
     enabled: bool = True
+    execution_mode: ScheduleExecutionMode = ScheduleExecutionMode.dry_run
 
     @model_validator(mode="after")
     def validate_mode(self) -> "ScheduleCreate":
@@ -46,6 +52,7 @@ class ScheduleUpdate(ModelBase):
     interval_minutes: int | None = Field(default=None, ge=5, le=10080)
     cron_expression: str | None = None
     enabled: bool | None = None
+    execution_mode: ScheduleExecutionMode | None = None
 
     @model_validator(mode="after")
     def reject_null_required_fields(self) -> Self:
@@ -55,6 +62,7 @@ class ScheduleUpdate(ModelBase):
             "agent_profile_id",
             "mode",
             "enabled",
+            "execution_mode",
         }
         null_fields = [
             field

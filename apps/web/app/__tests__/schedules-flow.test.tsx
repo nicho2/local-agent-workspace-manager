@@ -46,6 +46,7 @@ const sampleSchedule = {
   interval_minutes: 60,
   cron_expression: null,
   enabled: true,
+  execution_mode: "dry_run",
   next_run_at: "2026-04-18T10:00:00+00:00",
   created_at: "2026-04-18T09:00:00+00:00",
   updated_at: "2026-04-18T09:00:00+00:00",
@@ -87,6 +88,7 @@ describe("schedules flow", () => {
     expect(html).toContain("nightly-docs");
     expect(html).toContain("maintenance-agent");
     expect(html).toContain("Docs Vault");
+    expect(html).toContain("Dry-run");
   });
 
   it("renders schedule onboarding when no schedule exists", async () => {

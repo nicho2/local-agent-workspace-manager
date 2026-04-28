@@ -125,6 +125,7 @@ export interface Schedule {
   interval_minutes?: number | null;
   cron_expression?: string | null;
   enabled: boolean;
+  execution_mode: "dry_run" | "real_execution";
   next_run_at?: string | null;
   created_at: string;
   updated_at: string;
@@ -138,6 +139,7 @@ export interface ScheduleCreate {
   interval_minutes?: number | null;
   cron_expression?: string | null;
   enabled: boolean;
+  execution_mode?: "dry_run" | "real_execution";
 }
 
 export type ScheduleUpdate = Partial<ScheduleCreate>;
