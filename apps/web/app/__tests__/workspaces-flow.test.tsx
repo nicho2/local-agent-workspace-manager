@@ -106,6 +106,7 @@ const sampleSchedule = {
   interval_minutes: 60,
   cron_expression: null,
   enabled: true,
+  execution_mode: "dry_run",
   next_run_at: "2026-04-18T10:00:00+00:00",
   created_at: "2026-04-18T09:00:00+00:00",
   updated_at: "2026-04-18T09:00:00+00:00",

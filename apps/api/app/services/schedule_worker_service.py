@@ -7,7 +7,7 @@ from pathlib import Path
 from app.core.errors import AppError
 from app.db.database import get_connection, utc_now_iso
 from app.schemas.run import RunCreate, RunTrigger
-from app.schemas.schedule import ScheduleMode
+from app.schemas.schedule import ScheduleExecutionMode, ScheduleMode
 from app.services.cron_service import calculate_next_cron_run
 from app.services.run_service import create_run
 
@@ -25,6 +25,7 @@ class _ClaimedSchedule:
     id: str
     workspace_id: str
     agent_profile_id: str
+    execution_mode: ScheduleExecutionMode
 
 
 def _normalize_now(now: datetime | None) -> datetime:
@@ -39,7 +40,7 @@ def _next_interval_run_at(now: datetime, interval_minutes: int) -> str:
 
 
 def process_due_schedules(database_path: Path, now: datetime | None = None) -> ScheduleWorkerResult:
-    """Claim due schedules and trigger dry-run runs for them."""
+    """Claim due schedules and trigger runs for them."""
     current_time = _normalize_now(now)
     claimed_schedules: list[_ClaimedSchedule] = []
     skipped_count = 0
@@ -104,6 +105,7 @@ def process_due_schedules(database_path: Path, now: datetime | None = None) -> S
                     id=row["id"],
                     workspace_id=row["workspace_id"],
                     agent_profile_id=row["agent_profile_id"],
+                    execution_mode=ScheduleExecutionMode(str(row["execution_mode"])),
                 )
             )
 
@@ -118,7 +120,7 @@ def process_due_schedules(database_path: Path, now: datetime | None = None) -> S
                     agent_profile_id=schedule.agent_profile_id,
                     trigger=RunTrigger.schedule,
                     requested_by="schedule-worker",
-                    dry_run=True,
+                    dry_run=schedule.execution_mode == ScheduleExecutionMode.dry_run,
                 ),
             )
         except AppError:

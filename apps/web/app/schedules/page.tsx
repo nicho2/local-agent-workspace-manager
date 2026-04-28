@@ -61,6 +61,9 @@ export default async function SchedulesPage(): Promise<ReactElement> {
                   <T k="table.enabled" />
                 </th>
                 <th>
+                  <T k="schedules.executionMode" />
+                </th>
+                <th>
                   <T k="table.nextRun" />
                 </th>
               </tr>
@@ -72,6 +75,13 @@ export default async function SchedulesPage(): Promise<ReactElement> {
                   <td>{schedule.mode}</td>
                   <td>{agentById.get(schedule.agent_profile_id) ?? schedule.agent_profile_id}</td>
                   <td>{schedule.enabled ? <T k="common.yes" /> : <T k="common.no" />}</td>
+                  <td>
+                    {schedule.execution_mode === "real_execution" ? (
+                      <T k="schedules.realExecutionMode" />
+                    ) : (
+                      <T k="common.dryRun" />
+                    )}
+                  </td>
                   <td>{schedule.next_run_at ? new Date(schedule.next_run_at).toLocaleString() : "—"}</td>
                 </tr>
               ))}

@@ -72,7 +72,8 @@ sequenceDiagram
 The API can start an optional in-process schedule worker when
 `LAWM_SCHEDULE_WORKER_ENABLED=true`. The worker polls SQLite at the configured
 interval, claims due schedules with a conditional `next_run_at` update, and
-creates dry-run runs with `trigger=schedule`. It is intentionally
+creates `trigger=schedule` runs using each schedule's explicit
+`execution_mode` (`dry_run` by default, optional `real_execution`). It is intentionally
 single-machine and single-process for the MVP; distributed scheduling remains
 future work.
 
@@ -94,8 +95,9 @@ Therefore:
   workspace policy command-prefix allowlists
 - controlled subprocess runs use explicit argument lists, workspace `cwd`,
   timeout, incremental stdout/stderr capture, and no shell
-- scheduled runs are dry-run by default and the worker is disabled unless
-  explicitly enabled in configuration
+- scheduled runs default to dry-run, scheduled real execution requires explicit
+  schedule opt-in, and the worker is disabled unless explicitly enabled in
+  configuration
 - future hardening should consider per-run containerization or OS-level sandboxing
 
 ## MVP boundaries

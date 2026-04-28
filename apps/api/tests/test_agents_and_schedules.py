@@ -1,3 +1,5 @@
+import sys
+import time
 from datetime import datetime, timedelta, timezone
 
 from app.core.config import get_settings
@@ -20,14 +22,21 @@ def _create_workspace(client, workspace_root):
     return response.json()
 
 
-def _create_agent(client, workspace_id=None, *, is_active=True, name="triage-copilot"):
+def _create_agent(
+    client,
+    workspace_id=None,
+    *,
+    is_active=True,
+    name="triage-copilot",
+    command_template="gh copilot suggest -t triage",
+):
     response = client.post(
         "/agents",
         json={
             "name": name,
             "runtime": "copilot_cli",
             "workspace_id": workspace_id,
-            "command_template": "gh copilot suggest -t triage",
+            "command_template": command_template,
             "environment": {"CI": "false"},
             "is_active": is_active,
         },
@@ -46,6 +55,7 @@ def _create_interval_schedule(client, workspace_id, agent_id, *, enabled=True):
             "mode": "interval",
             "interval_minutes": 60,
             "enabled": enabled,
+            "execution_mode": "dry_run",
         },
     )
     assert response.status_code == 201
@@ -62,6 +72,7 @@ def _create_cron_schedule(client, workspace_id, agent_id, *, enabled=True, cron_
             "mode": "cron",
             "cron_expression": cron_expression,
             "enabled": enabled,
+            "execution_mode": "dry_run",
         },
     )
     assert response.status_code == 201
@@ -76,6 +87,7 @@ def test_create_agent_and_interval_schedule(client, workspace_root):
 
     schedule = _create_interval_schedule(client, workspace["id"], agent["id"])
     assert schedule["mode"] == "interval"
+    assert schedule["execution_mode"] == "dry_run"
     assert schedule["next_run_at"] is not None
 
 
@@ -397,3 +409,94 @@ def test_schedule_worker_processes_due_cron_once(client, workspace_root):
 
     second_result = process_due_schedules(database_path, now=now)
     assert second_result.processed_count == 0
+
+
+def test_schedule_worker_uses_real_execution_mode_and_blocks_when_disabled(client, workspace_root):
+    workspace = _create_workspace(client, workspace_root)
+    agent = _create_agent(
+        client,
+        workspace["id"],
+        command_template=f"{sys.executable} -c \"print('scheduled-real-blocked')\"",
+    )
+    schedule = _create_interval_schedule(client, workspace["id"], agent["id"])
+    database_path = get_settings().database_path
+    now = datetime(2026, 4, 18, 9, 0, tzinfo=timezone.utc)
+
+    update_response = client.put(
+        f"/schedules/{schedule['id']}",
+        json={"execution_mode": "real_execution"},
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["execution_mode"] == "real_execution"
+
+    with get_connection(database_path) as connection:
+        connection.execute(
+            "UPDATE schedules SET next_run_at = ? WHERE id = ?",
+            (now.isoformat(), schedule["id"]),
+        )
+
+    result = process_due_schedules(database_path, now=now)
+    assert result.processed_count == 1
+    runs = client.get("/runs").json()
+    assert len(runs) == 1
+    assert runs[0]["trigger"] == "schedule"
+    assert runs[0]["dry_run"] is False
+    assert runs[0]["status"] == "blocked"
+
+
+def test_schedule_worker_uses_real_execution_mode_when_allowed(
+    client_execution_enabled, workspace_root
+):
+    policy_response = client_execution_enabled.post(
+        "/policies",
+        json={
+            "name": "python-real-schedule",
+            "description": "Allow python -c for scheduled real runs",
+            "max_runtime_seconds": 60,
+            "allow_write": False,
+            "allow_network": False,
+            "allowed_command_prefixes": [f"{sys.executable} -c"],
+        },
+    )
+    assert policy_response.status_code == 201
+    policy_id = policy_response.json()["id"]
+    workspace = _create_workspace(client_execution_enabled, workspace_root)
+    workspace_update = client_execution_enabled.put(
+        f"/workspaces/{workspace['id']}",
+        json={"policy_id": policy_id},
+    )
+    assert workspace_update.status_code == 200
+    workspace_path = workspace_root / "repo-triage"
+    workspace_path.mkdir(parents=True, exist_ok=True)
+    agent = _create_agent(
+        client_execution_enabled,
+        workspace["id"],
+        command_template=f"{sys.executable} -c \"print('scheduled-real-ok')\"",
+    )
+    schedule = _create_interval_schedule(client_execution_enabled, workspace["id"], agent["id"])
+    database_path = get_settings().database_path
+    now = datetime(2026, 4, 18, 9, 0, tzinfo=timezone.utc)
+
+    update_response = client_execution_enabled.put(
+        f"/schedules/{schedule['id']}",
+        json={"execution_mode": "real_execution"},
+    )
+    assert update_response.status_code == 200
+
+    with get_connection(database_path) as connection:
+        connection.execute(
+            "UPDATE schedules SET next_run_at = ? WHERE id = ?",
+            (now.isoformat(), schedule["id"]),
+        )
+
+    result = process_due_schedules(database_path, now=now)
+    assert result.processed_count == 1
+
+    run_id = result.created_run_ids[0]
+    for _ in range(30):
+        run = client_execution_enabled.get(f"/runs/{run_id}").json()
+        if run["status"] in {"completed", "failed", "blocked"}:
+            break
+        time.sleep(0.1)
+    assert run["dry_run"] is False
+    assert run["status"] == "completed"

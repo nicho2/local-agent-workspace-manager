@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS schedules (
     interval_minutes INTEGER,
     cron_expression TEXT,
     enabled INTEGER NOT NULL,
+    execution_mode TEXT NOT NULL DEFAULT 'dry_run',
     next_run_at TEXT,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
@@ -124,6 +125,14 @@ def migrate_schema(connection: sqlite3.Connection) -> None:
     run_columns = {str(row[1]) for row in connection.execute("PRAGMA table_info(runs)").fetchall()}
     if "exit_code" not in run_columns:
         connection.execute("ALTER TABLE runs ADD COLUMN exit_code INTEGER")
+
+    schedule_columns = {
+        str(row[1]) for row in connection.execute("PRAGMA table_info(schedules)").fetchall()
+    }
+    if "execution_mode" not in schedule_columns:
+        connection.execute(
+            "ALTER TABLE schedules ADD COLUMN execution_mode TEXT NOT NULL DEFAULT 'dry_run'"
+        )
 
 
 def seed_defaults(

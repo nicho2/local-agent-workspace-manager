@@ -42,6 +42,7 @@ export function ScheduleAdminForm({
   const router = useRouter();
   const { t } = useI18n();
   const [scheduleId, setScheduleId] = useState("");
+  const [confirmRealExecution, setConfirmRealExecution] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const selectedSchedule = useMemo(
@@ -60,11 +61,18 @@ export function ScheduleAdminForm({
       agent_profile_id: String(formData.get("agent_profile_id") ?? ""),
       cron_expression: optionalText(formData.get("cron_expression")),
       enabled: formData.get("enabled") === "on",
+      execution_mode: String(
+        formData.get("execution_mode") ?? "dry_run"
+      ) as Schedule["execution_mode"],
       interval_minutes: optionalNumber(formData.get("interval_minutes")),
       mode,
       name: String(formData.get("name") ?? ""),
       workspace_id: String(formData.get("workspace_id") ?? ""),
     };
+    if (payload.execution_mode === "real_execution" && !confirmRealExecution) {
+      setError(t("schedules.realExecutionConfirmRequired"));
+      return;
+    }
 
     try {
       if (selectedSchedule) {
@@ -93,7 +101,14 @@ export function ScheduleAdminForm({
         </label>
         <select
           id="schedule-select"
-          onChange={(event) => setScheduleId(event.target.value)}
+          onChange={(event) => {
+            const nextScheduleId = event.target.value;
+            setScheduleId(nextScheduleId);
+            const mode =
+              schedules.find((schedule) => schedule.id === nextScheduleId)?.execution_mode ??
+              "dry_run";
+            setConfirmRealExecution(mode !== "real_execution");
+          }}
           value={scheduleId}
         >
           <option value="">{t("schedules.newSchedule")}</option>
@@ -171,6 +186,29 @@ export function ScheduleAdminForm({
         <label className="checkbox-row">
           <input defaultChecked={selectedSchedule?.enabled ?? true} name="enabled" type="checkbox" />
           {t("table.enabled")}
+        </label>
+
+        <label className="field-label" htmlFor="schedule-execution-mode">
+          {t("schedules.executionMode")}
+        </label>
+        <select
+          defaultValue={selectedSchedule?.execution_mode ?? "dry_run"}
+          id="schedule-execution-mode"
+          name="execution_mode"
+          onChange={(event) => setConfirmRealExecution(event.target.value !== "real_execution")}
+        >
+          <option value="dry_run">{t("common.dryRun")}</option>
+          <option value="real_execution">{t("schedules.realExecutionMode")}</option>
+        </select>
+        <p className="muted">{t("schedules.executionModeHint")}</p>
+        <label className="checkbox-row">
+          <input
+            checked={confirmRealExecution}
+            name="confirm_real_execution"
+            onChange={(event) => setConfirmRealExecution(event.target.checked)}
+            type="checkbox"
+          />
+          {t("schedules.confirmRealExecution")}
         </label>
 
         <button className="primary-button" type="submit">
