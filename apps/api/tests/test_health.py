@@ -17,3 +17,18 @@ def test_cors_preflight_allows_local_frontend(client):
     assert response.status_code == 200
     assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
     assert "POST" in response.headers["access-control-allow-methods"]
+
+
+def test_cors_preflight_allows_delete_for_local_frontend(client):
+    response = client.options(
+        "/agents/agent_123",
+        headers={
+            "Access-Control-Request-Headers": "content-type",
+            "Access-Control-Request-Method": "DELETE",
+            "Origin": "http://localhost:3000",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
+    assert "DELETE" in response.headers["access-control-allow-methods"]
